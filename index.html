@@ -2,17 +2,25 @@
 <html>
 <head lang="pt-br">
 
-	<meta charset="utf-8"/>
-	<title>SALOME BELEZA E ESTÉTICA</title>
-  <link rel="stylesheet" type="text/css" href="css/estilo.css">  
+    <meta charset="utf-8"/>
+    <title>SALOME BELEZA E ESTÉTICA</title>
+  <link rel="stylesheet" type="text/css" href="css/estilo.css"> 
+
+   <!-- Favicon -->
+   <link rel="icon" type="image/png" href="img/qs_logo.png"> 
    
+   <!-- CSS do Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- JS do Bootstrap -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+
 
 </head>
   <body>
 
       <!----- CONTAINER GERAL DA PAGINA -------------------------->
       <div id="container-page">
-      	
 
           <!----- MENU DE NAVEGAÇÃO -------------------------->
           <nav class="nav-menu-principal"> 
@@ -95,8 +103,24 @@
                     <span class="close-btn" id="closeMapModal">&times;</span>
                 </div>
                 <div class="modal-body">
-                    <img id="modalImage" src="img/frente.jpg" alt="Descrição da imagem" style="max-width: 100%; height: auto;">
-                    <p><strong>Endereço:</strong> Av. Professor Lucas Machado - N° 410 - Santa Luzia - MG</p>
+
+                    <!-- Carrossel -->
+                    <div class="carousel-container">
+                        <button class="prev">&#10094;</button>
+                        <div class="carousel">
+                            <img src="img/frente.jpg" alt="Frente do local">
+                            <img src="img/lado.jpg" alt="Vista lateral">
+                            <img src="img/interior.jpg" alt="Interior">
+                        </div>
+                        <button class="next">&#10095;</button>
+                    </div>
+
+                    <p>
+                        <strong>Endereço:</strong>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Av.+Professor+Lucas+Machado,+442,+Asteca,+Santa+Luzia+-+MG" target="_blank">
+                            Av. Professor Lucas Machado - N° 442 - Asteca, Santa Luzia - MG
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -109,12 +133,10 @@
 
           <!----- CONTAINER DA LOGOMARCA -------------------------->
            <div id="container-logo">
-           	<img src="img/logosomente.png" id="logo-menu"> <!-- imagem logo -->
+            <img src="img/logosomente.png" id="logo-menu"> <!-- imagem logo -->
            </div>
       
       </div>
-
-
 
   </body>
 </html>

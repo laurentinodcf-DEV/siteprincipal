@@ -9,13 +9,18 @@
    <!-- Favicon -->
    <link rel="icon" type="image/png" href="img/qs_logo.png"> 
    
+   <!-- CSS do Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- JS do Bootstrap -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+
 
 </head>
   <body>
 
       <!----- CONTAINER GERAL DA PAGINA -------------------------->
       <div id="container-page">
-        
 
           <!----- MENU DE NAVEGAÇÃO -------------------------->
           <nav class="nav-menu-principal"> 
@@ -132,8 +137,6 @@
            </div>
       
       </div>
-
-
 
   </body>
 </html>
