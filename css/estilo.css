@@ -33,6 +33,9 @@ div#container-page{ /*--------- pagina geral --------------*/
     justify-content: space-evenly; /* Distribui os itens uniformemente */
     align-items: center; /* Alinha verticalmente os itens dentro do nav */
     list-style: none;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
 }
 
 .menu-principal{   /*------------- QUADROS COM OS TITULOS DOS MENUS --------*/
@@ -53,14 +56,17 @@ div#container-page{ /*--------- pagina geral --------------*/
 	border-bottom:3px solid rgba(255, 255, 255, 1.0);
 }
 .li-menu-principal{ /*-------------- LINHA ONDE FICAM OS QUADROS ------------*/
-	width: 16.2%;
-	height: 100%;
-   list-style: none;
-   float: left;
-   line-height: 50px;
-   text-transform: uppercase;
-   font-size: 2vw; /* com a propriedade vw o texto vai se ajustando ao tamanho do box dele */
-   transition: .3s;
+    width: 16.2%;
+    height: 100%;
+    list-style: none;
+    float: left;
+    line-height: 50px;
+    text-transform: uppercase;
+    font-size: 2vw; /* com a propriedade vw o texto vai se ajustando ao tamanho do box dele */
+    transition: .3s;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
 }
 .li-menu-principal:hover{/* hover ao passar o mouse no menu */
 	background-color: rgba(255, 255, 255, 0.2); /* branco transparente */
@@ -113,6 +119,9 @@ img#logo-menu{ /* tamanho imagem se adaptando ao container */
     left: 0;
     width: 100%; /* Submenus ocupam o mesmo espaço do item pai */
     background-color: rgba(0, 0, 0, 0.4); /* Transparência igual ao menu principal */
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
 }
 
 /* Submenu items */

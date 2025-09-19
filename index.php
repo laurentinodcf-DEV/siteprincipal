@@ -4,16 +4,14 @@
 
     <meta charset="utf-8"/>
     <title>SALOME BELEZA E ESTÉTICA</title>
-  <link rel="stylesheet" type="text/css" href="css/estilo.css"> 
-
-   <!-- Favicon -->
-   <link rel="icon" type="image/png" href="img/qs_logo.png"> 
    
-   <!-- CSS do Bootstrap -->
+    <!-- CSS do Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- JS do Bootstrap -->
-    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/estilo.css"> 
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/qs_logo.png"> 
 
 
 </head>
@@ -126,6 +124,9 @@
         </div>
 
         <script src="js/script.js"></script>
+        
+        <!-- JS do Bootstrap -->
+        <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
 
           <!----- IMAGEM DO MENU DE NAVEGAÇÃO -------------------------->
