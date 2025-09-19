@@ -1,0 +1,287 @@
+/*--------------------------------- ZERANDO MARGENS E PADDINGS DEFALT --------------------------------------------------------------------*/
+*{
+	margin: 0;
+	padding: 0;
+    box-sizing: border-box;
+}
+
+
+/*---------------------------------- CONTAINER GERAL DA PAGINA ----------------------------------------------------------------------------*/
+
+div#container-page{ /*--------- pagina geral --------------*/
+ width: 100%;
+ height: 1000px;
+ position: relative; /* torna a dive pai */
+}
+
+/*----------------------------------- MENU -----------------------------------------------------------------------------------------------*/
+
+.nav-menu-principal{ /*----- container com a pocentagem do container geral (conatainer-page)--*/
+	width: 100%;
+	height: 53px; /* colocado em pixels pois independente do tamanho do container pai (container-page) ele não vai aumentar. vai ser fixo */
+	position: fixed;
+	top: 0;
+	z-index: 1000; /* Define a pilha de camadas, garantindo que este elemento fique sobre todos os outros elementos na página.*/
+}
+
+.ul-menu-principal{ /* -------- CONTAINER COM A TRANSPARENCIA DO MENU -------------*/
+	width: 100%; 
+	height: 100%; /* porcentagem do container nav do menu */
+	background-color: rgba(0, 0, 0, 0.4); /* transparencia do menu */
+	position: absolute; /* tirando a div total-page como pai se torna absoluta sobre ela e vai para baixo */
+    display: flex; /* Flexbox para garantir alinhamento e tamanho uniforme */
+    justify-content: space-evenly; /* Distribui os itens uniformemente */
+    align-items: center; /* Alinha verticalmente os itens dentro do nav */
+    list-style: none;
+}
+
+.menu-principal{   /*------------- QUADROS COM OS TITULOS DOS MENUS --------*/
+	width: 100%;
+	height: 100%;
+	display: block;
+	color: white;
+   text-decoration: none;
+   text-align: center;
+   cursor: pointer;
+}
+.menu-principal:hover{  /* ao passar o mouse no texto do menu */
+	color: #f0ca57; /* cor do textdo do menu */
+	filter: drop-shadow(1px 3px 1px rgba(215, 215, 0, 0.5)); /* neom por baixo do texto (direita(+)/esquerda(-) - baixo(+)/cima(-) - 
+	                                                            ofuscado(+)/solido(-) - cor) */ 
+	font-size: 3w;
+
+	border-bottom:3px solid rgba(255, 255, 255, 1.0);
+}
+.li-menu-principal{ /*-------------- LINHA ONDE FICAM OS QUADROS ------------*/
+	width: 16.2%;
+	height: 100%;
+   list-style: none;
+   float: left;
+   line-height: 50px;
+   text-transform: uppercase;
+   font-size: 2vw; /* com a propriedade vw o texto vai se ajustando ao tamanho do box dele */
+   transition: .3s;
+}
+.li-menu-principal:hover{/* hover ao passar o mouse no menu */
+	background-color: rgba(255, 255, 255, 0.2); /* branco transparente */
+	height: 100%;
+	color: red;
+}
+
+/* ------------------------------------ CONTAINER IMAGENS MENU ---------------------------------------------------------------------------*/
+
+div#container-logo{
+	position: absolute;
+	position:; /* usado para poder se movimentar em relação ao pai (container-page) */
+	width: 30%;
+	top: 8%;
+	left: 33%;
+}
+
+
+.whats-logo,
+.instagram-logo,
+.email-logo{
+    width: 5%; 
+    height: 3vh;
+    vertical-align: middle; 
+    margin-left: 5px;
+}
+
+/*------------------------------------- TITULOS, TEXTOS E FONTES -----------------------------------------------------------------------------*/
+
+.title-contact{
+    font-weight: bold;
+}
+
+/*------------------------------------- IMAGENS ------------------------------------------------------------------------------------------*/
+img#banner-menu{ /* tamanho imagem se adaptando ao container */
+	width: 100%;
+	height: 350px; /* para nao aumentar junto com tamanho da pagina geral */
+}
+img#logo-menu{ /* tamanho imagem se adaptando ao container */
+	width: 100%;
+	height: 100%;
+}
+
+
+/* Submenu container */
+.submenu {
+    display: none; /* Esconde o submenu inicialmente */
+    position: absolute;
+    top: 53px; /* Alinhado abaixo do menu principal */
+    left: 0;
+    width: 100%; /* Submenus ocupam o mesmo espaço do item pai */
+    background-color: rgba(0, 0, 0, 0.4); /* Transparência igual ao menu principal */
+}
+
+/* Submenu items */
+.submenu-item {
+    list-style: none;
+    text-align: center;
+    line-height: 40px;
+    font-size: 1.5vw;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Linha de separação */
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+}
+
+/* Hover nos itens do submenu */
+.submenu-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #f0ca57;
+}
+
+/* Exibe o submenu ao passar o mouse no item pai */
+.li-menu-principal:hover .submenu {
+    display: block;
+}
+
+/* Configuração para evitar sobreposição de submenus */
+.li-menu-principal {
+    position: relative;
+}
+
+
+/* Estilo para esconder o modal inicialmente */
+.modal, 
+.mapModal {
+    display: none; /* Esconde o modal inicialmente */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+/* --------------------------------- MODAL ------------------------------------------------------------------------------------------- */
+
+/* Modal */
+.modal-content {
+    background: #fffaf5;
+    width: 40%;
+    max-width: 500px;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+    border: 1px solid #dfb89b; /* Borda dourada suave */
+    animation: fadeIn 0.4s ease;
+}
+
+/* Cabeçalho do Modal */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dfb89b;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-family: 'Playfair Display', serif; /* Fonte elegante */
+    color: #6c4f3d; /* Marrom sofisticado */
+}
+
+.close-btn {
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #6c4f3d;
+    font-weight: normal;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: #dfb89b; /* Dourado ao passar o mouse */
+}
+
+/* Corpo do Modal */
+.modal-body {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+.modal-body p {
+    font-size: 1.1rem;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+}
+
+.modal-body strong {
+    color: #6c4f3d; /* Marrom sofisticado */
+    margin-right: 5px;
+}
+
+/* Ícones */
+.whats-logo,
+.email-logo,
+.instagram-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    filter: grayscale(1) opacity(0.8); /* Estilo discreto */
+}
+
+.whats-logo:hover,
+.email-logo:hover,
+.instagram-logo:hover {
+    filter: none; /* Remove efeitos ao passar o mouse */
+    transform: scale(1.5);
+}
+
+/* Animação de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* -----------------------------------------------------------------------*/
+.carousel-container {
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.carousel {
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+}
+
+.carousel img {
+  min-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 24px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
