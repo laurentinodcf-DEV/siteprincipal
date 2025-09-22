@@ -106,9 +106,10 @@
                     <div class="carousel-container">
                         <button class="prev">&#10094;</button>
                         <div class="carousel">
-                            <img src="img/frente.jpg" alt="Frente do local">
-                            <img src="img/lado.jpg" alt="Vista lateral">
-                            <img src="img/interior.jpg" alt="Interior">
+                            <img src="img/salao/entrada.jpg" alt="Entrada do local">
+                            <img src="img/salao/frente.jpg" alt="Frente do local">
+                            <img src="img/salao/interior01.jpg" alt="Interior">
+                            <img src="img/salao/interior02.jpg" alt="Interior">
                         </div>
                         <button class="next">&#10095;</button>
                     </div>
