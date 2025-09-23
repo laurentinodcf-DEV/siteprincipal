@@ -82,14 +82,58 @@ div#container-page{ /*--------- pagina geral --------------*/
 }
 
 
-/*------------------------------------- containes e banners -------------------------------------------------------*/
-.banner-1{
-    width: 100%;
-    height: 40%;
-}
+/* ------------------------------------- CONTAINER TOP ------------------------------------------------------- */
 .img-banner-1{ /* tamanho imagem se adaptando ao container */
 	width: 100%;
 	height: 100%; /* para nao aumentar junto com tamanho da pagina geral */
+}
+.hero {
+  display: flex;
+  width: 100%;
+  height: 40%; /* ocupa tela toda */
+}
+.hero-image{
+  flex: 1;
+  left: 10%;
+  width: 50%;
+  height: 100%; /* ocupa tela toda */
+}
+/* Lado do conteúdo */
+.hero-content {
+  width: 100%;
+  height: 100%; /* ocupa tela toda */
+  flex: 1;
+  background: #4a3225; /* marrom sofisticado */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+}
+.hero-content h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+.hero-button {
+  width: 30%;
+  height: 50%; /* ocupa tela toda */
+  display: inline-block;
+  padding: 12px 24px;
+  background: #ffddc1;
+  color: #3b2a20;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+.hero-button:hover {
+  background: #f9c89b;
 }
 
 
@@ -143,6 +187,16 @@ img#logo-menu{ /* tamanho imagem se adaptando ao container */
 /* Configuração para evitar sobreposição de submenus */
 .li-menu-principal {
     position: relative;
+}
+
+/* Remove os marcadores dos submenus */
+nav ul ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+nav ul ul li {
+  list-style: none;
 }
 
 
@@ -287,3 +341,6 @@ img#logo-menu{ /* tamanho imagem se adaptando ao container */
 
 .prev { left: 10px; }
 .next { right: 10px; }
+
+
+

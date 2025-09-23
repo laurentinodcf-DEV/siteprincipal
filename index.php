@@ -132,11 +132,23 @@
                 </div>
             </div>
 
-            <!----- IMAGEM DO MENU DE NAVEGAÇÃO -------------------------->
-            <div id="banner-1" class="banner-1">
-              <img src="img/banner01.png" id="img-banner-1" class="img-banner-1">
-            </div>
+            <!-- HERO / BANNER top -->
+                <section class="hero">
+                    <!-- Esquerda com imagem -->
+                    <div class="hero-image">
+                        <img src="img/asteca-professor.png" id="img-banner-1" class="img-banner-1">
+                    </div>
 
+                    <!-- Direita com texto -->
+                    <div class="hero-content">
+                        <h1>Beleza Exclusiva em <br> Santa Luzia</h1>
+                        <p>
+                            Descubra uma nova era de sofisticação e cuidados <br>
+                            estéticos personalizados em Santa Luzia.
+                        </p>
+                        <a href="#agenda" class="hero-button">Agende Sua Beleza</a>
+                    </div>
+                </section>
       </div>
 
       <!-- JS do Sistema -->
