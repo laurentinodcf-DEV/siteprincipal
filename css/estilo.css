@@ -23,7 +23,7 @@ div#container-page{ /*--------- pagina geral --------------*/
     top: 0;
     left: 0;
     z-index: 1000;
-    background: #333; /* cor de fundo */
+    background: rgba(0, 0, 0, 0.4); /* cor de fundo DO MENU NAV */
     display: flex;
     align-items: center;
     justify-content: space-between; /* logo esquerda, menu direita */

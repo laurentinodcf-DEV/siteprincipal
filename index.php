@@ -64,9 +64,15 @@
                     </ul>
                 </li>
             </ul>
+
+            <!----- CONTAINER DA LOGOMARCA -------------------------->
+            <div id="container-logo">
+                <img src="img/logosomente.png" id="logo-menu" class="logo-menu"> <!-- imagem logo -->
+            </div>
+
           </nav>
 
-            <!-- Modal -->
+            <!-- MODAL DE CONTATOS -->
             <div id="modal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -94,6 +100,7 @@
                 </div>
             </div>
 
+            <!-- MODAL DO LOCAL, IMAGENS DO LOCAL E ENDEREÇO -->
             <div id="mapModal" class="mapModal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -102,7 +109,7 @@
                     </div>
                     <div class="modal-body">
 
-                        <!-- Carrossel -->
+                        <!-- CARROSSEL DE IMAGENS DO LOCAL -->
                         <div class="carousel-container">
                             <button class="prev">&#10094;</button>
                             <div class="carousel">
@@ -115,6 +122,7 @@
                         </div>
 
                         <p>
+                            <!-- ENDEREÇO LIGADO AO GOOGLE -->
                             <strong>Endereço:</strong>
                             <a href="https://www.google.com/maps/search/?api=1&query=Av.+Professor+Lucas+Machado,+442,+Asteca,+Santa+Luzia+-+MG" target="_blank">
                                 Av. Professor Lucas Machado - N° 442 - Asteca, Santa Luzia - MG
@@ -127,11 +135,6 @@
             <!----- IMAGEM DO MENU DE NAVEGAÇÃO -------------------------->
             <div id="banner-1" class="banner-1">
               <img src="img/banner01.png" id="img-banner-1" class="img-banner-1">
-            </div>
-
-            <!----- CONTAINER DA LOGOMARCA -------------------------->
-            <div id="container-logo">
-                <img src="img/logosomente.png" id="logo-menu" class="logo-menu"> <!-- imagem logo -->
             </div>
 
       </div>
