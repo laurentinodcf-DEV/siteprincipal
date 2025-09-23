@@ -100,11 +100,19 @@ div#container-logo{
     font-weight: bold;
 }
 
-/*------------------------------------- IMAGENS ------------------------------------------------------------------------------------------*/
-img#banner-menu{ /* tamanho imagem se adaptando ao container */
-	width: 100%;
-	height: 350px; /* para nao aumentar junto com tamanho da pagina geral */
+
+/*------------------------------------- containes e banners -------------------------------------------------------*/
+.banner-1{
+    width: 100%;
+    height: 40%;
+    border: 3px solid red;
 }
+.img-banner-1{ /* tamanho imagem se adaptando ao container */
+	width: 100%;
+	height: 100%; /* para nao aumentar junto com tamanho da pagina geral */
+}
+
+/*------------------------------------- IMAGENS e containers ------------------------------------------------------------------------------------------*/
 img#logo-menu{ /* tamanho imagem se adaptando ao container */
 	width: 100%;
 	height: 100%;
