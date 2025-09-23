@@ -17,56 +17,46 @@ div#container-page{ /*--------- pagina geral --------------*/
 /*----------------------------------- MENU -----------------------------------------------------------------------------------------------*/
 
 .nav-menu-principal{ /*----- container com a pocentagem do container geral (conatainer-page)--*/
-	width: 100%;
-	height: 53px; /* colocado em pixels pois independente do tamanho do container pai (container-page) ele não vai aumentar. vai ser fixo */
-	position: fixed;
-	top: 0;
-	z-index: 1000; /* Define a pilha de camadas, garantindo que este elemento fique sobre todos os outros elementos na página.*/
+    width: 100%;
+    height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background: #333; /* cor de fundo */
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* logo esquerda, menu direita */
+    padding: 0 40px;/
 }
 
 .ul-menu-principal{ /* -------- CONTAINER COM A TRANSPARENCIA DO MENU -------------*/
-	width: 100%; 
-	height: 100%; /* porcentagem do container nav do menu */
-	background-color: rgba(0, 0, 0, 0.4); /* transparencia do menu */
-	position: absolute; /* tirando a div total-page como pai se torna absoluta sobre ela e vai para baixo */
-    display: flex; /* Flexbox para garantir alinhamento e tamanho uniforme */
-    justify-content: space-evenly; /* Distribui os itens uniformemente */
-    align-items: center; /* Alinha verticalmente os itens dentro do nav */
+    display: flex;
+    gap: 40px; /* espaço entre os itens */
     list-style: none;
-    margin: 0 !important;
-    padding: 0 !important;
-    list-style: none !important;
+    margin: 0;
+    padding: 0;
+    background: transparent; /* tira o fundo antigo */
 }
 
 .menu-principal{   /*------------- QUADROS COM OS TITULOS DOS MENUS --------*/
-	width: 100%;
-	height: 100%;
-	display: block;
-	color: white;
-   text-decoration: none;
-   text-align: center;
-   cursor: pointer;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+    transition: background 0.3s;
 }
 .menu-principal:hover{  /* ao passar o mouse no texto do menu */
-	color: #f0ca57; /* cor do textdo do menu */
-	filter: drop-shadow(1px 3px 1px rgba(215, 215, 0, 0.5)); /* neom por baixo do texto (direita(+)/esquerda(-) - baixo(+)/cima(-) - 
-	                                                            ofuscado(+)/solido(-) - cor) */ 
-	font-size: 3w;
-
-	border-bottom:3px solid rgba(255, 255, 255, 1.0);
+    background: #00BFFF;
+    border-radius: 4px;
+    color: #fff;
 }
 .li-menu-principal{ /*-------------- LINHA ONDE FICAM OS QUADROS ------------*/
-    width: 16.2%;
-    height: 100%;
-    list-style: none;
-    float: left;
-    line-height: 50px;
+    position: relative;
+    font-size: 16px;
     text-transform: uppercase;
-    font-size: 2vw; /* com a propriedade vw o texto vai se ajustando ao tamanho do box dele */
-    transition: .3s;
-    margin: 0 !important;
-    padding: 0 !important;
-    list-style: none !important;
+    display: flex;
+    align-items: center; /* centraliza o texto verticalmente */
 }
 .li-menu-principal:hover{/* hover ao passar o mouse no menu */
 	background-color: rgba(255, 255, 255, 0.2); /* branco transparente */
@@ -105,46 +95,44 @@ div#container-page{ /*--------- pagina geral --------------*/
 
 /* ------------------------------------ CONTAINER IMAGENS MENU e imagem ---------------------------------------------------------------------------*/
 div#container-logo{
-	position: absolute;
-	width: 30%;
-	top: 20%;
-	left: 33%;
+    position: relative;
+    width: auto;
+    height: 40px;
 }
 img#logo-menu{ /* tamanho imagem se adaptando ao container */
-	width: 100%;
-	height: 100%;
+    position: relative;
+    width: auto;
+    height: 40px;
 }
 
 
 /* Submenu container */
 .submenu {
-    display: none; /* Esconde o submenu inicialmente */
+    display: none;
     position: absolute;
-    top: 53px; /* Alinhado abaixo do menu principal */
+    top: 100%; /* garante que abre logo abaixo */
     left: 0;
-    width: 100%; /* Submenus ocupam o mesmo espaço do item pai */
-    background-color: rgba(0, 0, 0, 0.4); /* Transparência igual ao menu principal */
-    margin: 0 !important;
-    padding: 0 !important;
-    list-style: none !important;
+    min-width: 200px;
+    background: #f9f9f9;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    padding: 8px 0;
+    z-index: 999;
 }
 
 /* Submenu items */
 .submenu-item {
-    list-style: none;
-    text-align: center;
-    line-height: 40px;
-    font-size: 1.5vw;
-    color: white;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Linha de separação */
-    transition: background-color 0.3s, color 0.3s;
+    padding: 8px 12px;
+    color: #333;
+    text-align: left;
+    font-size: 14px;
     cursor: pointer;
 }
 
 /* Hover nos itens do submenu */
 .submenu-item:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #f0ca57;
+    background: #00BFFF;
+    color: #fff;
 }
 
 /* Exibe o submenu ao passar o mouse no item pai */
