@@ -131,7 +131,7 @@
 
             <!----- CONTAINER DA LOGOMARCA -------------------------->
             <div id="container-logo">
-                <img src="img/logosomente.png" id="logo-menu"> <!-- imagem logo -->
+                <img src="img/logosomente.png" id="logo-menu" class="logo-menu"> <!-- imagem logo -->
             </div>
 
       </div>
