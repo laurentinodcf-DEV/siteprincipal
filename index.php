@@ -135,12 +135,12 @@
             <!-- HERO / BANNER top -->
                 <section class="hero">
                     <!-- Esquerda com imagem -->
-                    <div class="hero-image">
+                    <div id="hero-image" class="hero-image">
                         <img src="img/asteca-professor.png" id="img-banner-1" class="img-banner-1">
                     </div>
 
                     <!-- Direita com texto -->
-                    <div class="hero-content">
+                    <div id="hero-content" class="hero-content">
                         <h1>Beleza Exclusiva em <br> Santa Luzia</h1>
                         <p>
                             Descubra uma nova era de sofisticação e cuidados <br>
