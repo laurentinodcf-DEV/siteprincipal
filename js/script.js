@@ -67,3 +67,43 @@ document.querySelector('.prev').addEventListener('click', () => {
   currentIndex = (currentIndex - 1 + totalImages) % totalImages;
   carousel.style.transform = `translateX(${-currentIndex * 100}%)`;
 });
+
+
+//----------------------------------------- controle paninel de login -----------------------------------------------
+// Abrir e fechar modal
+const loginModal = document.getElementById("loginModal");
+const openLoginBtn = document.getElementById("openLoginModal");
+const closeLoginBtn = document.getElementById("closeLoginModal");
+const loginError = document.getElementById("loginError");
+
+openLoginBtn.addEventListener("click", () => {
+    loginModal.style.display = "flex";
+});
+
+closeLoginBtn.addEventListener("click", () => {
+    loginModal.style.display = "none";
+    loginError.style.display = "none";
+});
+
+// Enviar formulário via AJAX
+document.getElementById("loginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch("adm/login_ajax.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            loginModal.style.display = "none";
+            loginError.style.display = "none";
+            location.reload(); // recarrega a página
+        } else {
+            loginError.textContent = data.message;
+            loginError.style.display = "block";
+        }
+    });
+});

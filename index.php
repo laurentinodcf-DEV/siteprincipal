@@ -23,9 +23,9 @@
           <!----- MENU DE NAVEGAÇÃO -------------------------->
           <nav class="nav-menu-principal"> 
             <ul class="ul-menu-principal">
-                <li class="li-menu-principal"><span class="menu-principal">Home</span>
+                <li class="li-menu-principal"><span class="menu-principal">ADM</span>
                     <ul class="submenu">
-                        <li class="submenu-item">Login</li>
+                        <li class="submenu-item" id="openLoginModal">Login</li>
                     </ul>
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Serviços</span>
@@ -150,6 +150,29 @@
                     </div>
                 </section>
       </div>
+
+        <!-- Modal de Login -->
+        <div id="loginModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Login do Administrador</h2>
+                    <span class="close-btn" id="closeLoginModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <label>Login:</label><br>
+                        <input type="text" name="login" required  placeholder="Login" required autocomplete="off"><br><br>
+
+                        <label>Senha:</label><br>
+                        <input type="password" name="password" required  placeholder="Senha" autocomplete="new-password"><br><br>
+
+                        <button type="submit">Entrar</button>
+                    </form>
+                    <p id="loginError" style="color:red; display:none;"></p>
+                </div>
+            </div>
+        </div>
+
 
       <!-- JS do Sistema -->
       <script src="js/script.js"></script>
