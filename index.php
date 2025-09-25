@@ -1,3 +1,8 @@
+<?php
+session_start();
+$adminLogado = isset($_SESSION['usuario_id']);
+?>
+
 <!DOCTYPE html>
 <html>
 <head lang="pt-br">
@@ -26,6 +31,7 @@
                 <li class="li-menu-principal"><span class="menu-principal">ADM</span>
                     <ul class="submenu">
                         <li class="submenu-item" id="openLoginModal">Login</li>
+                        <li class="submenu-item" id="logoutMenu" style="display:none;">Logout</li>
                     </ul>
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Serviços</span>
@@ -61,6 +67,13 @@
                         <li class="submenu-item" id="openMapModal">Endereço</li>
                         <li class="submenu-item">Profissional</li>
                         <li class="submenu-item">Fotos</li>
+                    </ul>
+                </li>
+                <li class="li-menu-principal" id="menuInserir" style="display:none;">
+                    <span class="menu-principal">Inserir</span>
+                    <ul class="submenu">
+                        <li class="submenu-item"><a href="resultados_videos.php">Vídeos</a></li>
+                        <li class="submenu-item"><a href="produtos.php">Produtos</a></li>
                     </ul>
                 </li>
             </ul>
@@ -161,10 +174,10 @@
                 <div class="modal-body">
                     <form id="loginForm">
                         <label>Login:</label><br>
-                        <input type="text" name="login" required  placeholder="Login" required autocomplete="off"><br><br>
+                        <input type="text" name="login" required autocomplete="off"><br><br>
 
                         <label>Senha:</label><br>
-                        <input type="password" name="password" required  placeholder="Senha" autocomplete="new-password"><br>
+                        <input type="password" name="password" required autocomplete="new-password"><br>
 
                         <label>
                             <input type="checkbox" id="showPassword"> Visualizar senha
@@ -178,6 +191,25 @@
             </div>
         </div>
 
+        <!-- Modal de Confirmação Logout -->
+        <div id="logoutModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Confirmar Logout</h2>
+                    <span class="close-btn" id="closeLogoutModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja sair?</p>
+                    <button id="confirmLogout">Sim</button>
+                    <button id="cancelLogout">Não</button>
+                </div>
+            </div>
+        </div>
+
+
+    <script>
+        const adminLogado = <?= $adminLogado ? 'true' : 'false' ?>;
+    </script>
 
       <!-- JS do Sistema -->
       <script src="js/script.js"></script>

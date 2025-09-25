@@ -119,3 +119,28 @@ showPasswordCheckbox.addEventListener('change', () => {
         senhaInput.type = 'password';
     }
 });
+
+// Logout Modal
+const logoutMenu = document.getElementById('logoutMenu');
+const logoutModal = document.getElementById('logoutModal');
+const closeLogoutModal = document.getElementById('closeLogoutModal');
+const confirmLogout = document.getElementById('confirmLogout');
+const cancelLogout = document.getElementById('cancelLogout');
+
+logoutMenu.addEventListener('click', () => {
+    logoutModal.style.display = 'flex';
+});
+
+closeLogoutModal.addEventListener('click', () => logoutModal.style.display = 'none');
+cancelLogout.addEventListener('click', () => logoutModal.style.display = 'none');
+
+confirmLogout.addEventListener('click', () => {
+    fetch('adm/logout.php')
+    .then(() => location.reload());
+});
+
+
+if(adminLogado){
+    document.getElementById('logoutMenu').style.display = 'block';
+    document.getElementById('menuInserir').style.display = 'flex';
+}
