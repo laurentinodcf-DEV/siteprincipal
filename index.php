@@ -164,7 +164,12 @@
                         <input type="text" name="login" required  placeholder="Login" required autocomplete="off"><br><br>
 
                         <label>Senha:</label><br>
-                        <input type="password" name="password" required  placeholder="Senha" autocomplete="new-password"><br><br>
+                        <input type="password" name="password" required  placeholder="Senha" autocomplete="new-password"><br>
+
+                        <label>
+                            <input type="checkbox" id="showPassword"> Visualizar senha
+                        </label><br><br>
+
 
                         <button type="submit">Entrar</button>
                     </form>

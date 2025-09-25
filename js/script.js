@@ -107,3 +107,15 @@ document.getElementById("loginForm").addEventListener("submit", function(e){
         }
     });
 });
+
+// Mostrar/ocultar senha
+const senhaInput = document.querySelector('input[name="password"]');
+const showPasswordCheckbox = document.getElementById('showPassword');
+
+showPasswordCheckbox.addEventListener('change', () => {
+    if(showPasswordCheckbox.checked){
+        senhaInput.type = 'text';
+    } else {
+        senhaInput.type = 'password';
+    }
+});
