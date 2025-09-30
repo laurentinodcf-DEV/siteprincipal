@@ -160,6 +160,9 @@ $adminLogado = isset($_SESSION['usuario_id']);
                         <a href="#agenda" class="secao-01-content-button">Agende Sua Beleza</a>
                     </div>
                 </section>
+
+            <?php include 'class/contatoFooter.php'; ?>
+            
       </div>
 
         <!-- Modal de Login -->
@@ -203,6 +206,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </div>
             </div>
         </div>
+
 
 
     <script>

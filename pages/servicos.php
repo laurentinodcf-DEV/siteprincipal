@@ -5,6 +5,12 @@
   <title>Serviços - Salome Beleza</title>
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/estilo.css">
+
+  <?php
+session_start();
+include __DIR__ . '/../class/menu.php';
+?>
+
   <style>
     .secao {
       padding: 80px 0;
