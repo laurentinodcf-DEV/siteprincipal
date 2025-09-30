@@ -101,11 +101,12 @@ div#container-page{ /*--------- pagina geral --------------*/
 .secao-01 {
     position: relative;
     width: 100%;
+    padding-top: 30px;
     height: 60vh;      
     display: flex;
     align-items: center;
     overflow: hidden;
-    background: linear-gradient(135deg, #8C7A5A, #FAF6F0, #8C7A5A, #E8D5B5); /* cor gradiente */
+    background: linear-gradient(130deg, #ffdf00, white, #ffd700, #fff5cc); /* cor gradiente */
     background-attachment: fixed;  /* mantém o gradiente fixo ao rolar */
     background-size: cover;        /* cobre toda a tela */
 }
@@ -132,13 +133,13 @@ div#container-page{ /*--------- pagina geral --------------*/
 .secao-01-content {
     position: relative;
     z-index: 2;
-    width: 40%;
-    padding: 60px;
+    width: 45%;
+    padding: 1%;
     margin-left: auto; /* empurra para a direita */
     color: #fff;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: justify;
     align-items: flex-start;
 }
 
@@ -161,10 +162,10 @@ div#container-page{ /*--------- pagina geral --------------*/
 .secao-01-content-button {
     width: auto;
     padding: 12px 24px;
-    background: #ffddc1;
     color: #3b2a20;
     text-decoration: none;
     font-weight: bold;
+    border: 1px solid #333;
     border-radius: 8px;
     transition: background 0.3s;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -418,4 +419,24 @@ nav ul ul li {
     font-size: 1.5rem;
     cursor: pointer;
     color: #6c4f3d;
+}
+
+.primeirafoto{
+    /* border: 1px solid red; */
+}
+
+.secao-foto { /* secão da imagem */
+  position: absolute;
+  left: 0;
+  top: 10%;
+  z-index: 10; /* joga a imagem acima das outras seções */
+  max-width: 30%;        /* controla o tamanho */
+  width: 30%;
+}
+
+.foto-quenia { /* imagem */
+  max-width: 100%;        /* controla o tamanho */
+  max-height: 100vh;
+  width: 50%;
+  height: 50vh;
 }

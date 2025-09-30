@@ -143,26 +143,31 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </div>
             </div>
 
-            <!-- HERO / BANNER top -->
+
+            <div id="primeirafoto" class="primeirafoto">
+                 <!-- HERO / BANNER top -->
                 <section id="secao-01" class="secao-01">
                     <!-- Esquerda com imagem -->
                     <div id="secao-01-image" class="secao-01-image">
-                        <img src="img/asteca-professor.png" id="img-banner-1" class="img-banner-1">
+                        <img src="img/salao/interior01.jpg" id="img-banner-1" class="img-banner-1">
                     </div>
 
                     <!-- Direita com texto -->
                     <div id="secao-01-content" class="secao-01-content">
-                        <h1>Beleza Exclusiva em <br> Santa Luzia</h1>
-                        <p>
-                            Descubra uma nova era de sofisticação e cuidados <br>
-                            estéticos personalizados em Santa Luzia.
-                        </p>
-                        <a href="#agenda" class="secao-01-content-button">Agende Sua Beleza</a>
+                        <h1>Transforme sua beleza</h1>
+                        <h1>com estilo</h1>
+                        <a href="#agenda" class="secao-01-content-button">Saiba mais</a>
                     </div>
                 </section>
 
-            <?php include 'class/contatoFooter.php'; ?>
-            
+                <!-- Foto da Profissional -->
+                <section id="secao-foto" class="secao-foto">
+                    <img src="img/profissional/quenia01.png" alt="Quênia Salomé" class="foto-quenia">
+                </section>
+
+                <?php include 'class/contatoFooter.php'; ?>
+            </div>  
+
       </div>
 
         <!-- Modal de Login -->
