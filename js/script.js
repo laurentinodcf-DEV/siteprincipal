@@ -175,3 +175,20 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const carousel = document.querySelector(".servicos-carousel");
+    const prevBtn = document.querySelector(".carousel-btn.prev");
+    const nextBtn = document.querySelector(".carousel-btn.next");
+
+    const scrollAmount = 320; // quanto rola por clique
+
+    prevBtn.addEventListener("click", () => {
+      carousel.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+    });
+
+    nextBtn.addEventListener("click", () => {
+      carousel.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    });
+  });
