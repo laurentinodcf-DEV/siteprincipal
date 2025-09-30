@@ -154,11 +154,69 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                     <!-- Direita com texto -->
                     <div id="secao-01-content" class="secao-01-content">
-                        <h1>Transforme sua beleza</h1>
-                        <h1>com estilo</h1>
-                        <a href="#agenda" class="secao-01-content-button">Saiba mais</a>
+                    <div class="sobre-texto">
+                        <h2>Transforme sua beleza com estilo</h2>
+                        <p class="p-servicos">
+                            “No Studio Salomé, cada detalhe é pensado para valorizar a sua beleza única.
+                            Oferecemos técnicas modernas, ambiente sofisticado e atendimento personalizado
+                            para que você viva uma experiência inesquecível de cuidado e transformação.”
+                                                    </p>
+                        <a href="#sobre" class="btn-sobre">Saiba mais</a>
+                    </div>
                     </div>
                 </section>
+
+                <!-- SEÇÃO 02 - Serviços -->
+                <section id="secao-02" class="secao-02">
+                <div class="container-servicos">
+                    <div class="sobre-texto">
+                        <h2>Sobre os Serviços</h2>
+                        <p class="p-servicos">
+                            Oferecemos tratamentos completos de beleza e estética, 
+                            com técnicas modernas e personalizadas para valorizar sua beleza natural.
+                        </p>
+                        <a href="#sobre" class="btn-sobre">Saiba mais</a>
+                    </div>
+                    <div class="card-servico">
+                    <img src="img/servicos/alisamento01.png" alt="Alisamento">
+                    <p>Alisamento de cabelos com técnica especializada</p>
+                    </div>
+                    <div class="card-servico">
+                    <img src="img/servicos/sobrancelha.png" alt="Sobrancelhas">
+                    <p>Cuidados personalizados para sobrancelhas</p>
+                    </div>
+                    <div class="card-servico">
+                    <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                    <p>Tratamentos estéticos de alta qualidade</p>
+                    </div>
+                </div>
+                </section>
+
+                <!-- SEÇÃO 03 - Sobre o Studio -->
+                <section id="secao-03" class="secao-03">
+                <div class="container-sobre">
+                    <!-- Coluna Imagem + Depoimento -->
+                    <div class="sobre-imagem">
+                         <img src="img/salao/interior02.jpg" alt="Studio Salomé">
+                    <div class="sobre-depoimento">
+                        <p class="depoimento-texto">“Transformou meu visual!”</p>
+                        <span class="depoimento-autor">Ana Clara</span>
+                    </div>
+                    </div>          
+                    <!-- Coluna Texto -->
+                    <div class="sobre-texto">
+                        <h2>Sobre o Studio Salomé</h2>
+                            <p>
+                                No Studio Salomé, oferecemos serviços de beleza e estética
+                                especializados em alisamento e cuidados para cabelos e sobrancelhas,
+                                com um toque de sofisticação.
+                            </p>
+                        <a href="#sobre" class="btn-sobre">Saiba mais</a>
+                    </div>
+                </div>
+                </section>
+
+
 
                 <!-- Foto da Profissional -->
                 <section id="secao-foto" class="secao-foto">

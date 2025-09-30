@@ -97,6 +97,9 @@ div#container-page{ /*--------- pagina geral --------------*/
 	width: 100%;
 	height: 100%; /* para nao aumentar junto com tamanho da pagina geral */
 }
+
+/* ----------------------------------------- SESSÕES ----------------------------------------------------------------*/
+
 /* HERO GERAL - FUNDOS E LAYOUT */
 .secao-01 {
     position: relative;
@@ -174,6 +177,148 @@ div#container-page{ /*--------- pagina geral --------------*/
 .secao-01-content-button:hover {
     background: #f9c89b;
 }
+
+/* SEÇÃO 02 */
+.secao-02 {
+  width: 100%;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #8C7A5A, #FAF6F0, #E8D5B5); /* fundo degradê dourado */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container-servicos {
+  display: flex;
+  gap: 30px;
+  max-width: 1200px;
+  width: 100%;
+  justify-content: center;
+}
+
+.card-servico {
+  flex: 1;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-servico img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-bottom: 2px solid #d4af37;
+}
+
+.card-servico p {
+  padding: 15px;
+  font-size: 1rem;
+  color: #f1f1f1;
+  background: rgba(0,0,0,0.4);
+}
+
+.card-servico:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.p-servicos{
+    text-align: left;
+}
+
+/* SEÇÃO 03 */
+.secao-03 {
+  width: 100%;
+  padding: 80px 60px;
+  background: #fff; /* fundo branco para destacar */
+  display: flex;
+  justify-content: center;
+}
+
+.container-sobre {
+  display: flex;
+  max-width: 1200px;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+/* Texto à esquerda */
+.sobre-texto {
+  flex: 1;
+}
+
+.sobre-texto h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+.sobre-texto p {
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.btn-sobre {
+  display: inline-block;
+  padding: 12px 30px;
+  border: 2px solid #000;
+  border-radius: 30px;
+  color: #000;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-sobre:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* Imagem com depoimento */
+.sobre-imagem {
+  flex: 1;
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.sobre-imagem img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 15px;
+}
+
+.sobre-depoimento {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #faf5ef;
+  padding: 20px;
+  border-radius: 0 0 15px 15px;
+}
+
+.depoimento-texto {
+  font-size: 1.1rem;
+  font-style: italic;
+  margin: 0;
+  color: #333;
+}
+
+.depoimento-autor {
+  font-size: 0.9rem;
+  color: #777;
+}
+
 
 
 /* ------------------------------------ CONTAINER IMAGENS MENU e imagem ---------------------------------------------------------------------------*/
@@ -421,6 +566,7 @@ nav ul ul li {
     color: #6c4f3d;
 }
 
+/* ----------------------------------- FOTO PROFISSIONAL --------------------------------------------------------------------------------------- */
 .primeirafoto{
     /* border: 1px solid red; */
 }
@@ -440,3 +586,5 @@ nav ul ul li {
   width: 50%;
   height: 50vh;
 }
+
+
