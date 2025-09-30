@@ -144,3 +144,34 @@ if(adminLogado){
     document.getElementById('logoutMenu').style.display = 'block';
     document.getElementById('menuInserir').style.display = 'flex';
 }
+
+//----------------------------------------- Inserir Vídeo (Link) -----------------------------------------------
+document.addEventListener('DOMContentLoaded', function () {
+    const formLink = document.getElementById('formLink');
+    if(formLink){
+        formLink.addEventListener('submit', function(e){
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            formData.append('tipo', 'link'); // força o tipo para link
+
+            fetch('video_action.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if(data.success){
+                    // fecha modal (se for bootstrap)
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalLink'));
+                    if(modal){ modal.hide(); }
+
+                    // recarrega lista de vídeos
+                    location.reload();
+                }
+            })
+            .catch(err => console.error('Erro:', err));
+        });
+    }
+});

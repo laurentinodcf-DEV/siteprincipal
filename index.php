@@ -36,9 +36,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Serviços</span>
                     <ul class="submenu">
-                        <li class="submenu-item">Um</li>
-                        <li class="submenu-item">Dois</li>
-                        <li class="submenu-item">Três</li>
+                        <li class="submenu-item"><a href="pages/servicos.php">Serviços Oferecidos</a></li>
                     </ul>
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Produtos</span>
@@ -50,7 +48,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Resultados</span>
                     <ul class="submenu">
-                        <li class="submenu-item">Videos</li>
+                        <li class="submenu-item"><a href="pages/resultados_videos.php">Vídeos</a></li>
                         <li class="submenu-item">Imagens</li>
                         <li class="submenu-item">Depoimentos</li>
                     </ul>
@@ -72,7 +70,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <li class="li-menu-principal" id="menuInserir" style="display:none;">
                     <span class="menu-principal">Inserir</span>
                     <ul class="submenu">
-                        <li class="submenu-item"><a href="resultados_videos.php">Vídeos</a></li>
+                        <li class="submenu-item"><a href="pages/inserir_video.php">Inserir Vídeo</a></li>
                         <li class="submenu-item"><a href="produtos.php">Produtos</a></li>
                     </ul>
                 </li>
