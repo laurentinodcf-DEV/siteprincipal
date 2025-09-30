@@ -147,22 +147,17 @@ $adminLogado = isset($_SESSION['usuario_id']);
             <div id="primeirafoto" class="primeirafoto">
                  <!-- HERO / BANNER top -->
                 <section id="secao-01" class="secao-01">
-                    <!-- Esquerda com imagem -->
-                    <div id="secao-01-image" class="secao-01-image">
-                        <img src="img/salao/interior01.jpg" id="img-banner-1" class="img-banner-1">
-                    </div>
-
                     <!-- Direita com texto -->
-                    <div id="secao-01-content" class="secao-01-content">
-                    <div class="sobre-texto">
-                        <h2>Transforme sua beleza com estilo</h2>
-                        <p class="p-servicos">
-                            “No Studio Salomé, cada detalhe é pensado para valorizar a sua beleza única.
-                            Oferecemos técnicas modernas, ambiente sofisticado e atendimento personalizado
-                            para que você viva uma experiência inesquecível de cuidado e transformação.”
-                                                    </p>
-                        <a href="#sobre" class="btn-sobre">Saiba mais</a>
-                    </div>
+                    <div id="secao-01" class="secao-01">
+                        <div class="sobre-texto-sesao-01">
+                            <h2>Transforme sua beleza com estilo</h2>
+                            <p class="p-belaza-estilo">
+                                “No Studio Salomé, cada detalhe é pensado para valorizar a sua beleza única.
+                                Oferecemos técnicas modernas, ambiente sofisticado e atendimento personalizado
+                                para que você viva uma experiência inesquecível de cuidado e transformação.”
+                                                        </p>
+                            <a href="#sobre-01" class="btn-sobre-01">Saiba mais</a>
+                        </div>
                     </div>
                 </section>
 

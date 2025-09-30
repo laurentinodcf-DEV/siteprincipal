@@ -114,68 +114,43 @@ div#container-page{ /*--------- pagina geral --------------*/
     background-size: cover;        /* cobre toda a tela */
 }
 
-/* IMAGEM SOBREPOSTA À ESQUERDA - POSICIONADA ABSOLUTAMENTE */
-.secao-01-image {
-    position: absolute;
-    left: 4%; /* recua a esquerda */
-    top: 2%; /* recua ao topo do pai */
-    width: 50%;
-    height: 96%;
-    z-index: 1;
-    overflow: hidden;
+.sobre-texto-sesao-01 {
+  flex: 1;
+  max-width: 60%;
+  width: 50%;
+  margin: 0 auto;
+  text-align: center;
 }
 
-.secao-01-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+.sobre-texto-sesao-01 h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #222;
+  text-align: center;
 }
 
-/* CONTEÚDO DE TEXTO À DIREITA - EM CIMA DO FUNDO MARROM */
-.secao-01-content {
-    position: relative;
-    z-index: 2;
-    width: 45%;
-    padding: 1%;
-    margin-left: auto; /* empurra para a direita */
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: justify;
-    align-items: flex-start;
+.sobre-texto-sesao-01 p {
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
-.secao-01-content h1 {
-    font-size: 2.8rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-    line-height: 1.2;
-    color: #fff;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+.btn-sobre-01 {
+  display: inline-block;
+  padding: 12px 30px;
+  border: 2px solid #000;
+  border-radius: 30px;
+  color: #000;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-.secao-01-content p {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-    line-height: 1.6;
-    color: #ddd;
-}
-
-.secao-01-content-button {
-    width: auto;
-    padding: 12px 24px;
-    color: #3b2a20;
-    text-decoration: none;
-    font-weight: bold;
-    border: 1px solid #333;
-    border-radius: 8px;
-    transition: background 0.3s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.secao-01-content-button:hover {
-    background: #f9c89b;
+.btn-sobre-01:hover {
+  background: #000;
+  color: #fff;
 }
 
 /* SEÇÃO 02 */
