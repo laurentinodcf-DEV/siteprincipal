@@ -164,25 +164,17 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <!-- SEÇÃO 02 - Serviços -->
                 <section id="secao-02" class="secao-02">
                 <div class="container-servicos">
-                    <div class="sobre-texto">
-                        <h2>Sobre os Serviços</h2>
-                        <p class="p-servicos">
-                            Oferecemos tratamentos completos de beleza e estética, 
-                            com técnicas modernas e personalizadas para valorizar sua beleza natural.
-                        </p>
-                        <a href="#sobre" class="btn-sobre">Saiba mais</a>
+                    <div class="card-servico">
+                        <img src="img/servicos/alisamento01.png" alt="Alisamento">
+                        <p>Alisamento de cabelos com técnica especializada</p>
                     </div>
                     <div class="card-servico">
-                    <img src="img/servicos/alisamento01.png" alt="Alisamento">
-                    <p>Alisamento de cabelos com técnica especializada</p>
+                        <img src="img/servicos/sobrancelha.png" alt="Sobrancelhas">
+                        <p>Cuidados personalizados para sobrancelhas</p>
                     </div>
                     <div class="card-servico">
-                    <img src="img/servicos/sobrancelha.png" alt="Sobrancelhas">
-                    <p>Cuidados personalizados para sobrancelhas</p>
-                    </div>
-                    <div class="card-servico">
-                    <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                    <p>Tratamentos estéticos de alta qualidade</p>
+                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                        <p>Tratamentos estéticos de alta qualidade</p>
                     </div>
                 </div>
                 </section>

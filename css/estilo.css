@@ -109,7 +109,7 @@ div#container-page{ /*--------- pagina geral --------------*/
     display: flex;
     align-items: center;
     overflow: hidden;
-    background: linear-gradient(130deg, #ffdf00, white, #ffd700, #fff5cc); /* cor gradiente */
+    background: linear-gradient(322deg,rgba(228, 174, 14, 1) 10%, rgba(255, 255, 255, 1) 52%, rgba(237, 221, 83, 1) 100%); /* cor gradiente */
     background-attachment: fixed;  /* mantém o gradiente fixo ao rolar */
     background-size: cover;        /* cobre toda a tela */
 }
