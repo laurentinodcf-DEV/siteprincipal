@@ -177,6 +177,26 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+// carrossel da sessão 02
+  document.addEventListener("DOMContentLoaded", function() {
+    const carousel = document.querySelector(".servicos-carousel-02");
+    const prevBtn = document.querySelector(".carousel-btn-02.prev");
+    const nextBtn = document.querySelector(".carousel-btn-02.next");
+
+    const scrollAmount = 320; // pixels que anda por clique
+
+    prevBtn.addEventListener("click", () => {
+      carousel.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+    });
+
+    nextBtn.addEventListener("click", () => {
+      carousel.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    });
+  });
+
+
+
+// carrossel da sessão 04
   document.addEventListener("DOMContentLoaded", function() {
     const carousel = document.querySelector(".servicos-carousel");
     const prevBtn = document.querySelector(".carousel-btn.prev");
@@ -192,3 +212,5 @@ document.addEventListener('DOMContentLoaded', function () {
       carousel.scrollBy({ left: scrollAmount, behavior: "smooth" });
     });
   });
+
+

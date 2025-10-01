@@ -164,20 +164,53 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <!-- SEÇÃO 02 - Serviços -->
                 <section id="secao-02" class="secao-02">
                 <div class="container-servicos">
-                    <div class="card-servico">
+
+
+                    <!-- Wrapper do carrossel -->
+                    <div class="carousel-wrapper-02">
+                    <!-- Botão anterior -->
+                    <button class="carousel-btn-02 prev">&#10094;</button>
+
+                    <!-- Carrossel -->
+                    <div class="servicos-carousel-02">
+
+                        <div class="card-servico">
                         <img src="img/servicos/alisamento01.png" alt="Alisamento">
                         <p>Alisamento de cabelos com técnica especializada</p>
-                    </div>
-                    <div class="card-servico">
+                        </div>
+
+                        <div class="card-servico">
                         <img src="img/servicos/sobrancelha.png" alt="Sobrancelhas">
                         <p>Cuidados personalizados para sobrancelhas</p>
-                    </div>
-                    <div class="card-servico">
+                        </div>
+
+                        <div class="card-servico">
                         <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
                         <p>Tratamentos estéticos de alta qualidade</p>
+                        </div>
+                                                <div class="card-servico">
+                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                        <p>Tratamentos estéticos de alta qualidade</p>
+                        </div>
+
+                                                <div class="card-servico">
+                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                        <p>Tratamentos estéticos de alta qualidade</p>
+                        </div>
+
+                                                <div class="card-servico">
+                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                        <p>Tratamentos estéticos de alta qualidade</p>
+                        </div>
+
+                    </div>
+
+                    <!-- Botão próximo -->
+                    <button class="carousel-btn-02 next">&#10095;</button>
                     </div>
                 </div>
                 </section>
+
 
                 <!-- SEÇÃO 03 - Sobre o Studio -->
                 <section id="secao-03" class="secao-03">
@@ -222,31 +255,31 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     <!-- Carrossel rolável -->
                     <div class="servicos-carousel">
                         <div class="card-servico-04">
-                            <img src="img/servicos/alisamento.jpg" alt="Alisamento de Cabelos">
+                            <img src="img/servicos/alisamento02.jpeg" alt="Alisamento de Cabelos">
                             <h3>Alisamento de Cabelos</h3>
                             <p>Transforme seus cabelos com nossos tratamentos de alisamento de alta qualidade e durabilidade.</p>
                         </div>
 
                         <div class="card-servico-04">
-                            <img src="img/servicos/tratamento.jpg" alt="Tratamentos Estéticos">
+                            <img src="img/servicos/escova.jpeg" alt="Tratamentos Estéticos">
                             <h3>Escova capilar</h3>
                             <p>Nossos especialistas garantem sobrancelhas perfeitamente moldadas e bem cuidadas.</p>
                         </div>
 
                         <div class="card-servico-04">
-                            <img src="img/servicos/spa.jpg" alt="Spa Capilar">
+                            <img src="img/servicos/tratamentos.png" alt="Spa Capilar">
                             <h3>Spa Capilar</h3>
                             <p>Relaxe e cuide da saúde dos seus fios com nossos tratamentos capilares premium.</p>
                         </div>
 
                         <div class="card-servico-04">
-                            <img src="img/servicos/produtos.jpg" alt="Produtos Exclusivos">
+                            <img src="img/servicos/produtos.jpeg" alt="Produtos Exclusivos">
                             <h3>Produtos Exclusivos</h3>
                             <p>Utilizamos apenas produtos de alta performance para garantir resultados impecáveis e duradouros.</p>
                         </div>
 
                         <div class="card-servico-04">
-                            <img src="img/servicos/sobrancelha.jpg" alt="Cuidados para Sobrancelhas">
+                            <img src="img/servicos/sobrancelha02.jpeg" alt="Cuidados para Sobrancelhas">
                             <h3>Estética de Sobrancelhas</h3>
                             <p>Realce sua beleza com nossos serviços de design e cuidados especiais para sobrancelhas.</p>
                         </div>
@@ -255,6 +288,10 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                     <!-- Botão próximo -->
                     <button class="carousel-btn next">&#10095;</button>
+                    </div>
+                    <br>
+                    <div class="sobre-texto-sesao-01">
+                        <a href="#sobre-01" class="btn-sobre-01">Saiba mais</a>
                     </div>
                 </div>
                 </section>
