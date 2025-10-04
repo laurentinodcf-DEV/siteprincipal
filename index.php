@@ -297,6 +297,10 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </section>
 
 
+                <div class="avatar-destaque">
+                    <img src="img/avatar/07.png" alt="Cliente destaque" class="avatar-destaque-img">
+                </div>
+
                 <!-- Foto da Profissional -->
                 <section id="secao-foto" class="secao-foto">
                     <img src="img/profissional/quenia01.png" alt="Quênia Salomé" class="foto-quenia">
