@@ -411,8 +411,9 @@ div#container-page{ /*--------- pagina geral --------------*/
 
 .card-servico-04 img {
   width: 100%;
-  height: 180px;
-  object-fit: fill;   /* mostra a imagem inteira */
+  height: 200px;
+  object-fit: cover;   /* preenche o quadro sem distorcer */
+  object-position: center;
 }
 
 .card-servico-04 h3 {
@@ -741,6 +742,7 @@ nav ul ul li {
   border-radius: 16px;
   width: 12%;
 }
+
 
 
 

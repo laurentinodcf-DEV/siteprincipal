@@ -255,13 +255,13 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     <!-- Carrossel rolável -->
                     <div class="servicos-carousel">
                         <div class="card-servico-04">
-                            <img src="img/servicos/alisamento02.jpeg" alt="Alisamento de Cabelos">
+                            <img src="img/servicos/alisamento02.png" alt="Alisamento de Cabelos">
                             <h3>Alisamento de Cabelos</h3>
                             <p>Transforme seus cabelos com nossos tratamentos de alisamento de alta qualidade e durabilidade.</p>
                         </div>
 
                         <div class="card-servico-04">
-                            <img src="img/servicos/escova.jpeg" alt="Tratamentos Estéticos">
+                            <img src="img/servicos/escova.png" alt="Tratamentos Estéticos">
                             <h3>Escova capilar</h3>
                             <p>Nossos especialistas garantem sobrancelhas perfeitamente moldadas e bem cuidadas.</p>
                         </div>
@@ -273,13 +273,13 @@ $adminLogado = isset($_SESSION['usuario_id']);
                         </div>
 
                         <div class="card-servico-04">
-                            <img src="img/servicos/produtos.jpeg" alt="Produtos Exclusivos">
+                            <img src="img/servicos/produtos.png" alt="Produtos Exclusivos">
                             <h3>Produtos Exclusivos</h3>
                             <p>Utilizamos apenas produtos de alta performance para garantir resultados impecáveis e duradouros.</p>
                         </div>
 
                         <div class="card-servico-04">
-                            <img src="img/servicos/sobrancelha02.jpeg" alt="Cuidados para Sobrancelhas">
+                            <img src="img/servicos/sobrancelha02.png" alt="Cuidados para Sobrancelhas">
                             <h3>Estética de Sobrancelhas</h3>
                             <p>Realce sua beleza com nossos serviços de design e cuidados especiais para sobrancelhas.</p>
                         </div>
