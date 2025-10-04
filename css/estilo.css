@@ -102,18 +102,139 @@ div#container-page{ /*--------- pagina geral --------------*/
 
 /* HERO GERAL - FUNDOS E LAYOUT */
 .secao-01 {
-    position: relative;
-    width: 100%;
-    padding-top: 30px;
-    height: 60vh;      
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    background: linear-gradient(322deg,rgba(228, 174, 14, 1) 10%, rgba(255, 255, 255, 1) 52%, rgba(237, 221, 83, 1) 100%); /* cor gradiente */
-    background-attachment: fixed;  /* mantém o gradiente fixo ao rolar */
-    background-size: cover;        /* cobre toda a tela */
+  position: relative;
+  width: 100%;
+  min-height: 80vh;
+  padding: 140px 40px 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
 }
 
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: -1;
+}
+
+.hero-content {
+  position: relative;
+  text-align: center;
+  max-width: 720px;
+  margin-bottom: 60px;
+  z-index: 1;
+}
+
+.hero-content h1 {
+  font-size: clamp(2.5rem, 4vw + 1rem, 4rem);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  color: #f3f3f3;
+}
+
+.secao-01 .btn-sobre-01 {
+  border-color: #fff;
+  color: #fff;
+  background: transparent;
+}
+
+.secao-01 .btn-sobre-01:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f1f1f;
+}
+
+.hero-highlights {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 960px;
+  z-index: 1;
+}
+
+.highlight-card {
+  flex: 1;
+  min-width: 180px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 24px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  text-align: center;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.highlight-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.highlight-card p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #e8e8e8;
+}
+
+@media (max-width: 900px) {
+  .secao-01 {
+    padding: 120px 24px 100px;
+  }
+
+  .hero-highlights {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .highlight-card {
+    flex: 1 1 220px;
+  }
+}
+
+@media (max-width: 600px) {
+  .secao-01 {
+    padding: 120px 18px 80px;
+  }
+
+  .hero-content {
+    margin-bottom: 40px;
+  }
+
+  .hero-highlights {
+    gap: 16px;
+  }
+
+  .highlight-card {
+    flex: 1 1 100%;
+  }
+
+  .hero-content p {
+    font-size: 1.05rem;
+  }
+}
 .sobre-texto-sesao-01 {
   flex: 1;
   max-width: 60%;
@@ -742,8 +863,3 @@ nav ul ul li {
   border-radius: 16px;
   width: 12%;
 }
-
-
-
-
-

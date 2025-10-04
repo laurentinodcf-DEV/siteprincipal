@@ -147,16 +147,29 @@ $adminLogado = isset($_SESSION['usuario_id']);
             <div id="primeirafoto" class="primeirafoto">
                  <!-- HERO / BANNER top -->
                 <section id="secao-01" class="secao-01">
-                    <!-- Direita com texto -->
-                    <div id="secao-01" class="secao-01">
-                        <div class="sobre-texto-sesao-01">
-                            <h2>Transforme sua beleza com estilo</h2>
-                            <p class="p-belaza-estilo">
-                                “No Studio Salomé, cada detalhe é pensado para valorizar a sua beleza única.
-                                Oferecemos técnicas modernas, ambiente sofisticado e atendimento personalizado
-                                para que você viva uma experiência inesquecível de cuidado e transformação.”
-                                                        </p>
-                            <a href="#sobre-01" class="btn-sobre-01">Saiba mais</a>
+                    <video class="hero-video" autoplay muted loop playsinline>
+                        <source src="videos/lavagem.mp4" type="video/mp4">
+                    </video>
+                    <div class="hero-overlay"></div>
+
+                    <div class="hero-content">
+                        <h1>Transforme sua beleza com confian�a</h1>
+                        <p>Servi�os de alisamento e cuidados capilares de alta qualidade.</p>
+                        <a href="#sobre-01" class="btn-sobre-01">Saiba mais</a>
+                    </div>
+
+                    <div class="hero-highlights">
+                        <div class="highlight-card">
+                            <h3>Cuidados Capilares</h3>
+                            <p>Tratamentos personalizados para todos os tipos de cabelo.</p>
+                        </div>
+                        <div class="highlight-card">
+                            <h3>Cuidados de Pele</h3>
+                            <p>Produtos profissionais para resultados duradouros.</p>
+                        </div>
+                        <div class="highlight-card">
+                            <h3>Linha de Produtos</h3>
+                            <p>Consultoria especializada em cuidados capilares.</p>
                         </div>
                     </div>
                 </section>
