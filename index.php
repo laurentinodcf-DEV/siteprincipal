@@ -153,8 +153,8 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     <div class="hero-overlay"></div>
 
                     <div class="hero-content">
-                        <h1>Transforme sua beleza com confiança</h1>
-                        <p>Serviços de alisamento e cuidados capilares de alta qualidade.</p>
+                        <h1>Transforme sua beleza com confian&ccedil;a</h1>
+                        <p>Servi&ccedil;os de alisamento e cuidados capilares de alta qualidade.</p>
                         <a href="#sobre-01" class="btn-sobre-01">Saiba mais</a>
                     </div>
 
