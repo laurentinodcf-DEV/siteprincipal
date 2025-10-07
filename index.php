@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 $adminLogado = isset($_SESSION['usuario_id']);
 ?>
@@ -200,78 +200,35 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                 <!-- SEÇÃO 03 - Sobre o Studio -->
                 <section id="secao-03" class="secao-03">
-                    <div class="container-servicos">
-                        <h2 class="titulo-servicos">Nossos Serviços</h2>
-                        <p class="subtitulo-servicos">
-                            Oferecemos tratamentos capilares e cuidados de pele com produtos de alta qualidade.
-                        </p>
+                    <div class="container-depoimentos">
+                        <h2 class="titulo-depoimentos">O que nossos clientes dizem</h2>
 
-                        <div class="carousel-wrapper-02">
-                            <button class="carousel-btn-02 prev" aria-label="Serviço anterior">&#10094;</button>
-
-                            <div class="servicos-carousel-02">
-                                <article class="card-servico">
-                                    <div class="card-servico-imagem">
-                                        <img src="img/servicos/alisamento01.png" alt="Alisamento de cabelos">
-                                    </div>
-                                    <div class="card-servico-info">
-                                        <h3>Alisamento de Cabelos</h3>
-                                        <p>Alisamento de cabelos com técnica especializada.</p>
-                                    </div>
-                                </article>
-
-                                <article class="card-servico">
-                                    <div class="card-servico-imagem">
-                                        <img src="img/servicos/sobrancelha.png" alt="Cuidados com sobrancelhas">
-                                    </div>
-                                    <div class="card-servico-info">
-                                        <h3>Design de Sobrancelhas</h3>
-                                        <p>Cuidados personalizados para sobrancelhas.</p>
-                                    </div>
-                                </article>
-
-                                <article class="card-servico">
-                                    <div class="card-servico-imagem">
-                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                                    </div>
-                                    <div class="card-servico-info">
-                                        <h3>Tratamentos Estéticos</h3>
-                                        <p>Tratamentos estéticos de alta qualidade.</p>
-                                    </div>
-                                </article>
-
-                                <article class="card-servico">
-                                    <div class="card-servico-imagem">
-                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                                    </div>
-                                    <div class="card-servico-info">
-                                        <h3>Tratamentos Estéticos</h3>
-                                        <p>Tratamentos estéticos de alta qualidade.</p>
-                                    </div>
-                                </article>
-
-                                <article class="card-servico">
-                                    <div class="card-servico-imagem">
-                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                                    </div>
-                                    <div class="card-servico-info">
-                                        <h3>Tratamentos Estéticos</h3>
-                                        <p>Tratamentos estéticos de alta qualidade.</p>
-                                    </div>
-                                </article>
-
-                                <article class="card-servico">
-                                    <div class="card-servico-imagem">
-                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                                    </div>
-                                    <div class="card-servico-info">
-                                        <h3>Tratamentos Estéticos</h3>
-                                        <p>Tratamentos estéticos de alta qualidade.</p>
-                                    </div>
-                                </article>
+                        <div class="depoimentos-wrapper">
+                        <!-- Depoimento 1 -->
+                        <div class="card-depoimento">
+                            <div class="avaliacao">★★★★★</div>
+                            <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
+                            <p class="texto-depoimento">
+                            O serviço foi excepcional e superou minhas expectativas em todos os aspectos.
+                            </p>
+                            <div class="autor">
+                            <img src="img/clientes/ana.jpg" alt="Ana L." class="foto-autor">
+                            <p class="nome-autor">Ana L.</p>
                             </div>
+                        </div>
 
-                            <button class="carousel-btn-02 next" aria-label="Próximo serviço">&#10095;</button>
+                        <!-- Depoimento 2 -->
+                        <div class="card-depoimento">
+                            <div class="avaliacao">★★★★★</div>
+                            <h3 class="titulo-depoimento">Estou admirada!</h3>
+                            <p class="texto-depoimento">
+                            A experiência foi incrível, definitivamente voltarei e recomendarei a todos!
+                            </p>
+                            <div class="autor">
+                            <img src="img/clientes/carlos.jpg" alt="Carlos M." class="foto-autor">
+                            <p class="nome-autor">Carlos M.</p>
+                            </div>
+                        </div>
                         </div>
                     </div>
                 </section>

@@ -1005,3 +1005,118 @@ nav ul ul li {
   border-radius: 16px;
   width: 12%;
 }
+
+
+/* === SEÇÃO 04 - DEPOIMENTOS === */
+.secao-04 {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* ocupa 100% da altura da janela */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* fundo + conteúdo centralizado */
+.container-depoimentos {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('../img/bg-depoimentos.jpg') center/cover no-repeat;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.titulo-depoimentos {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 60px;
+  letter-spacing: 1px;
+}
+
+.depoimentos-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 60px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.card-depoimento {
+  flex: 1 1 400px;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-depoimento:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.avaliacao {
+  font-size: 1.4rem;
+  color: #FFD700;
+  margin-bottom: 10px;
+}
+
+.titulo-depoimento {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.texto-depoimento {
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-bottom: 25px;
+  color: #eee;
+  line-height: 1.5;
+}
+
+.autor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.foto-autor {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.nome-autor {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .secao-04 {
+    height: auto;
+    padding: 80px 20px;
+  }
+
+  .depoimentos-wrapper {
+    flex-direction: column;
+    gap: 40px;
+  }
+}
