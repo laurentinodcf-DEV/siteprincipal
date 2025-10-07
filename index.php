@@ -176,6 +176,30 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                 <!-- SEÇÃO 02 - Serviços -->
                 <section id="secao-02" class="secao-02">
+                <div class="container-sobre">
+                    <!-- Coluna Imagem + Depoimento -->
+                    <div class="sobre-imagem">
+                         <img src="img/salao/interior02.jpg" alt="Studio Salomé">
+                    <div class="sobre-depoimento">
+                        <p class="depoimento-texto">"Transformou meu visual!"</p>
+                        <span class="depoimento-autor">Ana Clara</span>
+                    </div>
+                    </div>          
+
+                    <!-- Coluna Texto -->
+                    <div class="sobre-texto">
+                        <h2>Sobre o Studio</h2>
+                        <p>
+                            Oferecemos tratamentos exclusivos para cuidar da sua beleza com excelência, combinando o melhor da estética moderna e produtos de alta qualidade. Nossa equipe especializada está pronta para proporcionar experiências únicas em cada atendimento.
+                        </p>
+                        <a href="#servicos" class="btn-sobre">Conheça nossos serviços</a>
+                    </div>
+                </div>
+                </section>
+
+
+                <!-- SEÇÃO 03 - Sobre o Studio -->
+                <section id="secao-03" class="secao-03">
                     <div class="container-servicos">
                         <h2 class="titulo-servicos">Nossos Serviços</h2>
                         <p class="subtitulo-servicos">
@@ -250,31 +274,6 @@ $adminLogado = isset($_SESSION['usuario_id']);
                             <button class="carousel-btn-02 next" aria-label="Próximo serviço">&#10095;</button>
                         </div>
                     </div>
-                </section>
-
-
-                <!-- SEÇÃO 03 - Sobre o Studio -->
-                <section id="secao-03" class="secao-03">
-                <div class="container-sobre">
-                    <!-- Coluna Imagem + Depoimento -->
-                    <div class="sobre-imagem">
-                         <img src="img/salao/interior02.jpg" alt="Studio Salomé">
-                    <div class="sobre-depoimento">
-                        <p class="depoimento-texto">“Transformou meu visual!”</p>
-                        <span class="depoimento-autor">Ana Clara</span>
-                    </div>
-                    </div>          
-                    <!-- Coluna Texto -->
-                    <div class="sobre-texto">
-                        <h2>Sobre o Studio Salomé</h2>
-                            <p>
-                                No Studio Salomé, oferecemos serviços de beleza e estética
-                                especializados em alisamento e cuidados para cabelos e sobrancelhas,
-                                com um toque de sofisticação.
-                            </p>
-                        <a href="#sobre" class="btn-sobre">Saiba mais</a>
-                    </div>
-                </div>
                 </section>
 
                 <!-- SEÇÃO 04 - Nossos Serviços -->
