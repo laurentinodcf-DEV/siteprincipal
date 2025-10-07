@@ -176,52 +176,80 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                 <!-- SEÇÃO 02 - Serviços -->
                 <section id="secao-02" class="secao-02">
-                <div class="container-servicos">
+                    <div class="container-servicos">
+                        <h2 class="titulo-servicos">Nossos Serviços</h2>
+                        <p class="subtitulo-servicos">
+                            Oferecemos tratamentos capilares e cuidados de pele com produtos de alta qualidade.
+                        </p>
 
+                        <div class="carousel-wrapper-02">
+                            <button class="carousel-btn-02 prev" aria-label="Serviço anterior">&#10094;</button>
 
-                    <!-- Wrapper do carrossel -->
-                    <div class="carousel-wrapper-02">
-                    <!-- Botão anterior -->
-                    <button class="carousel-btn-02 prev">&#10094;</button>
+                            <div class="servicos-carousel-02">
+                                <article class="card-servico">
+                                    <div class="card-servico-imagem">
+                                        <img src="img/servicos/alisamento01.png" alt="Alisamento de cabelos">
+                                    </div>
+                                    <div class="card-servico-info">
+                                        <h3>Alisamento de Cabelos</h3>
+                                        <p>Alisamento de cabelos com técnica especializada.</p>
+                                    </div>
+                                </article>
 
-                    <!-- Carrossel -->
-                    <div class="servicos-carousel-02">
+                                <article class="card-servico">
+                                    <div class="card-servico-imagem">
+                                        <img src="img/servicos/sobrancelha.png" alt="Cuidados com sobrancelhas">
+                                    </div>
+                                    <div class="card-servico-info">
+                                        <h3>Design de Sobrancelhas</h3>
+                                        <p>Cuidados personalizados para sobrancelhas.</p>
+                                    </div>
+                                </article>
 
-                        <div class="card-servico">
-                        <img src="img/servicos/alisamento01.png" alt="Alisamento">
-                        <p>Alisamento de cabelos com técnica especializada</p>
+                                <article class="card-servico">
+                                    <div class="card-servico-imagem">
+                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                                    </div>
+                                    <div class="card-servico-info">
+                                        <h3>Tratamentos Estéticos</h3>
+                                        <p>Tratamentos estéticos de alta qualidade.</p>
+                                    </div>
+                                </article>
+
+                                <article class="card-servico">
+                                    <div class="card-servico-imagem">
+                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                                    </div>
+                                    <div class="card-servico-info">
+                                        <h3>Tratamentos Estéticos</h3>
+                                        <p>Tratamentos estéticos de alta qualidade.</p>
+                                    </div>
+                                </article>
+
+                                <article class="card-servico">
+                                    <div class="card-servico-imagem">
+                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                                    </div>
+                                    <div class="card-servico-info">
+                                        <h3>Tratamentos Estéticos</h3>
+                                        <p>Tratamentos estéticos de alta qualidade.</p>
+                                    </div>
+                                </article>
+
+                                <article class="card-servico">
+                                    <div class="card-servico-imagem">
+                                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
+                                    </div>
+                                    <div class="card-servico-info">
+                                        <h3>Tratamentos Estéticos</h3>
+                                        <p>Tratamentos estéticos de alta qualidade.</p>
+                                    </div>
+                                </article>
+                            </div>
+
+                            <button class="carousel-btn-02 next" aria-label="Próximo serviço">&#10095;</button>
                         </div>
-
-                        <div class="card-servico">
-                        <img src="img/servicos/sobrancelha.png" alt="Sobrancelhas">
-                        <p>Cuidados personalizados para sobrancelhas</p>
-                        </div>
-
-                        <div class="card-servico">
-                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                        <p>Tratamentos estéticos de alta qualidade</p>
-                        </div>
-                                                <div class="card-servico">
-                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                        <p>Tratamentos estéticos de alta qualidade</p>
-                        </div>
-
-                                                <div class="card-servico">
-                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                        <p>Tratamentos estéticos de alta qualidade</p>
-                        </div>
-
-                                                <div class="card-servico">
-                        <img src="img/servicos/cuidado.png" alt="Tratamentos estéticos">
-                        <p>Tratamentos estéticos de alta qualidade</p>
-                        </div>
-
                     </div>
-
-                    <!-- Botão próximo -->
-                    <button class="carousel-btn-02 next">&#10095;</button>
-                    </div>
-                </div>
                 </section>
 
 
@@ -263,44 +291,64 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     <div class="carousel-wrapper">
 
                     <!-- Botão anterior -->
-                    <button class="carousel-btn prev">&#10094;</button>
+                    <button class="carousel-btn prev" aria-label="Serviço anterior">&#10094;</button>
 
                     <!-- Carrossel rolável -->
                     <div class="servicos-carousel">
-                        <div class="card-servico-04">
-                            <img src="img/servicos/alisamento02.png" alt="Alisamento de Cabelos">
-                            <h3>Alisamento de Cabelos</h3>
-                            <p>Transforme seus cabelos com nossos tratamentos de alisamento de alta qualidade e durabilidade.</p>
-                        </div>
+                        <article class="card-servico-04">
+                            <div class="card-servico-04-imagem">
+                                <img src="img/servicos/alisamento02.png" alt="Alisamento de Cabelos">
+                            </div>
+                            <div class="card-servico-04-info">
+                                <h3>Alisamento de Cabelos</h3>
+                                <p>Transforme seus cabelos com nossos tratamentos de alisamento de alta qualidade e durabilidade.</p>
+                            </div>
+                        </article>
 
-                        <div class="card-servico-04">
-                            <img src="img/servicos/escova.png" alt="Tratamentos Estéticos">
-                            <h3>Escova capilar</h3>
-                            <p>Nossos especialistas garantem sobrancelhas perfeitamente moldadas e bem cuidadas.</p>
-                        </div>
+                        <article class="card-servico-04">
+                            <div class="card-servico-04-imagem">
+                                <img src="img/servicos/escova.png" alt="Escova capilar">
+                            </div>
+                            <div class="card-servico-04-info">
+                                <h3>Escova Capilar</h3>
+                                <p>Nossos especialistas garantem sobrancelhas perfeitamente moldadas e bem cuidadas.</p>
+                            </div>
+                        </article>
 
-                        <div class="card-servico-04">
-                            <img src="img/servicos/tratamentos.png" alt="Spa Capilar">
-                            <h3>Spa Capilar</h3>
-                            <p>Relaxe e cuide da saúde dos seus fios com nossos tratamentos capilares premium.</p>
-                        </div>
+                        <article class="card-servico-04">
+                            <div class="card-servico-04-imagem">
+                                <img src="img/servicos/tratamentos.png" alt="Spa Capilar">
+                            </div>
+                            <div class="card-servico-04-info">
+                                <h3>Spa Capilar</h3>
+                                <p>Relaxe e cuide da saúde dos seus fios com nossos tratamentos capilares premium.</p>
+                            </div>
+                        </article>
 
-                        <div class="card-servico-04">
-                            <img src="img/servicos/produtos.png" alt="Produtos Exclusivos">
-                            <h3>Produtos Exclusivos</h3>
-                            <p>Utilizamos apenas produtos de alta performance para garantir resultados impecáveis e duradouros.</p>
-                        </div>
+                        <article class="card-servico-04">
+                            <div class="card-servico-04-imagem">
+                                <img src="img/servicos/produtos.png" alt="Produtos Exclusivos">
+                            </div>
+                            <div class="card-servico-04-info">
+                                <h3>Produtos Exclusivos</h3>
+                                <p>Utilizamos apenas produtos de alta performance para garantir resultados impecáveis e duradouros.</p>
+                            </div>
+                        </article>
 
-                        <div class="card-servico-04">
-                            <img src="img/servicos/sobrancelha02.png" alt="Cuidados para Sobrancelhas">
-                            <h3>Estética de Sobrancelhas</h3>
-                            <p>Realce sua beleza com nossos serviços de design e cuidados especiais para sobrancelhas.</p>
-                        </div>
+                        <article class="card-servico-04">
+                            <div class="card-servico-04-imagem">
+                                <img src="img/servicos/sobrancelha02.png" alt="Estética de Sobrancelhas">
+                            </div>
+                            <div class="card-servico-04-info">
+                                <h3>Estética de Sobrancelhas</h3>
+                                <p>Realce sua beleza com nossos serviços de design e cuidados especiais para sobrancelhas.</p>
+                            </div>
+                        </article>
 
                     </div>
 
                     <!-- Botão próximo -->
-                    <button class="carousel-btn next">&#10095;</button>
+                    <button class="carousel-btn next" aria-label="Próximo serviço">&#10095;</button>
                     </div>
                     <br>
                     <div class="sobre-texto-sesao-01">

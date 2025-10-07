@@ -277,8 +277,8 @@ div#container-page{ /*--------- pagina geral --------------*/
 /* SEÇÃO 02 */
 .secao-02 {
   width: 100%;
-  padding: 80px 40px;
-  background: linear-gradient(135deg, #8C7A5A, #FAF6F0, #E8D5B5);
+  padding: 100px 40px;
+  background: #f6ede2;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -293,14 +293,15 @@ div#container-page{ /*--------- pagina geral --------------*/
 .titulo-servicos {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #fff;
+  color: #433530;
   margin-bottom: 10px;
 }
 
 .subtitulo-servicos {
   font-size: 1.2rem;
-  color: #eee;
-  margin-bottom: 40px;
+  color: #6e5c54;
+  margin: 0 auto 56px;
+  max-width: 620px;
 }
 
 /* Wrapper */
@@ -308,15 +309,17 @@ div#container-page{ /*--------- pagina geral --------------*/
   position: relative;
   width: 100%;
   overflow: hidden;
+  padding: 0 60px;
 }
 
 /* Carrossel */
 .servicos-carousel-02 {
   display: flex;
-  gap: 20px;
+  gap: 32px;
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 10px 0;
+  padding: 10px 0 20px;
+  scroll-snap-type: x mandatory;
 }
 
 .servicos-carousel-02::-webkit-scrollbar {
@@ -325,57 +328,134 @@ div#container-page{ /*--------- pagina geral --------------*/
 
 /* Card */
 .card-servico {
-  min-width: 280px;
-  max-width: 280px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  text-align: center;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  min-width: 360px;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
   flex-shrink: 0;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card-servico img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-bottom: 3px solid #d4af37;
-}
-
-.card-servico p {
-  padding: 15px;
-  font-size: 1rem;
-  color: #333;
+  scroll-snap-align: center;
 }
 
 .card-servico:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+}
+
+.card-servico-imagem {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 18px 30px rgba(0,0,0,0.18);
+}
+
+.card-servico-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-servico-info {
+  background: #fff;
+  padding: 28px 30px 32px;
+  border-radius: 20px;
+  margin-top: -60px;
+  width: 82%;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.card-servico-info h3 {
+  font-size: 1.25rem;
+  color: #3c2f2c;
+  margin-bottom: 12px;
+}
+
+.card-servico-info p {
+  font-size: 1rem;
+  color: #5f4c45;
 }
 
 /* Botões */
 .carousel-btn-02 {
   position: absolute;
-  top: 40%;
+  top: 45%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.6);
-  color: #fff;
+  background: #ffffff;
+  color: #3c2f2c;
   border: none;
-  font-size: 28px;
-  padding: 10px;
+  font-size: 32px;
+  width: 52px;
+  height: 52px;
   cursor: pointer;
   border-radius: 50%;
   z-index: 10;
-  transition: background 0.3s;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .carousel-btn-02:hover {
-  background: rgba(0,0,0,0.9);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.2);
 }
 
 .carousel-btn-02.prev { left: 10px; }
 .carousel-btn-02.next { right: 10px; }
+
+@media (max-width: 992px) {
+  .secao-02 {
+    padding: 80px 30px;
+  }
+
+  .carousel-wrapper-02 {
+    padding: 0 40px;
+  }
+
+  .card-servico {
+    min-width: 320px;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .secao-02 {
+    padding: 70px 20px;
+  }
+
+  .titulo-servicos {
+    font-size: 2.1rem;
+  }
+
+  .subtitulo-servicos {
+    font-size: 1.05rem;
+  }
+
+  .carousel-wrapper-02 {
+    padding: 0 24px;
+  }
+
+  .card-servico {
+    min-width: 260px;
+    max-width: 260px;
+  }
+
+  .card-servico-info {
+    width: 88%;
+    padding: 24px 20px 28px;
+  }
+
+  .carousel-btn-02 {
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
+  }
+}
 
 
 /* SEÇÃO 03 */
@@ -471,8 +551,8 @@ div#container-page{ /*--------- pagina geral --------------*/
 /* SEÇÃO 04 */
 .secao-04 {
   width: 100%;
-  padding: 80px 60px;
-  background: linear-gradient(197deg, #a48e65 10%, #ffffff 53%, #e4ae0e 100%);
+  padding: 96px 40px;
+  background: linear-gradient(160deg, #f4eadb 0%, #ffffff 45%, #f6e2b3 100%);
   display: flex;
   justify-content: center;
 }
@@ -485,16 +565,17 @@ div#container-page{ /*--------- pagina geral --------------*/
 
 /* Cabeçalho */
 .servicos-header h2 {
-  font-size: 2.5rem;
+  font-size: 2.4rem;
   font-weight: bold;
   margin-bottom: 10px;
-  color: #222;
+  color: #3b2d29;
 }
 
 .servicos-header p {
   font-size: 1.1rem;
-  color: #555;
-  margin-bottom: 40px;
+  color: #6a5650;
+  margin: 0 auto 52px;
+  max-width: 640px;
 }
 
 /* Wrapper do carrossel */
@@ -502,15 +583,17 @@ div#container-page{ /*--------- pagina geral --------------*/
   position: relative;
   width: 100%;
   overflow: hidden;
+  padding: 0 52px;
 }
 
 /* Lista rolável */
 .servicos-carousel {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 10px 0;
+  padding: 12px 0 24px;
+  scroll-snap-type: x mandatory;
 }
 
 .servicos-carousel::-webkit-scrollbar {
@@ -519,65 +602,124 @@ div#container-page{ /*--------- pagina geral --------------*/
 
 /* Cards */
 .card-servico-04 {
-  min-width: 280px;
-  max-width: 280px;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  text-align: left;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  min-width: 260px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
   flex-shrink: 0;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card-servico-04 img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;   /* preenche o quadro sem distorcer */
-  object-position: center;
-}
-
-.card-servico-04 h3 {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 15px;
-  color: #333;
-}
-
-.card-servico-04 p {
-  font-size: 0.95rem;
-  margin: 0 15px 20px;
-  color: #555;
-  line-height: 1.4;
+  transition: transform 0.3s ease;
+  scroll-snap-align: center;
 }
 
 .card-servico-04:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
+
+.card-servico-04-imagem {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 18px 30px rgba(0,0,0,0.16);
+}
+
+.card-servico-04-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.card-servico-04-info {
+  background: #fff;
+  padding: 24px 24px 28px;
+  border-radius: 18px;
+  margin-top: -56px;
+  width: 90%;
+  box-shadow: 0 18px 35px rgba(0,0,0,0.12);
+  text-align: center;
+}
+
+.card-servico-04-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #3d2f2a;
+}
+
+.card-servico-04-info p {
+  font-size: 0.95rem;
+  color: #5b4a45;
+  line-height: 1.5;
+}
+
 
 /* Botões de navegação */
 .carousel-btn {
   position: absolute;
-  top: 40%;
+  top: 45%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.5);
-  color: #fff;
+  background: #ffffff;
+  color: #3c2f2c;
   border: none;
   font-size: 28px;
-  padding: 10px;
+  width: 50px;
+  height: 50px;
   cursor: pointer;
   border-radius: 50%;
   z-index: 10;
-  transition: background 0.3s;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .carousel-btn:hover {
-  background: rgba(0,0,0,0.8);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.2);
 }
 
 .carousel-btn.prev { left: 10px; }
 .carousel-btn.next { right: 10px; }
+
+@media (max-width: 1100px) {
+  .carousel-wrapper {
+    padding: 0 36px;
+  }
+
+  .card-servico-04 {
+    min-width: 240px;
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .secao-04 {
+    padding: 80px 28px;
+  }
+
+  .carousel-wrapper {
+    padding: 0 24px;
+  }
+
+  .card-servico-04 {
+    min-width: 220px;
+    max-width: 220px;
+  }
+
+  .card-servico-04-info {
+    width: 92%;
+  }
+
+  .carousel-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
 
 
 /* ------------------------------------ CONTAINER IMAGENS MENU e imagem ---------------------------------------------------------------------------*/

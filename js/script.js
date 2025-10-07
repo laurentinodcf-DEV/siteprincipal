@@ -183,14 +183,38 @@ document.addEventListener('DOMContentLoaded', function () {
     const prevBtn = document.querySelector(".carousel-btn-02.prev");
     const nextBtn = document.querySelector(".carousel-btn-02.next");
 
-    const scrollAmount = 320; // pixels que anda por clique
+    if (!carousel || !prevBtn || !nextBtn) {
+      return;
+    }
+
+    const getScrollAmount = () => {
+      const firstCard = carousel.querySelector(".card-servico");
+      if (!firstCard) {
+        return 0;
+      }
+
+      const carouselStyles = window.getComputedStyle(carousel);
+      const gapValue = parseFloat(carouselStyles.getPropertyValue("column-gap"));
+      const gap = Number.isNaN(gapValue) ? 0 : gapValue;
+
+      return firstCard.offsetWidth + gap;
+    };
+
+    const scrollByAmount = (direction) => {
+      const amount = getScrollAmount();
+      if (amount === 0) {
+        return;
+      }
+
+      carousel.scrollBy({ left: direction * amount, behavior: "smooth" });
+    };
 
     prevBtn.addEventListener("click", () => {
-      carousel.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      scrollByAmount(-1);
     });
 
     nextBtn.addEventListener("click", () => {
-      carousel.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      scrollByAmount(1);
     });
   });
 
@@ -202,14 +226,38 @@ document.addEventListener('DOMContentLoaded', function () {
     const prevBtn = document.querySelector(".carousel-btn.prev");
     const nextBtn = document.querySelector(".carousel-btn.next");
 
-    const scrollAmount = 320; // quanto rola por clique
+    if (!carousel || !prevBtn || !nextBtn) {
+      return;
+    }
+
+    const getScrollAmount = () => {
+      const firstCard = carousel.querySelector(".card-servico-04");
+      if (!firstCard) {
+        return 0;
+      }
+
+      const carouselStyles = window.getComputedStyle(carousel);
+      const gapValue = parseFloat(carouselStyles.getPropertyValue("column-gap"));
+      const gap = Number.isNaN(gapValue) ? 0 : gapValue;
+
+      return firstCard.offsetWidth + gap;
+    };
+
+    const scrollByAmount = (direction) => {
+      const amount = getScrollAmount();
+      if (amount === 0) {
+        return;
+      }
+
+      carousel.scrollBy({ left: direction * amount * 4, behavior: "smooth" });
+    };
 
     prevBtn.addEventListener("click", () => {
-      carousel.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      scrollByAmount(-1);
     });
 
     nextBtn.addEventListener("click", () => {
-      carousel.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      scrollByAmount(1);
     });
   });
 
