@@ -461,10 +461,12 @@ div#container-page{ /*--------- pagina geral --------------*/
 /* SEÇÃO 03 */
 .secao-03 {
   width: 100%;
-  padding: 80px 60px;
+  height: 100vh; /* Define altura de 100% da viewport */
+  padding: 0; /* Remove padding para container ocupar 100% */
   background: #fff; /* fundo branco para destacar */
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .container-sobre {
@@ -1007,18 +1009,8 @@ nav ul ul li {
 }
 
 
-/* === SEÇÃO 04 - DEPOIMENTOS === */
-.secao-04 {
-  position: relative;
-  width: 100%;
-  height: 100vh; /* ocupa 100% da altura da janela */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-/* fundo + conteúdo centralizado */
+/* === SEÇÃO 03 - DEPOIMENTOS === */
+/* Container de depoimentos ocupa 100% da seção-03 */
 .container-depoimentos {
   position: relative;
   width: 100%;
@@ -1110,8 +1102,12 @@ nav ul ul li {
 
 /* Responsividade */
 @media (max-width: 768px) {
-  .secao-04 {
+  .secao-03 {
     height: auto;
+    min-height: 100vh;
+  }
+
+  .container-depoimentos {
     padding: 80px 20px;
   }
 
