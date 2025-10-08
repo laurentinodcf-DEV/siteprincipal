@@ -204,31 +204,43 @@ $adminLogado = isset($_SESSION['usuario_id']);
                         <h2 class="titulo-depoimentos">O que nossos clientes dizem</h2>
 
                         <div class="depoimentos-wrapper">
-                        <!-- Depoimento 1 -->
-                        <div class="card-depoimento">
-                            <div class="avaliacao">★★★★★</div>
-                            <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
-                            <p class="texto-depoimento">
-                            O serviço foi excepcional e superou minhas expectativas em todos os aspectos.
-                            </p>
-                            <div class="autor">
-                            <img src="img/clientes/ana.jpg" alt="Ana L." class="foto-autor">
-                            <p class="nome-autor">Ana L.</p>
+                            <!-- Depoimento 1 -->
+                            <div class="card-depoimento">
+                                <div class="avaliacao">★★★★★</div>
+                                <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
+                                <p class="texto-depoimento">
+                                O serviço foi excepcional e superou minhas expectativas em todos os aspectos.
+                                </p>
+                                <div class="autor">
+                                <img src="img/clientes/ana.jpg" alt="Ana L." class="foto-autor">
+                                <p class="nome-autor">Ana L.</p>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Depoimento 2 -->
-                        <div class="card-depoimento">
-                            <div class="avaliacao">★★★★★</div>
-                            <h3 class="titulo-depoimento">Estou admirada!</h3>
-                            <p class="texto-depoimento">
-                            A experiência foi incrível, definitivamente voltarei e recomendarei a todos!
-                            </p>
-                            <div class="autor">
-                            <img src="img/clientes/carlos.jpg" alt="Carlos M." class="foto-autor">
-                            <p class="nome-autor">Carlos M.</p>
+                            <!-- Depoimento 2 -->
+                            <div class="card-depoimento">
+                                <div class="avaliacao">★★★★★</div>
+                                <h3 class="titulo-depoimento">Estou admirada!</h3>
+                                <p class="texto-depoimento">
+                                A experiência foi incrível, definitivamente voltarei e recomendarei a todos!
+                                </p>
+                                <div class="autor">
+                                <img src="img/clientes/carla.jpg" alt="Carla M." class="foto-autor">
+                                <p class="nome-autor">Carla M.</p>
+                                </div>
                             </div>
-                        </div>
+                            <!-- Depoimento 3 -->
+                            <div class="card-depoimento">
+                                <div class="avaliacao">★★★★★</div>
+                                <h3 class="titulo-depoimento">Impressionada!</h3>
+                                <p class="texto-depoimento">
+                                Impressionada com meu novo brilho e liso, voltarei e recomendarei a todos!
+                                </p>
+                                <div class="autor">
+                                <img src="img/clientes/renata.jpg" alt="Renada L." class="foto-autor">
+                                <p class="nome-autor">Renata L.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

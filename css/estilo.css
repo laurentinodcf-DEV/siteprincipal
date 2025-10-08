@@ -463,7 +463,10 @@ div#container-page{ /*--------- pagina geral --------------*/
   width: 100%;
   height: 100vh; /* Define altura de 100% da viewport */
   padding: 0; /* Remove padding para container ocupar 100% */
-  background: #fff; /* fundo branco para destacar */
+      background-image: url('../img/salao/interior01.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -687,6 +690,487 @@ div#container-page{ /*--------- pagina geral --------------*/
 
 .carousel-btn.prev { left: 10px; }
 .carousel-btn.next { right: 10px; }
+
+@media (max-width: 1100px) {
+  .carousel-wrapper {
+    padding: 0 36px;
+  }
+
+  .card-servico-04 {
+    min-width: 240px;
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .secao-04 {
+    padding: 80px 28px;
+  }
+
+  .carousel-wrapper {
+    padding: 0 24px;
+  }
+
+  .card-servico-04 {
+    min-width: 220px;
+    max-width: 220px;
+  }
+
+  .card-servico-04-info {
+    width: 92%;
+  }
+
+  .carousel-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+
+/* ------------------------------------ CONTAINER IMAGENS MENU e imagem ---------------------------------------------------------------------------*/
+div#container-logo{
+    position: relative;
+    width: auto;
+    height: 40px;
+}
+img#logo-menu{ /* tamanho imagem se adaptando ao container */
+    position: relative;
+    width: auto;
+    height: 40px;
+}
+
+
+/* Submenu container */
+.submenu {
+    display: none;
+    position: absolute;
+    top: 100%; /* garante que abre logo abaixo */
+    left: 0;
+    min-width: 200px;
+    background: #f9f9f9;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    padding: 8px 0;
+    z-index: 999;
+}
+
+/* Submenu items */
+.submenu-item {
+    padding: 8px 12px;
+    color: #333;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Hover nos itens do submenu */
+.submenu-item:hover {
+    background: #00BFFF;
+    color: #fff;
+}
+
+/* Exibe o submenu ao passar o mouse no item pai */
+.li-menu-principal:hover .submenu {
+    display: block;
+}
+
+/* Configuração para evitar sobreposição de submenus */
+.li-menu-principal {
+    position: relative;
+}
+
+/* Remove os marcadores dos submenus */
+nav ul ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+nav ul ul li {
+  list-style: none;
+}
+
+
+/* Estilo para esconder o modal inicialmente */
+.modal, 
+.mapModal {
+    display: none; /* Esconde o modal inicialmente */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+/* --------------------------------- MODAL ------------------------------------------------------------------------------------------- */
+
+/* Modal */
+.modal-content {
+    background: #fffaf5;
+    width: 40%;
+    max-width: 500px;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+    border: 1px solid #dfb89b; /* Borda dourada suave */
+    animation: fadeIn 0.4s ease;
+}
+
+/* Cabeçalho do Modal */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dfb89b;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-family: 'Playfair Display', serif; /* Fonte elegante */
+    color: #6c4f3d; /* Marrom sofisticado */
+}
+
+.close-btn {
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #6c4f3d;
+    font-weight: normal;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: #dfb89b; /* Dourado ao passar o mouse */
+}
+
+/* Corpo do Modal */
+.modal-body {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+.modal-body p {
+    font-size: 1.1rem;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+}
+
+.modal-body strong {
+    color: #6c4f3d; /* Marrom sofisticado */
+    margin-right: 5px;
+}
+
+/* Ícones */
+.whats-logo,
+.email-logo,
+.instagram-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    filter: grayscale(1) opacity(0.8); /* Estilo discreto */
+}
+
+.whats-logo:hover,
+.email-logo:hover,
+.instagram-logo:hover {
+    filter: none; /* Remove efeitos ao passar o mouse */
+    transform: scale(1.5);
+}
+
+/* Animação de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* -----------------------------------------------------------------------*/
+.carousel-container {
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.carousel {
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+}
+
+.carousel img {
+  min-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 24px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+
+
+/* -------------------------- modal de login ------------------------------------------------------------------------------
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.modal-content {
+    background: #fffaf5;
+    padding: 30px;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.close-btn {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6c4f3d;
+}
+
+/* ----------------------------------- FOTO PROFISSIONAL --------------------------------------------------------------------------------------- */
+.primeirafoto{
+    /* border: 1px solid red; */
+}
+
+.secao-foto { /* secão da imagem */
+  position: absolute;
+  left: 0;
+  top: 10%;
+  z-index: 10; /* joga a imagem acima das outras seções */
+  max-width: 30%;        /* controla o tamanho */
+  width: 30%;
+}
+
+.foto-quenia { /* imagem */
+  max-width: 100%;        /* controla o tamanho */
+  max-height: 100vh;
+  width: 50%;
+  height: 50vh;
+}
+
+
+.avatar-destaque {
+  position: relative;
+  width: 100%;
+  height: 0;
+  z-index: 15;
+}
+
+.avatar-destaque-img {
+  position: absolute;
+  right: 3%;
+  top: -230px;
+  width: min(220px, 25vw);
+  height: auto;
+  border-radius: 16px;
+  width: 12%;
+}
+
+
+/* === SEÇÃO 03 - DEPOIMENTOS === */
+/* Container de depoimentos ocupa 100% da seção-03 */
+.container-depoimentos {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('../img/bg-depoimentos.jpg') center/cover no-repeat;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.titulo-depoimentos {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 60px;
+  letter-spacing: 1px;
+}
+
+.depoimentos-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 60px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.card-depoimento {
+  flex: 1 1 400px;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-depoimento:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.avaliacao {
+  font-size: 1.4rem;
+  color: #FFD700;
+  margin-bottom: 10px;
+}
+
+.titulo-depoimento {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.texto-depoimento {
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-bottom: 25px;
+  color: #eee;
+  line-height: 1.5;
+}
+
+.autor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.foto-autor {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.nome-autor {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .secao-03 {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .container-depoimentos {
+    padding: 80px 20px;
+  }
+
+  .depoimentos-wrapper {
+    flex-direction: column;
+    gap: 40px;
+  }
+}
+
+.depoimentos-carousel {
+    width: 100%;
+    height: 100%;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 24px;
+    margin: 0 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+}
+
+.swiper-button-next, .swiper-button-prev {
+    color: #a67c52;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swiper-button-next:after, .swiper-button-prev:after {
+    font-size: 22px;
+}
+
+@media (min-width: 768px) {
+    .depoimentos-carousel .swiper-slide {
+        min-width: 400px;
+    }
+}
+
+.swiper-button-next:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 16px 30px rgba(0,0,0,0.2);
+}
+
+.swiper-button-next.prev { left: 10px; }
+.swiper-button-next.next { right: 10px; }
 
 @media (max-width: 1100px) {
   .carousel-wrapper {
