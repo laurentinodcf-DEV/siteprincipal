@@ -1,4 +1,4 @@
-console.log("JavaScript carregado");
+﻿console.log("JavaScript carregado");
 
 
 //------------------ MODAL DE CONTATO ----------------------------------------------------------------------------------------------
@@ -70,103 +70,104 @@ document.querySelector('.prev').addEventListener('click', () => {
 
 
 //----------------------------------------- controle paninel de login -----------------------------------------------
-const loginModal = document.getElementById("loginModal");
-const openLoginBtn = document.getElementById("openLoginModal");
-const closeLoginBtn = document.getElementById("closeLoginModal");
-const loginError = document.getElementById("loginError");
-const loginForm = document.getElementById("loginForm");
 
-if (openLoginBtn && loginModal && closeLoginBtn && loginError && loginForm) {
-    openLoginBtn.addEventListener("click", () => {
+const scriptReference =
+    document.currentScript || document.querySelector('script[src*="js/script.js"]');
+const scriptBaseUrl = (() => {
+    if (!scriptReference || !scriptReference.src) {
+        return window.location.href;
+    }
+    return scriptReference.src.replace(/js\/script\.js(?:\?.*)?$/i, "");
+})();
+
+const resolveAdminUrl = (relativePath) => {
+    try {
+        return new URL(relativePath, scriptBaseUrl).toString();
+    } catch (error) {
+        return relativePath;
+    }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    const loginModal = document.getElementById("loginModal");
+    const closeLoginBtn = document.getElementById("closeLoginModal");
+    const loginError = document.getElementById("loginError");
+    const loginForm = document.getElementById("loginForm");
+    const adminAccessTrigger = document.getElementById("adminAccessTrigger");
+    const legacyLoginTrigger = document.getElementById("openLoginModal");
+
+    const openLoginModal = () => {
+        if (typeof adminLogado !== "undefined" && adminLogado) {
+            window.location.href = resolveAdminUrl("adm/dashboard.php");
+            return;
+        }
+
+        if (!loginModal) {
+            window.location.href = resolveAdminUrl("adm/login.php");
+            return;
+        }
+
+        if (loginError) {
+            loginError.style.display = "none";
+        }
         loginModal.style.display = "flex";
-    });
+    };
 
-    closeLoginBtn.addEventListener("click", () => {
-        loginModal.style.display = "none";
-        loginError.style.display = "none";
-    });
+    if (adminAccessTrigger) {
+        adminAccessTrigger.addEventListener("click", openLoginModal);
+    }
 
-    loginForm.addEventListener("submit", function (event) {
-        event.preventDefault();
+    if (legacyLoginTrigger) {
+        legacyLoginTrigger.addEventListener("click", openLoginModal);
+    }
 
-        const formData = new FormData(this);
-
-        fetch("adm/login_ajax.php", {
-            method: "POST",
-            body: formData
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                loginModal.style.display = "none";
-                loginError.style.display = "none";
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                } else {
-                    window.location.reload();
-                }
-            } else {
-                loginError.textContent = data.message;
-                loginError.style.display = "block";
-            }
-        })
-        .catch(() => {
-            loginError.textContent = "Erro ao tentar fazer login. Tente novamente.";
-            loginError.style.display = "block";
-        });
-    });
-
-    const senhaInput = loginForm.querySelector('input[name="password"]');
-    const showPasswordCheckbox = document.getElementById("showPassword");
-    if (showPasswordCheckbox && senhaInput) {
-        showPasswordCheckbox.addEventListener("change", () => {
-            senhaInput.type = showPasswordCheckbox.checked ? "text" : "password";
+    if (closeLoginBtn && loginModal && loginError) {
+        closeLoginBtn.addEventListener("click", () => {
+            loginModal.style.display = "none";
+            loginError.style.display = "none";
         });
     }
-} else if (openLoginBtn) {
-    openLoginBtn.addEventListener("click", () => {
-        window.location.href = "adm/login.php";
-    });
-}
 
-// Logout Modal
-const logoutMenu = document.getElementById("logoutMenu");
-const logoutModal = document.getElementById("logoutModal");
-const closeLogoutModal = document.getElementById("closeLogoutModal");
-const confirmLogout = document.getElementById("confirmLogout");
-const cancelLogout = document.getElementById("cancelLogout");
+    if (loginForm && loginError) {
+        loginForm.addEventListener("submit", function (event) {
+            event.preventDefault();
 
-if (logoutMenu && logoutModal && closeLogoutModal && confirmLogout && cancelLogout) {
-    logoutMenu.addEventListener("click", () => {
-        logoutModal.style.display = "flex";
-    });
+            const formData = new FormData(this);
 
-    closeLogoutModal.addEventListener("click", () => {
-        logoutModal.style.display = "none";
-    });
+            fetch(resolveAdminUrl("adm/login_ajax.php"), {
+                method: "POST",
+                body: formData
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        loginModal.style.display = "none";
+                        loginError.style.display = "none";
+                        const redirectTarget = data.redirect
+                            ? resolveAdminUrl(data.redirect)
+                            : resolveAdminUrl("adm/dashboard.php");
+                        window.location.href = redirectTarget;
+                    } else {
+                        loginError.textContent = data.message;
+                        loginError.style.display = "block";
+                    }
+                })
+                .catch(() => {
+                    loginError.textContent = "Erro ao tentar fazer login. Tente novamente.";
+                    loginError.style.display = "block";
+                });
+        });
 
-    cancelLogout.addEventListener("click", () => {
-        logoutModal.style.display = "none";
-    });
-
-    confirmLogout.addEventListener("click", () => {
-        fetch("adm/logout.php")
-            .then(() => window.location.reload());
-    });
-}
-
-if (typeof adminLogado !== "undefined" && adminLogado) {
-    if (logoutMenu) {
-        logoutMenu.style.display = "block";
+        const senhaInput = loginForm.querySelector('input[name="password"]');
+        const showPasswordCheckbox = document.getElementById("showPassword");
+        if (showPasswordCheckbox && senhaInput) {
+            showPasswordCheckbox.addEventListener("change", () => {
+                senhaInput.type = showPasswordCheckbox.checked ? "text" : "password";
+            });
+        }
     }
-    const dashboardLink = document.getElementById("dashboardLink");
-    if (dashboardLink) {
-        dashboardLink.style.display = "block";
-    }
-    if (openLoginBtn) {
-        openLoginBtn.style.display = "none";
-    }
-}
+});
+
 
 //----------------------------------------- Inserir Vídeo (Link) -----------------------------------------------
 document.addEventListener('DOMContentLoaded', function () {

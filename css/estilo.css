@@ -92,14 +92,6 @@ div#container-page{ /*--------- pagina geral --------------*/
     display: flex;
     align-items: center;
 }
-.admin-icon-container .submenu{
-    right: 0;
-    left: auto;
-}
-.admin-icon-container:hover .submenu,
-.admin-icon-container:focus-within .submenu{
-    display: block;
-}
 .li-menu-principal{ /*-------------- LINHA ONDE FICAM OS QUADROS ------------*/
     position: relative;
     font-size: 16px;

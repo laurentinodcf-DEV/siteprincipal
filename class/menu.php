@@ -46,14 +46,9 @@
     </ul>
 
     <div class="admin-icon-container">
-        <span class="menu-principal admin-menu-trigger" role="button" aria-haspopup="true" aria-expanded="false">
-            <img src="../img/icons/person_login.png" alt="Administração" class="admin-menu-icon">
-        </span>
-        <ul class="submenu">
-            <li class="submenu-item" id="openLoginModal">Login</li>
-            <li class="submenu-item" id="dashboardLink" style="display:none;"><a href="../adm/dashboard.php">Painel</a></li>
-            <li class="submenu-item" id="logoutMenu" style="display:none;">Logout</li>
-        </ul>
+        <button type="button" id="adminAccessTrigger" class="menu-principal admin-menu-trigger" aria-label="Área administrativa">
+            <img src="../img/icons/person_login.png" alt="Área administrativa" class="admin-menu-icon">
+        </button>
     </div>
 
     <div id="container-logo">
