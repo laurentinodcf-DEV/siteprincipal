@@ -262,3 +262,58 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
 
+// Carrossel de depoimentos (seção 03)
+document.addEventListener("DOMContentLoaded", function() {
+  const carousel = document.querySelector(".depoimentos-carousel");
+  const prevBtn = document.querySelector(".depoimentos-btn.prev");
+  const nextBtn = document.querySelector(".depoimentos-btn.next");
+  const indicators = document.querySelectorAll(".depoimentos-indicadores .indicador");
+  
+  if (!carousel || !prevBtn || !nextBtn) {
+    return;
+  }
+  
+  let currentSlide = 0;
+  const totalSlides = Math.ceil(carousel.children.length / 2); // Mostra 2 por vez
+  
+  // Função para atualizar o carrossel
+  function updateCarousel() {
+    // Calcula a posição de deslocamento
+    const offset = currentSlide * -100;
+    carousel.style.transform = `translateX(${offset}%)`;
+    
+    // Atualiza os indicadores
+    indicators.forEach((indicator, index) => {
+      indicator.classList.toggle("active", index === currentSlide);
+    });
+  }
+  
+  // Botão próximo
+  nextBtn.addEventListener("click", function() {
+    if (currentSlide < totalSlides - 1) {
+      currentSlide++;
+      updateCarousel();
+    }
+  });
+  
+  // Botão anterior
+  prevBtn.addEventListener("click", function() {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateCarousel();
+    }
+  });
+  
+  // Clique nos indicadores
+  indicators.forEach((indicator, index) => {
+    indicator.addEventListener("click", function() {
+      currentSlide = index;
+      updateCarousel();
+    });
+  });
+  
+  // Inicializa o carrossel
+  updateCarousel();
+});
+
+

@@ -274,6 +274,148 @@ div#container-page{ /*--------- pagina geral --------------*/
   color: #fff;
 }
 
+/* SEÇÃO 03 - Depoimentos */
+.secao-03 {
+  width: 100%;
+  padding: 0;
+  background: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container-depoimentos {
+  max-width: 100%;
+  width: 100%;
+  text-align: center;
+  padding: 100px 0;
+}
+
+.titulo-depoimentos {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.depoimentos-carousel-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+}
+
+.depoimentos-carousel {
+  display: flex;
+  gap: 30px;
+  transition: transform 0.5s ease;
+  width: 100%;
+}
+
+.card-depoimento {
+  min-width: calc(50% - 15px);
+  flex: 0 0 calc(50% - 15px);
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  text-align: left;
+  transition: transform 0.3s ease;
+}
+
+.card-depoimento:hover {
+  transform: translateY(-5px);
+}
+
+.avaliacao {
+  color: #ffb400;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.titulo-depoimento {
+  font-size: 1.3rem;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.texto-depoimento {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.autor {
+  display: flex;
+  align-items: center;
+}
+
+.foto-autor {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.nome-autor {
+  font-weight: bold;
+  color: #333;
+}
+
+.depoimentos-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  color: #333;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.depoimentos-btn:hover {
+  background: #f0f0f0;
+}
+
+.depoimentos-btn.prev {
+  left: 10px;
+}
+
+.depoimentos-btn.next {
+  right: 10px;
+}
+
+.depoimentos-indicadores {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  gap: 10px;
+}
+
+.indicador {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.indicador.active {
+  background: #433530;
+}
+
 /* SEÇÃO 02 */
 .secao-02 {
   width: 100%;
