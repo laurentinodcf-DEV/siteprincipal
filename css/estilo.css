@@ -1325,12 +1325,61 @@ nav ul ul li {
 .dia-card-header {
   background-color: #eef1f6;
   padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .dia-card-header h2 {
   margin: 0;
   font-size: 18px;
   color: #1f2933;
+}
+
+.dia-toggle {
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #1f2933;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dia-toggle:hover {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
+}
+
+.dia-toggle:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.4);
+  outline-offset: 2px;
+}
+
+.dia-toggle-icon {
+  display: inline-block;
+  min-width: 12px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.dia-card.collapsed .dia-card-body {
+  display: none;
+}
+
+.dia-card.collapsed .dia-toggle {
+  background-color: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
 }
 
 .dia-card-body {

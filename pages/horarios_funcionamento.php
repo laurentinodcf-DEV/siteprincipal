@@ -230,6 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         (int) $dadosDia['mes_inicio'],
                         (int) $dadosDia['mes_fim']
                     );
+                    $bodyId = 'dia-' . $slugDia . '-body';
                     $aberto = (int) $dadosDia['aberto'] === 1;
                     $valorAbertura = $dadosDia['horario_abertura'] ?? '';
                     $valorFechamento = $dadosDia['horario_fechamento'] ?? '';
@@ -239,8 +240,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <section class="dia-card" data-dia="<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="dia-card-header">
                         <h2><?= htmlspecialchars($rotuloDia, ENT_QUOTES, 'UTF-8'); ?></h2>
+                        <button
+                            type="button"
+                            class="dia-toggle"
+                            aria-expanded="true"
+                            aria-controls="<?= htmlspecialchars($bodyId, ENT_QUOTES, 'UTF-8'); ?>"
+                        >
+                            <span class="dia-toggle-icon">-</span>
+                        </button>
                     </div>
-                    <div class="dia-card-body">
+                    <div class="dia-card-body" id="<?= htmlspecialchars($bodyId, ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="periodo-ano">
                             <span class="periodo-titulo">Período do ano</span>
                             <div class="meses-grade">
@@ -335,6 +344,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const cartoesDia = document.querySelectorAll('.dia-card');
+            const toggles = document.querySelectorAll('.dia-toggle');
+
+            const atualizarIconeToggle = (botao, estaColapsado) => {
+                const icone = botao.querySelector('.dia-toggle-icon');
+                if (icone) {
+                    icone.textContent = estaColapsado ? '+' : '-';
+                }
+            };
+
+            toggles.forEach((botao) => {
+                const card = botao.closest('.dia-card');
+                const corpo = card ? card.querySelector('.dia-card-body') : null;
+                if (!card || !corpo) {
+                    return;
+                }
+
+                corpo.hidden = card.classList.contains('collapsed');
+                atualizarIconeToggle(botao, card.classList.contains('collapsed'));
+                botao.setAttribute('aria-expanded', card.classList.contains('collapsed') ? 'false' : 'true');
+
+                botao.addEventListener('click', () => {
+                    const agoraColapsado = card.classList.toggle('collapsed');
+                    corpo.hidden = agoraColapsado;
+                    botao.setAttribute('aria-expanded', agoraColapsado ? 'false' : 'true');
+                    atualizarIconeToggle(botao, agoraColapsado);
+                });
+            });
 
             const coletarValores = (card) => {
                 const meses = Array.from(card.querySelectorAll('.mes-item input'))
