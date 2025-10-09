@@ -8,17 +8,6 @@ if (!isset($_SESSION['usuario_id'])) {
 
 require '../conexao.php';
 
-$diasSemana = [
-    'segunda'   => 'Segunda',
-    'terca'     => 'Terça',
-    'quarta'    => 'Quarta',
-    'quinta'    => 'Quinta',
-    'sexta'     => 'Sexta',
-    'sabado'    => 'Sábado',
-    'domingo'   => 'Domingo',
-    'feriados'  => 'Feriados',
-];
-
 $mesesAno = [
     1  => 'Janeiro',
     2  => 'Fevereiro',
@@ -34,134 +23,108 @@ $mesesAno = [
     12 => 'Dezembro',
 ];
 
+$diasSemana = [
+    'segunda'  => 'Segunda',
+    'terca'    => 'Terça',
+    'quarta'   => 'Quarta',
+    'quinta'   => 'Quinta',
+    'sexta'    => 'Sexta',
+    'sabado'   => 'Sábado',
+    'domingo'  => 'Domingo',
+    'feriados' => 'Feriados',
+];
+
 $mensagemSucesso = '';
 $mensagemErro = '';
 
 $horariosCadastrados = [];
-foreach ($diasSemana as $slugDia => $rotuloDia) {
-    $horariosCadastrados[$slugDia] = [
-        'dia_semana'        => $slugDia,
-        'mes_inicio'        => 1,
-        'mes_fim'           => 12,
-        'horario_abertura'  => null,
-        'horario_fechamento'=> null,
-        'almoco_inicio'     => null,
-        'almoco_fim'        => null,
-        'aberto'            => 1,
-    ];
+foreach ($mesesAno as $numeroMes => $_) {
+    foreach ($diasSemana as $slugDia => $_nomeDia) {
+        $horariosCadastrados[$numeroMes][$slugDia] = [
+            'mes'               => $numeroMes,
+            'dia_semana'        => $slugDia,
+            'horario_abertura'  => null,
+            'horario_fechamento'=> null,
+            'almoco_inicio'     => null,
+            'almoco_fim'        => null,
+            'aberto'            => 1,
+        ];
+    }
 }
 
-$resultado = $conn->query('SELECT * FROM salao_horarios_funcionamento');
+$resultado = $conn->query('SELECT * FROM salao_horarios_funcionamento_mes');
 if ($resultado) {
     while ($linha = $resultado->fetch_assoc()) {
-        $diaTabela = $linha['dia_semana'];
-        if (isset($horariosCadastrados[$diaTabela])) {
-            $horariosCadastrados[$diaTabela] = $linha;
+        $mes = (int) $linha['mes'];
+        $dia = $linha['dia_semana'];
+        if (isset($horariosCadastrados[$mes][$dia])) {
+            $horariosCadastrados[$mes][$dia] = [
+                'mes'               => $mes,
+                'dia_semana'        => $dia,
+                'horario_abertura'  => $linha['horario_abertura'],
+                'horario_fechamento'=> $linha['horario_fechamento'],
+                'almoco_inicio'     => $linha['almoco_inicio'],
+                'almoco_fim'        => $linha['almoco_fim'],
+                'aberto'            => (int) $linha['aberto'],
+            ];
         }
     }
     $resultado->free();
 }
 
-function calcularMesesSelecionados(?int $inicio, ?int $fim): array
-{
-    if (!$inicio || !$fim) {
-        return range(1, 12);
-    }
-
-    if ($inicio <= $fim) {
-        return range($inicio, $fim);
-    }
-
-    return array_merge(range($inicio, 12), range(1, $fim));
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $horariosPost = $_POST['horarios'] ?? [];
+    $mesesPost = $_POST['meses'] ?? [];
+
     $conn->begin_transaction();
 
     try {
-        $stmtBusca = $conn->prepare('SELECT id FROM salao_horarios_funcionamento WHERE dia_semana = ? LIMIT 1');
-        $stmtAtualiza = $conn->prepare(
-            'UPDATE salao_horarios_funcionamento
-             SET mes_inicio = ?, mes_fim = ?, horario_abertura = ?, horario_fechamento = ?, almoco_inicio = ?, almoco_fim = ?, aberto = ?
-             WHERE id = ?'
+        $stmt = $conn->prepare(
+            'INSERT INTO salao_horarios_funcionamento_mes
+             (mes, dia_semana, horario_abertura, horario_fechamento, almoco_inicio, almoco_fim, aberto)
+             VALUES (?, ?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+             horario_abertura = VALUES(horario_abertura),
+             horario_fechamento = VALUES(horario_fechamento),
+             almoco_inicio = VALUES(almoco_inicio),
+             almoco_fim = VALUES(almoco_fim),
+             aberto = VALUES(aberto)'
         );
-        $stmtInsere = $conn->prepare(
-            'INSERT INTO salao_horarios_funcionamento
-             (dia_semana, mes_inicio, mes_fim, horario_abertura, horario_fechamento, almoco_inicio, almoco_fim, aberto)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-        );
 
-        foreach ($diasSemana as $slugDia => $rotuloDia) {
-            $prefixo = $slugDia . '_';
+        foreach ($mesesAno as $numeroMes => $_nomeMes) {
+            $funcionandoMes = $mesesPost[$numeroMes]['funciona'] ?? 'sim';
+            $mesAtivo = $funcionandoMes === 'sim';
 
-            $selecionados = isset($_POST[$prefixo . 'meses'])
-                ? array_map('intval', (array) $_POST[$prefixo . 'meses'])
-                : [];
-            $selecionados = array_values(array_filter($selecionados, static function ($mes) {
-                return $mes >= 1 && $mes <= 12;
-            }));
-            sort($selecionados);
+            foreach ($diasSemana as $slugDia => $_labelDia) {
+                $dadosDiaPost = $horariosPost[$numeroMes][$slugDia] ?? [];
 
-            if (empty($selecionados)) {
-                $mesInicio = 1;
-                $mesFim = 12;
-            } else {
-                $mesInicio = $selecionados[0];
-                $mesFim = $selecionados[count($selecionados) - 1];
-            }
+                $aberto = $mesAtivo ? (isset($dadosDiaPost['fechado']) ? 0 : 1) : 0;
+                $horarioAbertura = $dadosDiaPost['abertura'] ?? '';
+                $horarioFechamento = $dadosDiaPost['fechamento'] ?? '';
+                $almocoInicio = $dadosDiaPost['almoco_inicio'] ?? '';
+                $almocoFim = $dadosDiaPost['almoco_fim'] ?? '';
 
-            $estaFechado = isset($_POST[$prefixo . 'fechado']) ? 1 : 0;
-            $aberto = $estaFechado ? 0 : 1;
+                $horarioAbertura = trim((string) $horarioAbertura);
+                $horarioFechamento = trim((string) $horarioFechamento);
+                $almocoInicio = trim((string) $almocoInicio);
+                $almocoFim = trim((string) $almocoFim);
 
-            $horarioAbertura = isset($_POST[$prefixo . 'abertura']) ? trim((string) $_POST[$prefixo . 'abertura']) : '';
-            $horarioFechamento = isset($_POST[$prefixo . 'fechamento']) ? trim((string) $_POST[$prefixo . 'fechamento']) : '';
-            $almocoInicio = isset($_POST[$prefixo . 'almoco_inicio']) ? trim((string) $_POST[$prefixo . 'almoco_inicio']) : '';
-            $almocoFim = isset($_POST[$prefixo . 'almoco_fim']) ? trim((string) $_POST[$prefixo . 'almoco_fim']) : '';
+                $horarioAbertura = $horarioAbertura === '' ? null : $horarioAbertura;
+                $horarioFechamento = $horarioFechamento === '' ? null : $horarioFechamento;
+                $almocoInicio = $almocoInicio === '' ? null : $almocoInicio;
+                $almocoFim = $almocoFim === '' ? null : $almocoFim;
 
-            $horarioAbertura = $horarioAbertura === '' ? null : $horarioAbertura;
-            $horarioFechamento = $horarioFechamento === '' ? null : $horarioFechamento;
-            $almocoInicio = $almocoInicio === '' ? null : $almocoInicio;
-            $almocoFim = $almocoFim === '' ? null : $almocoFim;
-
-            if (!$aberto) {
-                $horarioAbertura = null;
-                $horarioFechamento = null;
-                $almocoInicio = null;
-                $almocoFim = null;
-            }
-
-            $stmtBusca->bind_param('s', $slugDia);
-            if (!$stmtBusca->execute()) {
-                throw new Exception('Erro ao consultar horários existentes: ' . $stmtBusca->error);
-            }
-
-            $idExistente = null;
-            $stmtBusca->bind_result($idExistente);
-            $temRegistro = $stmtBusca->fetch();
-            $stmtBusca->free_result();
-
-            if ($temRegistro) {
-                $stmtAtualiza->bind_param(
-                    'iissssii',
-                    $mesInicio,
-                    $mesFim,
-                    $horarioAbertura,
-                    $horarioFechamento,
-                    $almocoInicio,
-                    $almocoFim,
-                    $aberto,
-                    $idExistente
-                );
-
-                if (!$stmtAtualiza->execute()) {
-                    throw new Exception('Erro ao atualizar horários: ' . $stmtAtualiza->error);
+                if ($aberto === 0) {
+                    $horarioAbertura = null;
+                    $horarioFechamento = null;
+                    $almocoInicio = null;
+                    $almocoFim = null;
                 }
-            } else {
-                $stmtInsere->bind_param(
-                    'siissssi',
+
+                $stmt->bind_param(
+                    'isssssi',
+                    $numeroMes,
                     $slugDia,
-                    $mesInicio,
-                    $mesFim,
                     $horarioAbertura,
                     $horarioFechamento,
                     $almocoInicio,
@@ -169,33 +132,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $aberto
                 );
 
-                if (!$stmtInsere->execute()) {
-                    throw new Exception('Erro ao inserir horários: ' . $stmtInsere->error);
+                if (!$stmt->execute()) {
+                    throw new Exception('Erro ao salvar horários: ' . $stmt->error);
                 }
-            }
 
-            $horariosCadastrados[$slugDia] = [
-                'dia_semana'         => $slugDia,
-                'mes_inicio'         => $mesInicio,
-                'mes_fim'            => $mesFim,
-                'horario_abertura'   => $horarioAbertura,
-                'horario_fechamento' => $horarioFechamento,
-                'almoco_inicio'      => $almocoInicio,
-                'almoco_fim'         => $almocoFim,
-                'aberto'             => $aberto,
-            ];
+                $horariosCadastrados[$numeroMes][$slugDia] = [
+                    'mes'               => $numeroMes,
+                    'dia_semana'        => $slugDia,
+                    'horario_abertura'  => $horarioAbertura,
+                    'horario_fechamento'=> $horarioFechamento,
+                    'almoco_inicio'     => $almocoInicio,
+                    'almoco_fim'        => $almocoFim,
+                    'aberto'            => $aberto,
+                ];
+            }
         }
 
-        $stmtBusca->close();
-        $stmtAtualiza->close();
-        $stmtInsere->close();
-
+        $stmt->close();
         $conn->commit();
         $mensagemSucesso = 'Horários atualizados com sucesso.';
     } catch (Exception $ex) {
         $conn->rollback();
         $mensagemErro = $ex->getMessage();
     }
+}
+
+function mesEstaFuncionando(array $diasMes): bool
+{
+    foreach ($diasMes as $dadosDia) {
+        if ((int) ($dadosDia['aberto'] ?? 0) === 1) {
+            return true;
+        }
+    }
+    return false;
 }
 
 ?>
@@ -211,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="horarios-wrapper">
         <header class="horarios-header">
             <h1>Horário de Funcionamento</h1>
-            <p class="horarios-subtitle">Configure os períodos, horários e intervalos de almoço para cada dia.</p>
+            <p class="horarios-subtitle">Configure meses, dias e intervalos de almoço do salão.</p>
         </header>
 
         <?php if ($mensagemSucesso): ?>
@@ -223,111 +192,137 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post" class="horarios-formulario">
-            <?php foreach ($diasSemana as $slugDia => $rotuloDia): ?>
+            <?php foreach ($mesesAno as $numeroMes => $nomeMes): ?>
                 <?php
-                    $dadosDia = $horariosCadastrados[$slugDia];
-                    $selecionados = calcularMesesSelecionados(
-                        (int) $dadosDia['mes_inicio'],
-                        (int) $dadosDia['mes_fim']
-                    );
-                    $bodyId = 'dia-' . $slugDia . '-body';
-                    $aberto = (int) $dadosDia['aberto'] === 1;
-                    $valorAbertura = $dadosDia['horario_abertura'] ?? '';
-                    $valorFechamento = $dadosDia['horario_fechamento'] ?? '';
-                    $valorAlmocoInicio = $dadosDia['almoco_inicio'] ?? '';
-                    $valorAlmocoFim = $dadosDia['almoco_fim'] ?? '';
+                    $diasMes = $horariosCadastrados[$numeroMes];
+                    $mesAtivo = mesEstaFuncionando($diasMes);
+                    $bodyMesId = 'mes-' . $numeroMes . '-body';
                 ?>
-                <section class="dia-card" data-dia="<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>">
-                    <div class="dia-card-header">
-                        <h2><?= htmlspecialchars($rotuloDia, ENT_QUOTES, 'UTF-8'); ?></h2>
+                <section class="mes-card" data-mes="<?= (int) $numeroMes; ?>">
+                    <div class="mes-card-header">
+                        <h2><?= htmlspecialchars($nomeMes, ENT_QUOTES, 'UTF-8'); ?></h2>
+                        <div class="mes-funciona-opcao">
+                            <span>Funcionando?</span>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="meses[<?= (int) $numeroMes; ?>][funciona]"
+                                    value="sim"
+                                    <?= $mesAtivo ? 'checked' : ''; ?>
+                                >
+                                Sim
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="meses[<?= (int) $numeroMes; ?>][funciona]"
+                                    value="nao"
+                                    <?= $mesAtivo ? '' : 'checked'; ?>
+                                >
+                                Não
+                            </label>
+                        </div>
                         <button
                             type="button"
-                            class="dia-toggle"
-                            aria-expanded="true"
-                            aria-controls="<?= htmlspecialchars($bodyId, ENT_QUOTES, 'UTF-8'); ?>"
+                            class="mes-toggle"
+                            aria-expanded="false"
+                            aria-controls="<?= htmlspecialchars($bodyMesId, ENT_QUOTES, 'UTF-8'); ?>"
                         >
-                            <span class="dia-toggle-icon">-</span>
+                            <span class="mes-toggle-icon">+</span>
                         </button>
                     </div>
-                    <div class="dia-card-body" id="<?= htmlspecialchars($bodyId, ENT_QUOTES, 'UTF-8'); ?>">
-                        <div class="periodo-ano">
-                            <span class="periodo-titulo">Período do ano</span>
-                            <div class="meses-grade">
-                                <?php foreach ($mesesAno as $numeroMes => $rotuloMes): ?>
-                                    <label class="mes-item">
-                                        <input
-                                            type="checkbox"
-                                            name="<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>_meses[]"
-                                            value="<?= (int) $numeroMes; ?>"
-                                            <?= in_array($numeroMes, $selecionados, true) ? 'checked' : ''; ?>
+                    <div class="mes-card-body" id="<?= htmlspecialchars($bodyMesId, ENT_QUOTES, 'UTF-8'); ?>" hidden>
+                        <div class="mes-instrucoes">
+                            <p>Abra os dias da semana para definir horários específicos.</p>
+                        </div>
+                        <div class="dias-container">
+                            <?php foreach ($diasSemana as $slugDia => $nomeDia): ?>
+                                <?php
+                                    $dadosDia = $diasMes[$slugDia];
+                                    $bodyId = 'mes-' . $numeroMes . '-' . $slugDia . '-body';
+                                    $aberto = (int) ($dadosDia['aberto'] ?? 0) === 1;
+                                    $valorAbertura = $dadosDia['horario_abertura'] ?? '';
+                                    $valorFechamento = $dadosDia['horario_fechamento'] ?? '';
+                                    $valorAlmocoInicio = $dadosDia['almoco_inicio'] ?? '';
+                                    $valorAlmocoFim = $dadosDia['almoco_fim'] ?? '';
+                                ?>
+                                <article class="dia-card" data-mes="<?= (int) $numeroMes; ?>" data-dia="<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <div class="dia-card-header">
+                                        <h3><?= htmlspecialchars($nomeDia, ENT_QUOTES, 'UTF-8'); ?></h3>
+                                        <button
+                                            type="button"
+                                            class="dia-toggle"
+                                            aria-expanded="false"
+                                            aria-controls="<?= htmlspecialchars($bodyId, ENT_QUOTES, 'UTF-8'); ?>"
                                         >
-                                        <?= htmlspecialchars($rotuloMes, ENT_QUOTES, 'UTF-8'); ?>
-                                    </label>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-
-                        <div class="linha-horarios">
-                            <div class="campo-horario">
-                                <label for="<?= $slugDia; ?>_abertura">Horário - De</label>
-                                <input
-                                    type="time"
-                                    id="<?= $slugDia; ?>_abertura"
-                                    name="<?= $slugDia; ?>_abertura"
-                                    value="<?= htmlspecialchars($valorAbertura, ENT_QUOTES, 'UTF-8'); ?>"
-                                    class="input-horario"
-                                >
-                            </div>
-                            <div class="campo-horario">
-                                <label for="<?= $slugDia; ?>_fechamento">Horário - Até</label>
-                                <input
-                                    type="time"
-                                    id="<?= $slugDia; ?>_fechamento"
-                                    name="<?= $slugDia; ?>_fechamento"
-                                    value="<?= htmlspecialchars($valorFechamento, ENT_QUOTES, 'UTF-8'); ?>"
-                                    class="input-horario"
-                                >
-                            </div>
-                            <div class="campo-horario">
-                                <label for="<?= $slugDia; ?>_almoco_inicio">Almoço - De</label>
-                                <input
-                                    type="time"
-                                    id="<?= $slugDia; ?>_almoco_inicio"
-                                    name="<?= $slugDia; ?>_almoco_inicio"
-                                    value="<?= htmlspecialchars($valorAlmocoInicio, ENT_QUOTES, 'UTF-8'); ?>"
-                                    class="input-horario"
-                                >
-                            </div>
-                            <div class="campo-horario">
-                                <label for="<?= $slugDia; ?>_almoco_fim">Almoço - Até</label>
-                                <input
-                                    type="time"
-                                    id="<?= $slugDia; ?>_almoco_fim"
-                                    name="<?= $slugDia; ?>_almoco_fim"
-                                    value="<?= htmlspecialchars($valorAlmocoFim, ENT_QUOTES, 'UTF-8'); ?>"
-                                    class="input-horario"
-                                >
-                            </div>
-                        </div>
-
-                        <div class="dia-opcoes">
-                            <label class="opcao-item">
-                                <input type="checkbox" class="opcao-24h">
-                                24 horas
-                            </label>
-                            <label class="opcao-item">
-                                <input
-                                    type="checkbox"
-                                    name="<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>_fechado"
-                                    class="opcao-fechado"
-                                    <?= $aberto ? '' : 'checked'; ?>
-                                >
-                                Fechado
-                            </label>
-                            <label class="opcao-item">
-                                <input type="checkbox" class="opcao-aplicar-todos">
-                                Aplicar horário a todos os dias
-                            </label>
+                                            <span class="dia-toggle-icon">+</span>
+                                        </button>
+                                    </div>
+                                    <div class="dia-card-body" id="<?= htmlspecialchars($bodyId, ENT_QUOTES, 'UTF-8'); ?>" hidden>
+                                        <div class="linha-horarios">
+                                            <div class="campo-horario">
+                                                <label for="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-abertura">Horário - De</label>
+                                                <input
+                                                    type="time"
+                                                    id="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-abertura"
+                                                    name="horarios[<?= (int) $numeroMes; ?>][<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>][abertura]"
+                                                    value="<?= htmlspecialchars($valorAbertura, ENT_QUOTES, 'UTF-8'); ?>"
+                                                    class="input-horario"
+                                                >
+                                            </div>
+                                            <div class="campo-horario">
+                                                <label for="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-fechamento">Horário - Até</label>
+                                                <input
+                                                    type="time"
+                                                    id="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-fechamento"
+                                                    name="horarios[<?= (int) $numeroMes; ?>][<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>][fechamento]"
+                                                    value="<?= htmlspecialchars($valorFechamento, ENT_QUOTES, 'UTF-8'); ?>"
+                                                    class="input-horario"
+                                                >
+                                            </div>
+                                            <div class="campo-horario">
+                                                <label for="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-almoco-inicio">Almoço - De</label>
+                                                <input
+                                                    type="time"
+                                                    id="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-almoco-inicio"
+                                                    name="horarios[<?= (int) $numeroMes; ?>][<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>][almoco_inicio]"
+                                                    value="<?= htmlspecialchars($valorAlmocoInicio, ENT_QUOTES, 'UTF-8'); ?>"
+                                                    class="input-horario"
+                                                >
+                                            </div>
+                                            <div class="campo-horario">
+                                                <label for="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-almoco-fim">Almoço - Até</label>
+                                                <input
+                                                    type="time"
+                                                    id="dia-<?= $numeroMes; ?>-<?= $slugDia; ?>-almoco-fim"
+                                                    name="horarios[<?= (int) $numeroMes; ?>][<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>][almoco_fim]"
+                                                    value="<?= htmlspecialchars($valorAlmocoFim, ENT_QUOTES, 'UTF-8'); ?>"
+                                                    class="input-horario"
+                                                >
+                                            </div>
+                                        </div>
+                                        <div class="dia-opcoes">
+                                            <label class="opcao-item">
+                                                <input type="checkbox" class="opcao-24h">
+                                                24 horas
+                                            </label>
+                                            <label class="opcao-item">
+                                                <input
+                                                    type="checkbox"
+                                                    name="horarios[<?= (int) $numeroMes; ?>][<?= htmlspecialchars($slugDia, ENT_QUOTES, 'UTF-8'); ?>][fechado]"
+                                                    class="opcao-fechado"
+                                                    <?= $aberto ? '' : 'checked'; ?>
+                                                >
+                                                Fechado
+                                            </label>
+                                            <label class="opcao-item">
+                                                <input type="checkbox" class="opcao-aplicar-mes">
+                                                Aplicar horário a todos os dias do mês
+                                            </label>
+                                        </div>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </section>
@@ -343,138 +338,200 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const cartoesDia = document.querySelectorAll('.dia-card');
-            const toggles = document.querySelectorAll('.dia-toggle');
+            const mesCards = document.querySelectorAll('.mes-card');
 
-            const atualizarIconeToggle = (botao, estaColapsado) => {
-                const icone = botao.querySelector('.dia-toggle-icon');
+            const actualizarIconeToggle = (botao, estadoColapsado) => {
+                const icone = botao.querySelector('.mes-toggle-icon, .dia-toggle-icon');
                 if (icone) {
-                    icone.textContent = estaColapsado ? '+' : '-';
+                    icone.textContent = estadoColapsado ? '+' : '-';
                 }
             };
 
-            toggles.forEach((botao) => {
-                const card = botao.closest('.dia-card');
-                const corpo = card ? card.querySelector('.dia-card-body') : null;
-                if (!card || !corpo) {
-                    return;
+            mesCards.forEach((mesCard) => {
+                const toggleMes = mesCard.querySelector('.mes-toggle');
+                const corpoMes = mesCard.querySelector('.mes-card-body');
+                const radiosFuncionamento = mesCard.querySelectorAll('input[type="radio"][name^="meses"]');
+
+                if (toggleMes && corpoMes) {
+                    actualizarIconeToggle(toggleMes, true);
+                    toggleMes.addEventListener('click', () => {
+                        const oculto = corpoMes.hasAttribute('hidden');
+                        if (oculto) {
+                            corpoMes.removeAttribute('hidden');
+                        } else {
+                            corpoMes.setAttribute('hidden', 'hidden');
+                        }
+                        const estaColapsado = !oculto;
+                        toggleMes.setAttribute('aria-expanded', oculto ? 'true' : 'false');
+                        actualizarIconeToggle(toggleMes, estaColapsado);
+                    });
                 }
 
-                corpo.hidden = card.classList.contains('collapsed');
-                atualizarIconeToggle(botao, card.classList.contains('collapsed'));
-                botao.setAttribute('aria-expanded', card.classList.contains('collapsed') ? 'false' : 'true');
+                const diasDoMes = mesCard.querySelectorAll('.dia-card');
 
-                botao.addEventListener('click', () => {
-                    const agoraColapsado = card.classList.toggle('collapsed');
-                    corpo.hidden = agoraColapsado;
-                    botao.setAttribute('aria-expanded', agoraColapsado ? 'false' : 'true');
-                    atualizarIconeToggle(botao, agoraColapsado);
-                });
-            });
-
-            const coletarValores = (card) => {
-                const meses = Array.from(card.querySelectorAll('.mes-item input'))
-                    .filter((checkbox) => checkbox.checked)
-                    .map((checkbox) => checkbox.value);
-
-                return {
-                    meses,
-                    abertura: card.querySelector('input[name$="_abertura"]').value,
-                    fechamento: card.querySelector('input[name$="_fechamento"]').value,
-                    almocoInicio: card.querySelector('input[name$="_almoco_inicio"]').value,
-                    almocoFim: card.querySelector('input[name$="_almoco_fim"]').value,
-                    fechado: card.querySelector('.opcao-fechado').checked,
+                const aplicarEstadoMes = (funciona) => {
+                    diasDoMes.forEach((diaCard) => {
+                        const fechadoCheckbox = diaCard.querySelector('.opcao-fechado');
+                        if (fechadoCheckbox) {
+                            fechadoCheckbox.checked = !funciona;
+                            fechadoCheckbox.dispatchEvent(new Event('change'));
+                        }
+                    });
                 };
-            };
 
-            const aplicarValores = (card, valores) => {
-                const mesesInputs = card.querySelectorAll('.mes-item input');
-                mesesInputs.forEach((checkbox) => {
-                    checkbox.checked = valores.meses.includes(checkbox.value);
-                });
-
-                card.querySelector('input[name$="_abertura"]').value = valores.abertura;
-                card.querySelector('input[name$="_fechamento"]').value = valores.fechamento;
-                card.querySelector('input[name$="_almoco_inicio"]').value = valores.almocoInicio;
-                card.querySelector('input[name$="_almoco_fim"]').value = valores.almocoFim;
-
-                const fechadoCheckbox = card.querySelector('.opcao-fechado');
-                fechadoCheckbox.checked = valores.fechado;
-                atualizarEstado(card);
-            };
-
-            const aplicarHorarioEmTodos = (origem) => {
-                const origemDia = origem.dataset.dia;
-                const valoresOrigem = coletarValores(origem);
-
-                cartoesDia.forEach((card) => {
-                    if (card.dataset.dia === origemDia) {
-                        return;
-                    }
-                    aplicarValores(card, valoresOrigem);
-                });
-            };
-
-            const atualizarEstado = (card) => {
-                const inputsTempo = card.querySelectorAll('.input-horario');
-                const fechadoCheckbox = card.querySelector('.opcao-fechado');
-                const vinteQuatroHorasCheckbox = card.querySelector('.opcao-24h');
-                const campoAbertura = card.querySelector('input[name$="_abertura"]');
-                const campoFechamento = card.querySelector('input[name$="_fechamento"]');
-
-                if (fechadoCheckbox.checked) {
-                    inputsTempo.forEach((input) => {
-                        input.value = '';
-                        input.readOnly = true;
+                radiosFuncionamento.forEach((radio) => {
+                    radio.addEventListener('change', () => {
+                        if (radio.value === 'sim' && radio.checked) {
+                            aplicarEstadoMes(true);
+                        }
+                        if (radio.value === 'nao' && radio.checked) {
+                            aplicarEstadoMes(false);
+                        }
                     });
-                    vinteQuatroHorasCheckbox.checked = false;
-                    return;
-                }
-
-                if (vinteQuatroHorasCheckbox.checked) {
-                    campoAbertura.value = '00:00';
-                    campoFechamento.value = '23:59';
-                    inputsTempo.forEach((input) => {
-                        input.readOnly = true;
-                    });
-                } else {
-                    inputsTempo.forEach((input) => {
-                        input.readOnly = false;
-                    });
-                }
-            };
-
-            cartoesDia.forEach((card) => {
-                const fechadoCheckbox = card.querySelector('.opcao-fechado');
-                const vinteQuatroHorasCheckbox = card.querySelector('.opcao-24h');
-                const aplicarTodosCheckbox = card.querySelector('.opcao-aplicar-todos');
-                const campoAbertura = card.querySelector('input[name$="_abertura"]');
-                const campoFechamento = card.querySelector('input[name$="_fechamento"]');
-
-                if (campoAbertura.value === '00:00' && campoFechamento.value === '23:59') {
-                    vinteQuatroHorasCheckbox.checked = true;
-                }
-
-                atualizarEstado(card);
-
-                fechadoCheckbox.addEventListener('change', () => {
-                    atualizarEstado(card);
                 });
 
-                vinteQuatroHorasCheckbox.addEventListener('change', () => {
-                    if (vinteQuatroHorasCheckbox.checked) {
-                        fechadoCheckbox.checked = false;
-                    }
-                    atualizarEstado(card);
-                });
+                diasDoMes.forEach((diaCard) => {
+                    const toggleDia = diaCard.querySelector('.dia-toggle');
+                    const corpoDia = diaCard.querySelector('.dia-card-body');
+                    const fechadoCheckbox = diaCard.querySelector('.opcao-fechado');
+                    const vinteQuatroCheckbox = diaCard.querySelector('.opcao-24h');
+                    const aplicarMesCheckbox = diaCard.querySelector('.opcao-aplicar-mes');
+                    const inputsTempo = diaCard.querySelectorAll('.input-horario');
+                    const aberturaInput = diaCard.querySelector('input[name$="[abertura]"]');
+                    const fechamentoInput = diaCard.querySelector('input[name$="[fechamento]"]');
+                    const almocoInicioInput = diaCard.querySelector('input[name$="[almoco_inicio]"]');
+                    const almocoFimInput = diaCard.querySelector('input[name$="[almoco_fim]"]');
 
-                aplicarTodosCheckbox.addEventListener('change', () => {
-                    if (aplicarTodosCheckbox.checked) {
-                        aplicarHorarioEmTodos(card);
-                        setTimeout(() => {
-                            aplicarTodosCheckbox.checked = false;
-                        }, 150);
+                    if (toggleDia && corpoDia) {
+                        actualizarIconeToggle(toggleDia, true);
+                        toggleDia.addEventListener('click', () => {
+                            const oculto = corpoDia.hasAttribute('hidden');
+                            if (oculto) {
+                                corpoDia.removeAttribute('hidden');
+                            } else {
+                                corpoDia.setAttribute('hidden', 'hidden');
+                            }
+                            const estaColapsado = !oculto;
+                            toggleDia.setAttribute('aria-expanded', oculto ? 'true' : 'false');
+                            actualizarIconeToggle(toggleDia, estaColapsado);
+                        });
                     }
+
+                    const actualizarCampos = () => {
+                        if (fechadoCheckbox.checked) {
+                            inputsTempo.forEach((input) => {
+                                input.value = '';
+                                input.readOnly = true;
+                            });
+                            if (vinteQuatroCheckbox) {
+                                vinteQuatroCheckbox.checked = false;
+                            }
+                            return;
+                        }
+
+                        if (vinteQuatroCheckbox && vinteQuatroCheckbox.checked) {
+                            if (aberturaInput) {
+                                aberturaInput.value = '00:00';
+                            }
+                            if (fechamentoInput) {
+                                fechamentoInput.value = '23:59';
+                            }
+                            if (almocoInicioInput) {
+                                almocoInicioInput.value = '';
+                            }
+                            if (almocoFimInput) {
+                                almocoFimInput.value = '';
+                            }
+                            inputsTempo.forEach((input) => {
+                                input.readOnly = true;
+                            });
+                        } else {
+                            inputsTempo.forEach((input) => {
+                                input.readOnly = false;
+                            });
+                        }
+                    };
+
+                    if (fechadoCheckbox) {
+                        fechadoCheckbox.addEventListener('change', actualizarCampos);
+                    }
+
+                    if (vinteQuatroCheckbox) {
+                        if (
+                            aberturaInput &&
+                            fechamentoInput &&
+                            aberturaInput.value === '00:00' &&
+                            fechamentoInput.value === '23:59'
+                        ) {
+                            vinteQuatroCheckbox.checked = true;
+                        }
+
+                        vinteQuatroCheckbox.addEventListener('change', () => {
+                            if (vinteQuatroCheckbox.checked && fechadoCheckbox) {
+                                fechadoCheckbox.checked = false;
+                            }
+                            actualizarCampos();
+                        });
+                    }
+
+                    if (aplicarMesCheckbox) {
+                        aplicarMesCheckbox.addEventListener('change', () => {
+                            if (!aplicarMesCheckbox.checked) {
+                                return;
+                            }
+
+                            const valoresOrigem = {
+                                abertura: diaCard.querySelector('input[name$="[abertura]"]').value,
+                                fechamento: diaCard.querySelector('input[name$="[fechamento]"]').value,
+                                almocoInicio: diaCard.querySelector('input[name$="[almoco_inicio]"]').value,
+                                almocoFim: diaCard.querySelector('input[name$="[almoco_fim]"]').value,
+                                fechado: fechadoCheckbox.checked,
+                                vinteQuatro: vinteQuatroCheckbox ? vinteQuatroCheckbox.checked : false,
+                            };
+
+                            diasDoMes.forEach((alvo) => {
+                                if (alvo === diaCard) {
+                                    return;
+                                }
+
+                                const fechadoAlvo = alvo.querySelector('.opcao-fechado');
+                                const vinteQuatroAlvo = alvo.querySelector('.opcao-24h');
+                                const inputsAlvo = alvo.querySelectorAll('.input-horario');
+
+                                alvo.querySelector('input[name$="[abertura]"]').value = valoresOrigem.abertura;
+                                alvo.querySelector('input[name$="[fechamento]"]').value = valoresOrigem.fechamento;
+                                alvo.querySelector('input[name$="[almoco_inicio]"]').value = valoresOrigem.almocoInicio;
+                                alvo.querySelector('input[name$="[almoco_fim]"]').value = valoresOrigem.almocoFim;
+
+                                if (fechadoAlvo) {
+                                    fechadoAlvo.checked = valoresOrigem.fechado;
+                                    fechadoAlvo.dispatchEvent(new Event('change'));
+                                }
+
+                                if (vinteQuatroAlvo) {
+                                    vinteQuatroAlvo.checked = valoresOrigem.vinteQuatro;
+                                    vinteQuatroAlvo.dispatchEvent(new Event('change'));
+                                }
+
+                                if (valoresOrigem.vinteQuatro && !valoresOrigem.fechado) {
+                                    const aberturaAlvo = alvo.querySelector('input[name$="[abertura]"]');
+                                    const fechamentoAlvo = alvo.querySelector('input[name$="[fechamento]"]');
+                                    if (aberturaAlvo) {
+                                        aberturaAlvo.value = '00:00';
+                                    }
+                                    if (fechamentoAlvo) {
+                                        fechamentoAlvo.value = '23:59';
+                                    }
+                                }
+                            });
+
+                            setTimeout(() => {
+                                aplicarMesCheckbox.checked = false;
+                            }, 150);
+                        });
+                    }
+
+                    actualizarCampos();
                 });
             });
         });

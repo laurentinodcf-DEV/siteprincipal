@@ -1315,6 +1315,105 @@ nav ul ul li {
   gap: 24px;
 }
 
+.mes-card {
+  border: 1px solid #d0d5dd;
+  border-radius: 14px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+}
+
+.mes-card + .mes-card {
+  margin-top: 16px;
+}
+
+.mes-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%);
+}
+
+.mes-card-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #1e293b;
+}
+
+.mes-funciona-opcao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #334155;
+  flex-wrap: wrap;
+}
+
+.mes-funciona-opcao span {
+  font-weight: 600;
+}
+
+.mes-funciona-opcao label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.mes-toggle {
+  border: 1px solid #94a3b8;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mes-toggle:hover {
+  background-color: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
+  box-shadow: 0 10px 20px rgba(29, 78, 216, 0.25);
+}
+
+.mes-toggle:focus-visible {
+  outline: 3px solid rgba(29, 78, 216, 0.35);
+  outline-offset: 2px;
+}
+
+.mes-card-body {
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mes-card-body[hidden] {
+  display: none;
+}
+
+.mes-instrucoes p {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+}
+
+.dias-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .dia-card {
   border: 1px solid #e4e7ec;
   border-radius: 12px;
@@ -1331,9 +1430,9 @@ nav ul ul li {
   gap: 12px;
 }
 
-.dia-card-header h2 {
+.dia-card-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   color: #1f2933;
 }
 
@@ -1372,7 +1471,14 @@ nav ul ul li {
   font-weight: 700;
 }
 
-.dia-card.collapsed .dia-card-body {
+.dia-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dia-card-body[hidden] {
   display: none;
 }
 
@@ -1380,13 +1486,6 @@ nav ul ul li {
   background-color: #0f172a;
   color: #ffffff;
   border-color: #0f172a;
-}
-
-.dia-card-body {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
 }
 
 .periodo-ano {
@@ -1524,6 +1623,17 @@ nav ul ul li {
 @media (max-width: 768px) {
   .horarios-wrapper {
     padding: 24px 18px;
+  }
+
+  .mes-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .mes-funciona-opcao {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .linha-horarios {
