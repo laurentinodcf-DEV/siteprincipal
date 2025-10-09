@@ -1,4 +1,4 @@
-ï»¿<?php
+<?php
 session_start();
 $adminLogado = isset($_SESSION['usuario_id']);
 ?>
@@ -8,7 +8,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 <head lang="pt-br">
 
     <meta charset="utf-8"/>
-    <title>SALOME BELEZA E ESTÃ‰TICA</title>
+    <title>SALOME BELEZA E ESTÉTICA</title>
    
     <!-- CSS do Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -25,24 +25,24 @@ $adminLogado = isset($_SESSION['usuario_id']);
       <!----- CONTAINER GERAL DA PAGINA -------------------------->
       <div id="container-page">
 
-          <!----- MENU DE NAVEGAÃ‡ÃƒO -------------------------->
+          <!----- MENU DE NAVEGAÇÃO -------------------------->
           <nav class="nav-menu-principal"> 
             <ul class="ul-menu-principal">
-                <li class="li-menu-principal"><span class="menu-principal">ServiÃ§os</span>
+                <li class="li-menu-principal"><span class="menu-principal">Serviços</span>
                     <ul class="submenu">
-                        <li class="submenu-item"><a href="pages/servicos.php">ServiÃ§os Oferecidos</a></li>
+                        <li class="submenu-item"><a href="pages/servicos.php">Serviços Oferecidos</a></li>
                     </ul>
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Produtos</span>
                     <ul class="submenu">
                         <li class="submenu-item">Um</li>
                         <li class="submenu-item">Dois</li>
-                        <li class="submenu-item">TrÃªs</li>
+                        <li class="submenu-item">Três</li>
                     </ul>
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Resultados</span>
                     <ul class="submenu">
-                        <li class="submenu-item"><a href="pages/resultados_videos.php">VÃ­deos</a></li>
+                        <li class="submenu-item"><a href="pages/resultados_videos.php">Vídeos</a></li>
                         <li class="submenu-item">Imagens</li>
                         <li class="submenu-item">Depoimentos</li>
                     </ul>
@@ -56,17 +56,11 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <li class="li-menu-principal"><span class="menu-principal">Sobre</span>
                     <ul class="submenu">
                         <li class="submenu-item" id="openModal">Contato</li>
-                        <li class="submenu-item" id="openMapModal">EndereÃ§o</li>
+                        <li class="submenu-item" id="openMapModal">Endereço</li>
                         <li class="submenu-item">Profissional</li>
                         <li class="submenu-item">Fotos</li>
                     </ul>
                 </li>
-                <li class="li-menu-principal" id="menuInserir" style="display:none;">
-                    <span class="menu-principal">Inserir</span>
-                    <ul class="submenu">
-                        <li class="submenu-item"><a href="pages/inserir_video.php">Inserir VÃ­deo</a></li>
-                        <li class="submenu-item"><a href="pages/horarios_funcionamento.php">Horario de Funcionamento</a></li>
-                        <li class="submenu-item"><a href="pages/servicos_admin.php">Serviï¿½os</a></li>
                         <li class="submenu-item"><a href="produtos.php">Produtos</a></li>
                     </ul>
                 </li>
@@ -75,10 +69,11 @@ $adminLogado = isset($_SESSION['usuario_id']);
             <!----- CONTAINER DA LOGOMARCA -------------------------->
             <div class="admin-icon-container">
                 <span class="menu-principal admin-menu-trigger" role="button" aria-haspopup="true" aria-expanded="false">
-                    <img src="img/icons/person_login.png" alt="AdministraÃ§Ã£o" class="admin-menu-icon">
+                    <img src="img/icons/person_login.png" alt="Administração" class="admin-menu-icon">
                 </span>
                 <ul class="submenu">
                     <li class="submenu-item" id="openLoginModal">Login</li>
+                    <li class="submenu-item" id="dashboardLink" style="display:none;"><a href="adm/dashboard.php">Painel</a></li>
                     <li class="submenu-item" id="logoutMenu" style="display:none;">Logout</li>
                 </ul>
             </div>
@@ -116,7 +111,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </div>
             </div>
 
-            <!-- MODAL DO LOCAL, IMAGENS DO LOCAL E ENDEREÃ‡O -->
+            <!-- MODAL DO LOCAL, IMAGENS DO LOCAL E ENDEREÇO -->
             <div id="mapModal" class="mapModal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -138,10 +133,10 @@ $adminLogado = isset($_SESSION['usuario_id']);
                         </div>
 
                         <p>
-                            <!-- ENDEREÃ‡O LIGADO AO GOOGLE -->
-                            <strong>EndereÃ§o:</strong>
+                            <!-- ENDEREÇO LIGADO AO GOOGLE -->
+                            <strong>Endereço:</strong>
                             <a href="https://www.google.com/maps/search/?api=1&query=Av.+Professor+Lucas+Machado,+442,+Asteca,+Santa+Luzia+-+MG" target="_blank">
-                                Av. Professor Lucas Machado - NÂ° 442 - Asteca, Santa Luzia - MG
+                                Av. Professor Lucas Machado - N° 442 - Asteca, Santa Luzia - MG
                             </a>
                         </p>
                     </div>
@@ -179,12 +174,12 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     </div>
                 </section>
 
-                <!-- SEÃ‡ÃƒO 02 - ServiÃ§os -->
+                <!-- SEÇÃO 02 - Serviços -->
                 <section id="secao-02" class="secao-02">
                 <div class="container-sobre">
                     <!-- Coluna Imagem + Depoimento -->
                     <div class="sobre-imagem">
-                         <img src="img/salao/interior02.jpg" alt="Studio SalomÃ©">
+                         <img src="img/salao/interior02.jpg" alt="Studio Salomé">
                     <div class="sobre-depoimento">
                         <p class="depoimento-texto">"Transformou meu visual!"</p>
                         <span class="depoimento-autor">Ana Clara</span>
@@ -195,31 +190,31 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     <div class="sobre-texto">
                         <h2>Sobre o Studio</h2>
                         <p>
-                            Oferecemos tratamentos exclusivos para cuidar da sua beleza com excelÃªncia, combinando o melhor da estÃ©tica moderna e produtos de alta qualidade. Nossa equipe especializada estÃ¡ pronta para proporcionar experiÃªncias Ãºnicas em cada atendimento.
+                            Oferecemos tratamentos exclusivos para cuidar da sua beleza com excelência, combinando o melhor da estética moderna e produtos de alta qualidade. Nossa equipe especializada está pronta para proporcionar experiências únicas em cada atendimento.
                         </p>
-                        <a href="#servicos" class="btn-sobre">ConheÃ§a nossos serviÃ§os</a>
+                        <a href="#servicos" class="btn-sobre">Conheça nossos serviços</a>
                     </div>
                 </div>
                 </section>
 
 
-                <!-- SEÃ‡ÃƒO 03 - Sobre o Studio -->
+                <!-- SEÇÃO 03 - Sobre o Studio -->
                 <section id="secao-03" class="secao-03">
                     <div class="container-depoimentos">
                         <h2 class="titulo-depoimentos">O que nossos clientes dizem</h2>
 
                         <div class="depoimentos-carousel-container">
-                            <!-- BotÃ£o anterior -->
+                            <!-- Botão anterior -->
                             <button class="depoimentos-btn prev" aria-label="Depoimento anterior">&#10094;</button>
                             
                             <!-- Carrossel de depoimentos -->
                             <div class="depoimentos-carousel">
                                 <!-- Depoimento 1 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">â˜…â˜…â˜…â˜…â˜…</div>
+                                    <div class="avaliacao">?????</div>
                                     <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
                                     <p class="texto-depoimento">
-                                    O serviÃ§o foi excepcional e superou minhas expectativas em todos os aspectos.
+                                    O serviço foi excepcional e superou minhas expectativas em todos os aspectos.
                                     </p>
                                     <div class="autor">
                                     <img src="img/clientes/ana.jpg" alt="Ana L." class="foto-autor">
@@ -229,10 +224,10 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                                 <!-- Depoimento 2 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">â˜…â˜…â˜…â˜…â˜…</div>
+                                    <div class="avaliacao">?????</div>
                                     <h3 class="titulo-depoimento">Estou admirada!</h3>
                                     <p class="texto-depoimento">
-                                    A experiÃªncia foi incrÃ­vel, definitivamente voltarei e recomendarei a todos!
+                                    A experiência foi incrível, definitivamente voltarei e recomendarei a todos!
                                     </p>
                                     <div class="autor">
                                     <img src="img/clientes/carla.jpg" alt="Carla M." class="foto-autor">
@@ -242,7 +237,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                                 
                                 <!-- Depoimento 3 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">â˜…â˜…â˜…â˜…â˜…</div>
+                                    <div class="avaliacao">?????</div>
                                     <h3 class="titulo-depoimento">Impressionada!</h3>
                                     <p class="texto-depoimento">
                                     Impressionada com meu novo brilho e liso, voltarei e recomendarei a todos!
@@ -254,8 +249,8 @@ $adminLogado = isset($_SESSION['usuario_id']);
                                 </div>
                             </div>
                             
-                            <!-- BotÃ£o prÃ³ximo -->
-                            <button class="depoimentos-btn next" aria-label="PrÃ³ximo depoimento">&#10095;</button>
+                            <!-- Botão próximo -->
+                            <button class="depoimentos-btn next" aria-label="Próximo depoimento">&#10095;</button>
                         </div>
                         
                         <!-- Indicadores de slide -->
@@ -266,23 +261,23 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     </div>
                 </section>
 
-                <!-- SEÃ‡ÃƒO 04 - Nossos ServiÃ§os -->
+                <!-- SEÇÃO 04 - Nossos Serviços -->
                 <section id="secao-04" class="secao-04">
                 <div class="container-servicos-04">
 
-                    <!-- TÃ­tulo e descriÃ§Ã£o -->
+                    <!-- Título e descrição -->
                     <div class="servicos-header">
-                    <h2>Nossos ServiÃ§os</h2>
+                    <h2>Nossos Serviços</h2>
                     <p>Oferecemos tratamentos de beleza para cabelos e sobrancelhas com qualidade excepcional.</p>
                     </div>
 
                     <!-- Wrapper do carrossel -->
                     <div class="carousel-wrapper">
 
-                    <!-- BotÃ£o anterior -->
-                    <button class="carousel-btn prev" aria-label="ServiÃ§o anterior">&#10094;</button>
+                    <!-- Botão anterior -->
+                    <button class="carousel-btn prev" aria-label="Serviço anterior">&#10094;</button>
 
-                    <!-- Carrossel rolÃ¡vel -->
+                    <!-- Carrossel rolável -->
                     <div class="servicos-carousel">
                         <article class="card-servico-04">
                             <div class="card-servico-04-imagem">
@@ -310,7 +305,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                             </div>
                             <div class="card-servico-04-info">
                                 <h3>Spa Capilar</h3>
-                                <p>Relaxe e cuide da saÃºde dos seus fios com nossos tratamentos capilares premium.</p>
+                                <p>Relaxe e cuide da saúde dos seus fios com nossos tratamentos capilares premium.</p>
                             </div>
                         </article>
 
@@ -320,24 +315,24 @@ $adminLogado = isset($_SESSION['usuario_id']);
                             </div>
                             <div class="card-servico-04-info">
                                 <h3>Produtos Exclusivos</h3>
-                                <p>Utilizamos apenas produtos de alta performance para garantir resultados impecÃ¡veis e duradouros.</p>
+                                <p>Utilizamos apenas produtos de alta performance para garantir resultados impecáveis e duradouros.</p>
                             </div>
                         </article>
 
                         <article class="card-servico-04">
                             <div class="card-servico-04-imagem">
-                                <img src="img/servicos/sobrancelha02.png" alt="EstÃ©tica de Sobrancelhas">
+                                <img src="img/servicos/sobrancelha02.png" alt="Estética de Sobrancelhas">
                             </div>
                             <div class="card-servico-04-info">
-                                <h3>EstÃ©tica de Sobrancelhas</h3>
-                                <p>Realce sua beleza com nossos serviÃ§os de design e cuidados especiais para sobrancelhas.</p>
+                                <h3>Estética de Sobrancelhas</h3>
+                                <p>Realce sua beleza com nossos serviços de design e cuidados especiais para sobrancelhas.</p>
                             </div>
                         </article>
 
                     </div>
 
-                    <!-- BotÃ£o prÃ³ximo -->
-                    <button class="carousel-btn next" aria-label="PrÃ³ximo serviÃ§o">&#10095;</button>
+                    <!-- Botão próximo -->
+                    <button class="carousel-btn next" aria-label="Próximo serviço">&#10095;</button>
                     </div>
                     <br>
                     <div class="sobre-texto-sesao-01">
@@ -353,7 +348,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                 <!-- Foto da Profissional -->
                 <section id="secao-foto" class="secao-foto">
-                    <img src="img/profissional/quenia01.png" alt="QuÃªnia SalomÃ©" class="foto-quenia">
+                    <img src="img/profissional/quenia01.png" alt="Quênia Salomé" class="foto-quenia">
                 </section>
 
                 <?php include 'class/contatoFooter.php'; ?>
@@ -388,7 +383,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
             </div>
         </div>
 
-        <!-- Modal de ConfirmaÃ§Ã£o Logout -->
+        <!-- Modal de Confirmação Logout -->
         <div id="logoutModal" class="modal" style="display:none;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -398,7 +393,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <div class="modal-body">
                     <p>Tem certeza que deseja sair?</p>
                     <button id="confirmLogout">Sim</button>
-                    <button id="cancelLogout">NÃ£o</button>
+                    <button id="cancelLogout">Não</button>
                 </div>
             </div>
         </div>
@@ -418,3 +413,6 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
   </body>
 </html>
+
+
+

@@ -70,79 +70,102 @@ document.querySelector('.prev').addEventListener('click', () => {
 
 
 //----------------------------------------- controle paninel de login -----------------------------------------------
-// Abrir e fechar modal
 const loginModal = document.getElementById("loginModal");
 const openLoginBtn = document.getElementById("openLoginModal");
 const closeLoginBtn = document.getElementById("closeLoginModal");
 const loginError = document.getElementById("loginError");
+const loginForm = document.getElementById("loginForm");
 
-openLoginBtn.addEventListener("click", () => {
-    loginModal.style.display = "flex";
-});
-
-closeLoginBtn.addEventListener("click", () => {
-    loginModal.style.display = "none";
-    loginError.style.display = "none";
-});
-
-// Enviar formulário via AJAX
-document.getElementById("loginForm").addEventListener("submit", function(e){
-    e.preventDefault();
-
-    const formData = new FormData(this);
-
-    fetch("adm/login_ajax.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success){
-            loginModal.style.display = "none";
-            loginError.style.display = "none";
-            location.reload(); // recarrega a página
-        } else {
-            loginError.textContent = data.message;
-            loginError.style.display = "block";
-        }
+if (openLoginBtn && loginModal && closeLoginBtn && loginError && loginForm) {
+    openLoginBtn.addEventListener("click", () => {
+        loginModal.style.display = "flex";
     });
-});
 
-// Mostrar/ocultar senha
-const senhaInput = document.querySelector('input[name="password"]');
-const showPasswordCheckbox = document.getElementById('showPassword');
+    closeLoginBtn.addEventListener("click", () => {
+        loginModal.style.display = "none";
+        loginError.style.display = "none";
+    });
 
-showPasswordCheckbox.addEventListener('change', () => {
-    if(showPasswordCheckbox.checked){
-        senhaInput.type = 'text';
-    } else {
-        senhaInput.type = 'password';
+    loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch("adm/login_ajax.php", {
+            method: "POST",
+            body: formData
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                loginModal.style.display = "none";
+                loginError.style.display = "none";
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                loginError.textContent = data.message;
+                loginError.style.display = "block";
+            }
+        })
+        .catch(() => {
+            loginError.textContent = "Erro ao tentar fazer login. Tente novamente.";
+            loginError.style.display = "block";
+        });
+    });
+
+    const senhaInput = loginForm.querySelector('input[name="password"]');
+    const showPasswordCheckbox = document.getElementById("showPassword");
+    if (showPasswordCheckbox && senhaInput) {
+        showPasswordCheckbox.addEventListener("change", () => {
+            senhaInput.type = showPasswordCheckbox.checked ? "text" : "password";
+        });
     }
-});
+} else if (openLoginBtn) {
+    openLoginBtn.addEventListener("click", () => {
+        window.location.href = "adm/login.php";
+    });
+}
 
 // Logout Modal
-const logoutMenu = document.getElementById('logoutMenu');
-const logoutModal = document.getElementById('logoutModal');
-const closeLogoutModal = document.getElementById('closeLogoutModal');
-const confirmLogout = document.getElementById('confirmLogout');
-const cancelLogout = document.getElementById('cancelLogout');
+const logoutMenu = document.getElementById("logoutMenu");
+const logoutModal = document.getElementById("logoutModal");
+const closeLogoutModal = document.getElementById("closeLogoutModal");
+const confirmLogout = document.getElementById("confirmLogout");
+const cancelLogout = document.getElementById("cancelLogout");
 
-logoutMenu.addEventListener('click', () => {
-    logoutModal.style.display = 'flex';
-});
+if (logoutMenu && logoutModal && closeLogoutModal && confirmLogout && cancelLogout) {
+    logoutMenu.addEventListener("click", () => {
+        logoutModal.style.display = "flex";
+    });
 
-closeLogoutModal.addEventListener('click', () => logoutModal.style.display = 'none');
-cancelLogout.addEventListener('click', () => logoutModal.style.display = 'none');
+    closeLogoutModal.addEventListener("click", () => {
+        logoutModal.style.display = "none";
+    });
 
-confirmLogout.addEventListener('click', () => {
-    fetch('adm/logout.php')
-    .then(() => location.reload());
-});
+    cancelLogout.addEventListener("click", () => {
+        logoutModal.style.display = "none";
+    });
 
+    confirmLogout.addEventListener("click", () => {
+        fetch("adm/logout.php")
+            .then(() => window.location.reload());
+    });
+}
 
-if(adminLogado){
-    document.getElementById('logoutMenu').style.display = 'block';
-    document.getElementById('menuInserir').style.display = 'flex';
+if (typeof adminLogado !== "undefined" && adminLogado) {
+    if (logoutMenu) {
+        logoutMenu.style.display = "block";
+    }
+    const dashboardLink = document.getElementById("dashboardLink");
+    if (dashboardLink) {
+        dashboardLink.style.display = "block";
+    }
+    if (openLoginBtn) {
+        openLoginBtn.style.display = "none";
+    }
 }
 
 //----------------------------------------- Inserir Vídeo (Link) -----------------------------------------------
@@ -315,5 +338,9 @@ document.addEventListener("DOMContentLoaded", function() {
   // Inicializa o carrossel
   updateCarousel();
 });
+
+
+
+
 
 

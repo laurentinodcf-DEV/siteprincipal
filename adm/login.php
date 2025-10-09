@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['usuario_nome'] = $user['username'];
 
             // redireciona para a página principal ou painel
-            header("Location: ../index.php");
+            header("Location: dashboard.php");
             exit();
         } else {
             $erro = "Senha incorreta!";
@@ -47,10 +47,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Login:</label><br>
         <input type="text" name="login" required autocomplete="off"><br><br>
 
-        <label>Senhaddd:</label><br>
+        <label>Senha:</label><br>
         <input type="password" name="password" required required autocomplete="new-password"><br><br>
 
         <button type="submit">Entrar</button>
     </form>
 </body>
 </html>
+
