@@ -1,4 +1,4 @@
-/*--------------------------------- ZERANDO MARGENS E PADDINGS DEFALT --------------------------------------------------------------------*/
+﻿/*--------------------------------- ZERANDO MARGENS E PADDINGS DEFALT --------------------------------------------------------------------*/
 *{
 	margin: 0;
 	padding: 0;
@@ -68,9 +68,13 @@ div#container-page{ /*--------- pagina geral --------------*/
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    border: none;
 }
 .menu-principal.admin-menu-trigger:hover{
     background: transparent;
+    opacity: 1;   /* aparece suavemente */
+    border-radius: 50%;
+    box-shadow: 0 0 5px 5px rgba(255, 215, 0, 0.7); /* leve glow dourado */
 }
 .menu-principal.admin-menu-trigger:focus-visible{
     outline: 3px solid rgba(0, 191, 255, 0.6);
