@@ -1,4 +1,4 @@
-<?php
+Ôªø<?php
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -81,12 +81,12 @@ if (!isset($_SESSION['usuario_id'])) {
 </head>
 <body>
     <div class="placeholder">
-        <h2>Gest„o de produtos</h2>
-        <p>Este mÛdulo ainda n„o possui cadastros. Defina como deseja divulgar os produtos para liberarmos o painel.</p>
+        <h2>Gest√£o de produtos</h2>
+        <p>Este m√≥dulo ainda n√£o possui cadastros. Defina como deseja divulgar os produtos para liberarmos o painel.</p>
         <ul>
-            <li>Listagem com fotos, preÁos e descriÁ„o detalhada.</li>
-            <li>OrganizaÁ„o por categorias ou destaque promocional.</li>
-            <li>IntegraÁ„o com estoque ou orÁamentos (opcional).</li>
+            <li>Listagem com fotos, pre√ßos e descri√ß√£o detalhada.</li>
+            <li>Organiza√ß√£o por categorias ou destaque promocional.</li>
+            <li>Integra√ß√£o com estoque ou or√ßamentos (opcional).</li>
         </ul>
         <a href="../dashboard.php?module=overview" target="_top">Voltar ao painel</a>
     </div>

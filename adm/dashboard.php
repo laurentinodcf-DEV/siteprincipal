@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -9,17 +9,17 @@ if (!isset($_SESSION['usuario_id'])) {
 $modules = [
     'overview' => [
         'label' => 'Painel geral',
-        'description' => 'Visão rápida das principais ações administrativas.',
+        'description' => 'VisÃ£o rÃ¡pida das principais aÃ§Ãµes administrativas.',
         'src' => 'modules/overview.php',
     ],
     'videos' => [
-        'label' => 'Inserir vídeos',
-        'description' => 'Cadastre novos vídeos para os destaques do site.',
+        'label' => 'Inserir vÃ­deos',
+        'description' => 'Cadastre novos vÃ­deos para os destaques do site.',
         'src' => '../pages/inserir_video.php',
     ],
     'servicos' => [
-        'label' => 'Serviços',
-        'description' => 'Gerencie o catálogo de serviços oferecidos.',
+        'label' => 'ServiÃ§os',
+        'description' => 'Gerencie o catÃ¡logo de ServiÃ§os oferecidos.',
         'src' => '../pages/servicos_admin.php',
     ],
     'produtos' => [
@@ -28,8 +28,8 @@ $modules = [
         'src' => 'modules/produtos.php',
     ],
     'horarios' => [
-        'label' => 'Horário de funcionamento',
-        'description' => 'Configure meses, dias e períodos de atendimento.',
+        'label' => 'HorÃ¡rio de funcionamento',
+        'description' => 'Configure meses, dias e perÃ­odos de atendimento.',
         'src' => '../pages/horarios_funcionamento.php',
     ],
 ];
@@ -44,7 +44,7 @@ $navigation = [
         'items' => ['videos', 'servicos', 'produtos'],
     ],
     [
-        'title' => 'Operação',
+        'title' => 'OperaÃ§Ã£o',
         'items' => ['horarios'],
     ],
 ];
@@ -73,7 +73,7 @@ $usuario = $_SESSION['usuario_nome'] ?? 'Administrador';
                 <span>QS</span>
                 <div>
                     <div>Painel administrativo</div>
-                    <small>Studio Salomé</small>
+                    <small>Studio SalomÃ©</small>
                 </div>
             </div>
 

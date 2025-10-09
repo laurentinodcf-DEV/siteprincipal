@@ -1,4 +1,4 @@
-<?php
+Ôªø<?php
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -101,25 +101,25 @@ $usuario = $_SESSION['usuario_nome'] ?? 'Administrador';
 </head>
 <body>
     <section class="welcome-card">
-        <h2>Ol·, <?php echo htmlspecialchars($usuario, ENT_QUOTES, 'UTF-8'); ?>!</h2>
-        <p>Use o menu ao lado ou os atalhos abaixo para gerenciar o conte˙do do site com seguranÁa.</p>
+        <h2>Ol√°, <?php echo htmlspecialchars($usuario, ENT_QUOTES, 'UTF-8'); ?>!</h2>
+        <p>Use o menu ao lado ou os atalhos abaixo para gerenciar o conte√∫do do site com seguran√ßa.</p>
     </section>
 
     <section class="modules-grid">
         <article class="module-card">
-            <h3>VÌdeos</h3>
-            <p>Cadastrar novos vÌdeos e manter a vitrine atualizada.</p>
-            <a href="../dashboard.php?module=videos" target="_top">Ir para vÌdeos</a>
+            <h3>V√≠deos</h3>
+            <p>Cadastrar novos V√≠deos e manter a vitrine atualizada.</p>
+            <a href="../dashboard.php?module=videos" target="_top">Ir para V√≠deos</a>
         </article>
         <article class="module-card">
-            <h3>ServiÁos</h3>
-            <p>Adicionar, editar ou remover serviÁos exibidos aos clientes.</p>
-            <a href="../dashboard.php?module=servicos" target="_top">Ver serviÁos</a>
+            <h3>Servi√ßos</h3>
+            <p>Adicionar, editar ou remover Servi√ßos exibidos aos clientes.</p>
+            <a href="../dashboard.php?module=servicos" target="_top">Ver Servi√ßos</a>
         </article>
         <article class="module-card">
-            <h3>Hor·rios</h3>
-            <p>Atualizar perÌodos de atendimento e hor·rios especiais.</p>
-            <a href="../dashboard.php?module=horarios" target="_top">Configurar hor·rios</a>
+            <h3>Hor√°rios</h3>
+            <p>Atualizar per√≠odos de atendimento e Hor√°rios especiais.</p>
+            <a href="../dashboard.php?module=horarios" target="_top">Configurar Hor√°rios</a>
         </article>
     </section>
 </body>
