@@ -1262,6 +1262,235 @@ nav ul ul li {
   }
 }
 
+.pagina-admin {
+  background-color: #f2f4f7;
+  min-height: 100vh;
+  padding: 32px 16px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.horarios-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  padding: 32px 40px;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.horarios-header h1 {
+  font-size: 28px;
+  color: #1f2933;
+  margin-bottom: 4px;
+}
+
+.horarios-subtitle {
+  color: #52606d;
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+
+.alerta {
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.alerta-sucesso {
+  background-color: #eefaf3;
+  color: #0d8050;
+  border: 1px solid rgba(13, 128, 80, 0.25);
+}
+
+.alerta-erro {
+  background-color: #fef1f2;
+  color: #b91c1c;
+  border: 1px solid rgba(185, 28, 28, 0.25);
+}
+
+.horarios-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dia-card {
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f9fafc;
+}
+
+.dia-card-header {
+  background-color: #eef1f6;
+  padding: 14px 20px;
+}
+
+.dia-card-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #1f2933;
+}
+
+.dia-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.periodo-ano {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.periodo-titulo {
+  font-weight: 600;
+  color: #334155;
+  font-size: 14px;
+}
+
+.meses-grade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+}
+
+.mes-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.mes-item input {
+  width: 16px;
+  height: 16px;
+}
+
+.linha-horarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.campo-horario label {
+  display: block;
+  font-size: 13px;
+  color: #52606d;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.input-horario {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2933;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-horario:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  outline: none;
+}
+
+.input-horario[readonly] {
+  background-color: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.dia-opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #e4e7ec;
+}
+
+.opcao-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.opcao-item input {
+  width: 18px;
+  height: 18px;
+}
+
+.acoes-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.botao-salvar {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.botao-salvar:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+}
+
+.botao-voltar {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  color: #1f2933;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.botao-voltar:hover {
+  color: #2563eb;
+  border-color: #2563eb;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+}
+
+@media (max-width: 768px) {
+  .horarios-wrapper {
+    padding: 24px 18px;
+  }
+
+  .linha-horarios {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .dia-opcoes {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .acoes-formulario {
+    justify-content: center;
+  }
+}
+
 .depoimentos-carousel {
     width: 100%;
     height: 100%;
