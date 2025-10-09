@@ -61,6 +61,45 @@ div#container-page{ /*--------- pagina geral --------------*/
     border-radius: 4px;
     color: #fff;
 }
+.menu-principal.admin-menu-trigger{
+    padding: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.menu-principal.admin-menu-trigger:hover{
+    background: transparent;
+}
+.menu-principal.admin-menu-trigger:focus-visible{
+    outline: 3px solid rgba(0, 191, 255, 0.6);
+    border-radius: 50%;
+}
+.admin-menu-icon{
+    height: 40px;
+    width: 40px;
+    object-fit: contain;
+    display: block;
+}
+.li-admin-menu{
+    margin-left: auto;
+}
+.admin-icon-container{
+    position: relative;
+    margin-left: auto;
+    margin-right: 5px;
+    display: flex;
+    align-items: center;
+}
+.admin-icon-container .submenu{
+    right: 0;
+    left: auto;
+}
+.admin-icon-container:hover .submenu,
+.admin-icon-container:focus-within .submenu{
+    display: block;
+}
 .li-menu-principal{ /*-------------- LINHA ONDE FICAM OS QUADROS ------------*/
     position: relative;
     font-size: 16px;

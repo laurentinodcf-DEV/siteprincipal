@@ -28,12 +28,6 @@ $adminLogado = isset($_SESSION['usuario_id']);
           <!----- MENU DE NAVEGAÇÃO -------------------------->
           <nav class="nav-menu-principal"> 
             <ul class="ul-menu-principal">
-                <li class="li-menu-principal"><span class="menu-principal">ADM</span>
-                    <ul class="submenu">
-                        <li class="submenu-item" id="openLoginModal">Login</li>
-                        <li class="submenu-item" id="logoutMenu" style="display:none;">Logout</li>
-                    </ul>
-                </li>
                 <li class="li-menu-principal"><span class="menu-principal">Serviços</span>
                     <ul class="submenu">
                         <li class="submenu-item"><a href="pages/servicos.php">Serviços Oferecidos</a></li>
@@ -79,6 +73,15 @@ $adminLogado = isset($_SESSION['usuario_id']);
             </ul>
 
             <!----- CONTAINER DA LOGOMARCA -------------------------->
+            <div class="admin-icon-container">
+                <span class="menu-principal admin-menu-trigger" role="button" aria-haspopup="true" aria-expanded="false">
+                    <img src="img/icons/person_login.png" alt="Administração" class="admin-menu-icon">
+                </span>
+                <ul class="submenu">
+                    <li class="submenu-item" id="openLoginModal">Login</li>
+                    <li class="submenu-item" id="logoutMenu" style="display:none;">Logout</li>
+                </ul>
+            </div>
             <div id="container-logo">
                 <img src="img/logosomente.png" id="logo-menu" class="logo-menu"> <!-- imagem logo -->
             </div>
