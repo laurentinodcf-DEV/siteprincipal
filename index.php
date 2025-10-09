@@ -208,7 +208,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                             <div class="depoimentos-carousel">
                                 <!-- Depoimento 1 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">?????</div>
+                                    <div class="avaliacao">★★★★★</div>
                                     <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
                                     <p class="texto-depoimento">
                                     O Serviço foi excepcional e superou minhas expectativas em todos os aspectos.
@@ -221,7 +221,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                                 <!-- Depoimento 2 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">?????</div>
+                                    <div class="avaliacao">★★★★★</div>
                                     <h3 class="titulo-depoimento">Estou admirada!</h3>
                                     <p class="texto-depoimento">
                                     A experiência foi incrível, definitivamente voltarei e recomendarei a todos!
@@ -234,7 +234,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                                 
                                 <!-- Depoimento 3 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">?????</div>
+                                    <div class="avaliacao">★★★★★</div>
                                     <h3 class="titulo-depoimento">Impressionada!</h3>
                                     <p class="texto-depoimento">
                                     Impressionada com meu novo brilho e liso, voltarei e recomendarei a todos!
