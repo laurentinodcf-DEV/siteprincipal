@@ -72,6 +72,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     <ul class="submenu">
                         <li class="submenu-item"><a href="pages/inserir_video.php">Inserir Vídeo</a></li>
                         <li class="submenu-item"><a href="pages/horarios_funcionamento.php">Horario de Funcionamento</a></li>
+                        <li class="submenu-item"><a href="pages/servicos_admin.php">Servi�os</a></li>
                         <li class="submenu-item"><a href="produtos.php">Produtos</a></li>
                     </ul>
                 </li>
