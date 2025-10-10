@@ -1,106 +1,164 @@
+<?php
+session_start();
+$adminLogado = isset($_SESSION['usuario_id']);
+
+require '../conexao.php';
+
+$servicos = [];
+$resultado = $conn->query(
+    'SELECT nome, descricao, imagem FROM salao_servicos WHERE ativo = 1 AND ordem IS NOT NULL ORDER BY ordem ASC'
+);
+if ($resultado) {
+    while ($linha = $resultado->fetch_assoc()) {
+        $servicos[] = $linha;
+    }
+    $resultado->free();
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Serviços - Salome Beleza</title>
+  <title>Servicos - Salome Beleza</title>
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/estilo.css">
-
   <style>
-    .secao {
-      padding: 80px 0;
+    .servicos-publico-wrapper {
+      padding: 120px 0 80px;
+      background: linear-gradient(180deg, #f5e3a3 0%, #c7993e 100%);
+    }
+
+    .servico-publico-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 48px;
+      max-width: 1100px;
+      margin: 0 auto 60px;
+      padding: 60px 50px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 26px 80px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(4px);
+    }
+
+    .servico-publico-card:nth-child(even) {
+      flex-direction: row-reverse;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .servico-publico-texto {
+      flex: 1;
       color: #fff;
     }
-    .secao h2 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-    .secao video {
-      max-width: 100%;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-    .secao p {
-      font-size: 1.2rem;
-    }
-    .secao-alisamentos { background: linear-gradient(135deg, #d4af37, #c0a060); }
-    .secao-escovas { background: linear-gradient(135deg, #e6c87f, #d4af37); }
-    .secao-sobrancelhas { background: linear-gradient(135deg, #bfa46b, #d4af37); }
 
-    .secao-profissional {
-      background: #f9f9f9;
+    .servico-publico-texto h2 {
+      font-size: 2.6rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .servico-publico-texto p {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+      max-width: 90%;
+    }
+
+    .servico-publico-imagem {
+      flex-shrink: 0;
+      width: 360px;
+      height: 260px;
+      border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .servico-publico-imagem img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @media (max-width: 992px) {
+      .servico-publico-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 32px;
+      }
+
+      .servico-publico-card:nth-child(even) {
+        flex-direction: column;
+      }
+
+      .servico-publico-texto p {
+        max-width: 100%;
+      }
+
+      .servico-publico-imagem {
+        width: 100%;
+        height: 240px;
+      }
+    }
+
+    .servicos-publico-vazio {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #4b5563;
       text-align: center;
-      padding: 60px 0;
-      color: #333;
-    }
-    .social-icons a {
-      margin: 0 10px;
-      font-size: 1.8rem;
-      color: #d4af37;
-      transition: 0.3s;
-    }
-    .social-icons a:hover {
-      color: #a67c00;
     }
   </style>
 </head>
 <body>
 <?php
-include '../class/menu.php';
+$menuShowAdminIcon = false;
+include __DIR__ . '/../class/menu.php';
 ?>
 
-<!-- Seção Alisamentos -->
-<section class="secao secao-alisamentos" id="alisamentos">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-6">
-        <video controls>
-          <source src="../videos/alisamento.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="col-md-6">
-        <h2>Alisamentos</h2>
-        <p>Transforme seus cabelos com técnicas modernas de alisamento que preservam a saúde e o brilho dos fios.</p>
-      </div>
-    </div>
-  </div>
-</section>
+<main class="servicos-publico-wrapper">
+  <?php if (empty($servicos)): ?>
+    <div class="servicos-publico-vazio">Nao ha servicos cadastrados!</div>
+  <?php else: ?>
+    <?php foreach ($servicos as $servico): ?>
+      <?php
+        $imagemSrc = '';
+        if (!empty($servico['imagem'])) {
+            $imagemValor = (string) $servico['imagem'];
+            if (preg_match('/^(https?:)?\/\//i', $imagemValor)) {
+                $imagemSrc = $imagemValor;
+            } elseif (strpos($imagemValor, '../') === 0) {
+                $imagemSrc = $imagemValor;
+            } elseif ($imagemValor !== '' && $imagemValor[0] === '/') {
+                $imagemSrc = $imagemValor;
+            } else {
+                $imagemSrc = '../' . ltrim($imagemValor, '/');
+            }
+        }
+        $descricaoFormatada = !empty($servico['descricao'])
+            ? nl2br(htmlspecialchars($servico['descricao'], ENT_QUOTES, 'UTF-8'))
+            : 'Descricao em breve.';
+      ?>
+      <section class="servico-publico-card">
+        <div class="servico-publico-texto">
+          <h2><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></h2>
+          <p><?= $descricaoFormatada; ?></p>
+        </div>
+        <?php if ($imagemSrc !== ''): ?>
+          <figure class="servico-publico-imagem">
+            <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+          </figure>
+        <?php endif; ?>
+      </section>
+    <?php endforeach; ?>
+  <?php endif; ?>
+</main>
 
-<!-- Seção Escovas -->
-<section class="secao secao-escovas" id="escovas">
-  <div class="container">
-    <div class="row align-items-center flex-row-reverse">
-      <div class="col-md-6">
-        <video controls>
-          <source src="../videos/escova.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="col-md-6">
-        <h2>Escovas</h2>
-        <p>Escovas especiais para cada tipo de cabelo, garantindo movimento natural e um visual elegante.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Seção Sobrancelhas -->
-<section class="secao secao-sobrancelhas" id="sobrancelhas">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-6">
-        <video controls>
-          <source src="../videos/sobrancelha.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="col-md-6">
-        <h2>Sobrancelhas</h2>
-        <p>Realce sua beleza com design de sobrancelhas personalizado e técnicas de longa duração.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Seção Contato -->
-<?php include '../class/contatoFooter.php'; ?>
+<?php include __DIR__ . '/../class/contatoFooter.php'; ?>
+<?php include __DIR__ . '/../class/modais.php'; ?>
+</body>
+</html>

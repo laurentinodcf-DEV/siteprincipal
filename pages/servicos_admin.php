@@ -124,6 +124,17 @@ function removerImagemServico(?string $webPath, string $destinoDir, string $webB
     }
 }
 
+function obterProximaOrdem(mysqli $conn): int
+{
+    $resultado = $conn->query('SELECT COALESCE(MAX(ordem), 0) + 1 AS proxima FROM salao_servicos WHERE ativo = 1');
+    if ($resultado) {
+        $linha = $resultado->fetch_assoc();
+        $resultado->free();
+        return (int) ($linha['proxima'] ?? 1);
+    }
+    return 1;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['action'] ?? '';
 
@@ -157,9 +168,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $imagemFisicaNova = $infoUpload['fisico'] ?? null;
                 }
 
+                $ordemParam = null;
+                if ($ativo === 1) {
+                    $ordemParam = obterProximaOrdem($conn);
+                }
+
                 $stmt = $conn->prepare(
-                    'INSERT INTO salao_servicos (nome, descricao, duracao, preco, categoria, imagem, ativo)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)'
+                    'INSERT INTO salao_servicos (nome, descricao, duracao, preco, categoria, imagem, ativo, ordem)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
                 );
 
                 if ($stmt === false) {
@@ -173,14 +189,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $imagemParam = $imagemWebPath !== null && $imagemWebPath !== '' ? $imagemWebPath : null;
 
                     $stmt->bind_param(
-                        'ssidssi',
+                        'ssidssii',
                         $nome,
                         $descricaoParam,
                         $duracao,
                         $preco,
                         $categoriaParam,
                         $imagemParam,
-                        $ativo
+                        $ativo,
+                        $ordemParam
                     );
 
                     if ($stmt->execute()) {
@@ -211,13 +228,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensagemErro = 'Preencha nome, duracao (em minutos) e preco valido.';
         } else {
             $imagemAtual = null;
-            $stmtBusca = $conn->prepare('SELECT imagem FROM salao_servicos WHERE id = ?');
+            $ativoAnterior = 0;
+            $ordemAtual = null;
+            $stmtBusca = $conn->prepare('SELECT imagem, ativo, ordem FROM salao_servicos WHERE id = ?');
             if ($stmtBusca === false) {
                 $mensagemErro = 'Erro ao localizar servico para edicao.';
             } else {
                 $stmtBusca->bind_param('i', $id);
                 if ($stmtBusca->execute()) {
-                    $stmtBusca->bind_result($imagemAtual);
+                    $stmtBusca->bind_result($imagemAtual, $ativoAnterior, $ordemAtual);
                     if (!$stmtBusca->fetch()) {
                         $mensagemErro = 'Servico nao encontrado.';
                     }
@@ -248,9 +267,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $imagemFisicaNova = $infoUpload['fisico'] ?? null;
                     }
 
+                    $ordemParam = null;
+                    if ($ativo === 1) {
+                        if ((int) $ativoAnterior === 1 && $ordemAtual !== null) {
+                            $ordemParam = (int) $ordemAtual;
+                        } else {
+                            $ordemParam = obterProximaOrdem($conn);
+                        }
+                    }
+
                     $stmt = $conn->prepare(
                         'UPDATE salao_servicos
-                         SET nome = ?, descricao = ?, duracao = ?, preco = ?, categoria = ?, imagem = ?, ativo = ?
+                         SET nome = ?, descricao = ?, duracao = ?, preco = ?, categoria = ?, imagem = ?, ativo = ?, ordem = ?
                          WHERE id = ?'
                     );
 
@@ -265,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $imagemParam = $imagemWebPath !== null && $imagemWebPath !== '' ? $imagemWebPath : null;
 
                         $stmt->bind_param(
-                            'ssidssii',
+                            'ssidssiii',
                             $nome,
                             $descricaoParam,
                             $duracao,
@@ -273,6 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $categoriaParam,
                             $imagemParam,
                             $ativo,
+                            $ordemParam,
                             $id
                         );
 
