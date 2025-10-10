@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -48,7 +48,7 @@ function tratarUploadImagemProduto(string $campo, string $destinoDir, string $we
     }
 
     if ($arquivo['size'] > $tamanhoMaximo) {
-        $erro = 'A imagem deve ter no máximo 2MB.';
+        $erro = 'A imagem deve ter no mximo 2MB.';
         return null;
     }
 
@@ -79,7 +79,7 @@ function tratarUploadImagemProduto(string $campo, string $destinoDir, string $we
     }
 
     if ($extFinal === null) {
-        $erro = 'Formato de imagem não suportado. Utilize JPG, PNG, GIF ou WEBP.';
+        $erro = 'Formato de imagem no suportado. Utilize JPG, PNG, GIF ou WEBP.';
         return null;
     }
 
@@ -87,7 +87,7 @@ function tratarUploadImagemProduto(string $campo, string $destinoDir, string $we
     $destinoFisico = rtrim($destinoDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $nomeArquivo;
 
     if (!move_uploaded_file($arquivo['tmp_name'], $destinoFisico)) {
-        $erro = 'Não foi possível salvar a imagem enviada.';
+        $erro = 'No foi possvel salvar a imagem enviada.';
         return null;
     }
 
@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($nome === '' || $preco < 0) {
-            $mensagemErro = 'Informe pelo menos o nome do produto e um preço válido.';
+            $mensagemErro = 'Informe pelo menos o nome do produto e um preo vlido.';
         } else {
             $uploadErro = null;
             $infoUpload = tratarUploadImagemProduto(
@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
 
                 if ($stmt === false) {
-                    $mensagemErro = 'Erro ao preparar inserção.';
+                    $mensagemErro = 'Erro ao preparar insero.';
                     if ($imagemFisicaNova) {
                         @unlink($imagemFisicaNova);
                     }
@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $skuParam = $sku !== '' ? $sku : null;
 
                     $stmt->bind_param(
-                        'issddsiisi',
+                        'issddsisii',
                         $categoriaId,
                         $nome,
                         $descricaoParam,
@@ -236,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($id <= 0 || $nome === '' || $preco < 0) {
-            $mensagemErro = 'Produto inválido ou dados obrigatórios faltando.';
+            $mensagemErro = 'Produto invlido ou dados obrigatrios faltando.';
         } else {
             $imagemAtual = null;
             $ativoAnterior = 0;
@@ -244,16 +244,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmtBusca = $conn->prepare('SELECT imagem, ativo, ordem FROM salao_produtos WHERE id = ?');
             if ($stmtBusca === false) {
-                $mensagemErro = 'Erro ao localizar produto para edição.';
+                $mensagemErro = 'Erro ao localizar produto para edio.';
             } else {
                 $stmtBusca->bind_param('i', $id);
                 if ($stmtBusca->execute()) {
                     $stmtBusca->bind_result($imagemAtual, $ativoAnterior, $ordemAtual);
                     if (!$stmtBusca->fetch()) {
-                        $mensagemErro = 'Produto não encontrado.';
+                        $mensagemErro = 'Produto no encontrado.';
                     }
                 } else {
-                    $mensagemErro = 'Erro ao localizar produto para edição.';
+                    $mensagemErro = 'Erro ao localizar produto para edio.';
                 }
                 $stmtBusca->close();
             }
@@ -295,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
 
                     if ($stmt === false) {
-                        $mensagemErro = 'Erro ao preparar atualização.';
+                        $mensagemErro = 'Erro ao preparar atualizao.';
                         if ($imagemFisicaNova) {
                             @unlink($imagemFisicaNova);
                         }
@@ -304,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $skuParam = $sku !== '' ? $sku : null;
 
                         $stmt->bind_param(
-                            'issddsiisii',
+                            'issddsisiii',
                             $categoriaId,
                             $nome,
                             $descricaoParam,
@@ -338,21 +338,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($acao === 'delete') {
         $id = (int) ($_POST['id'] ?? 0);
         if ($id <= 0) {
-            $mensagemErro = 'Produto inválido para exclusão.';
+            $mensagemErro = 'Produto invlido para excluso.';
         } else {
             $imagemRemover = null;
             $stmtBusca = $conn->prepare('SELECT imagem FROM salao_produtos WHERE id = ?');
             if ($stmtBusca === false) {
-                $mensagemErro = 'Erro ao localizar produto para exclusão.';
+                $mensagemErro = 'Erro ao localizar produto para excluso.';
             } else {
                 $stmtBusca->bind_param('i', $id);
                 if ($stmtBusca->execute()) {
                     $stmtBusca->bind_result($imagemRemover);
                     if (!$stmtBusca->fetch()) {
-                        $mensagemErro = 'Produto não encontrado.';
+                        $mensagemErro = 'Produto no encontrado.';
                     }
                 } else {
-                    $mensagemErro = 'Erro ao localizar produto para exclusão.';
+                    $mensagemErro = 'Erro ao localizar produto para excluso.';
                 }
                 $stmtBusca->close();
             }
@@ -360,7 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($mensagemErro === '') {
                 $stmt = $conn->prepare('DELETE FROM salao_produtos WHERE id = ?');
                 if ($stmt === false) {
-                    $mensagemErro = 'Erro ao preparar exclusão.';
+                    $mensagemErro = 'Erro ao preparar excluso.';
                 } else {
                     $stmt->bind_param('i', $id);
                     if ($stmt->execute()) {
@@ -456,11 +456,11 @@ if ($resultado) {
                         <input type="text" name="nome" class="form-control" required maxlength="150" autocomplete="off">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Preço*</label>
+                        <label class="form-label">Preo*</label>
                         <input type="text" name="preco" class="form-control" required placeholder="Ex: 199,90">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Preço promocional</label>
+                        <label class="form-label">Preo promocional</label>
                         <input type="text" name="preco_promocional" class="form-control" placeholder="Ex: 149,90">
                     </div>
                     <div class="col-md-4">
@@ -481,13 +481,13 @@ if ($resultado) {
                         <input type="number" name="estoque" class="form-control" min="0" value="0">
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Descrição</label>
+                        <label class="form-label">Descrio</label>
                         <textarea name="descricao" class="form-control" rows="4" placeholder="Detalhes do produto"></textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Imagem principal</label>
                         <input type="file" name="imagem" class="form-control" accept="image/*">
-                        <small class="form-text text-muted">Tamanho máximo: 2 MB.</small>
+                        <small class="form-text text-muted">Tamanho mximo: 2 MB.</small>
                     </div>
                     <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="form-check">
@@ -516,7 +516,7 @@ if ($resultado) {
             </div>
 
             <?php if (empty($produtos)): ?>
-                <div class="alert alert-info">Nenhum produto cadastrado até o momento.</div>
+                <div class="alert alert-info">Nenhum produto cadastrado at o momento.</div>
             <?php else: ?>
                 <div class="servicos-grid">
                     <?php foreach ($produtos as $produto): ?>
@@ -543,7 +543,7 @@ if ($resultado) {
                             $temImagem = $imagemSrc !== '';
                             $descricaoFormatada = !empty($produto['descricao'])
                                 ? nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'))
-                                : '<span class="texto-suave">Sem descrição cadastrada.</span>';
+                                : '<span class="texto-suave">Sem descrio cadastrada.</span>';
                             $temPromo = $produto['preco_promocional'] !== null && (float) $produto['preco_promocional'] > 0;
                         ?>
                         <article class="servico-accordion-item">
@@ -573,23 +573,23 @@ if ($resultado) {
 
                                             <dl class="servico-propriedades">
                                                 <div>
-                                                    <dt>Preço:</dt>
+                                                    <dt>Preo:</dt>
                                                     <dd class="servico-propriedade-valor"><?= 'R$ ' . number_format((float) $produto['preco'], 2, ',', '.'); ?></dd>
                                                 </div>
                                                 <div>
-                                                    <dt>Promoção:</dt>
-                                                    <dd><?= $temPromo ? 'R$ ' . number_format((float) $produto['preco_promocional'], 2, ',', '.') : '—'; ?></dd>
+                                                    <dt>Promoo:</dt>
+                                                    <dd><?= $temPromo ? 'R$ ' . number_format((float) $produto['preco_promocional'], 2, ',', '.') : ''; ?></dd>
                                                 </div>
                                                 <div>
                                                     <dt>SKU:</dt>
-                                                    <dd><?= $produto['sku'] !== null && $produto['sku'] !== '' ? htmlspecialchars($produto['sku'], ENT_QUOTES, 'UTF-8') : '—'; ?></dd>
+                                                    <dd><?= $produto['sku'] !== null && $produto['sku'] !== '' ? htmlspecialchars($produto['sku'], ENT_QUOTES, 'UTF-8') : ''; ?></dd>
                                                 </div>
                                                 <div>
                                                     <dt>Estoque:</dt>
                                                     <dd><?= (int) $produto['estoque']; ?></dd>
                                                 </div>
                                                 <div class="servico-descricao-bloco">
-                                                    <dt>Descrição:</dt>
+                                                    <dt>Descrio:</dt>
                                                     <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
                                                 </div>
                                             </dl>
@@ -614,6 +614,7 @@ if ($resultado) {
             <?php endif; ?>
         </section>
 
+
         <div class="modal fade" id="modalEditarProduto" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
@@ -628,4 +629,179 @@ if ($resultado) {
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Nome*</label>
-                                    <input type="text" name="nome" class="form-control" id="editarProdutoNome" required maxlength=
+                                    <input type="text" name="nome" class="form-control" id="editarProdutoNome" required maxlength="150">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Preco*</label>
+                                    <input type="text" name="preco" class="form-control" id="editarProdutoPreco" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Preco promocional</label>
+                                    <input type="text" name="preco_promocional" class="form-control" id="editarProdutoPrecoPromocional">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Categoria</label>
+                                    <select name="categoria_id" class="form-select" id="editarProdutoCategoria">
+                                        <option value="">Sem categoria</option>
+                                        <?php foreach ($categoriasProduto as $categoria): ?>
+                                            <option value="<?= (int) $categoria['id']; ?>"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">SKU</label>
+                                    <input type="text" name="sku" class="form-control" id="editarProdutoSku" maxlength="50">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Estoque</label>
+                                    <input type="number" name="estoque" class="form-control" id="editarProdutoEstoque" min="0">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Descricao</label>
+                                    <textarea name="descricao" class="form-control" id="editarProdutoDescricao" rows="4"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Imagem principal</label>
+                                    <input type="file" name="imagem" class="form-control" id="editarProdutoImagem" accept="image/*">
+                                    <input type="hidden" name="imagem_atual" id="editarProdutoImagemAtual">
+                                    <small class="form-text text-muted" id="editarProdutoImagemInfo"></small>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="1" id="editarProdutoAtivo" name="ativo">
+                                        <label class="form-check-label" for="editarProdutoAtivo">
+                                            Produto ativo
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar alteracoes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalExcluirProduto" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="post" class="modal-body-form">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" id="excluirProdutoId">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Excluir produto</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">Deseja realmente excluir este produto?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Nao</button>
+                            <button type="submit" class="btn btn-danger">Sim</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.servico-accordion-toggle').forEach((toggle) => {
+                const item = toggle.closest('.servico-accordion-item');
+                if (!item) {
+                    return;
+                }
+                const content = item.querySelector('.servico-accordion-content');
+                const icon = toggle.querySelector('.servico-accordion-icon');
+                if (!content || !icon) {
+                    return;
+                }
+
+                toggle.addEventListener('click', () => {
+                    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                    const newState = !expanded;
+                    toggle.setAttribute('aria-expanded', String(newState));
+                    content.setAttribute('aria-hidden', String(!newState));
+                    icon.textContent = newState ? '-' : '+';
+                });
+            });
+
+            const editarModal = document.getElementById('modalEditarProduto');
+            const excluirModal = document.getElementById('modalExcluirProduto');
+
+            const preencherModalEdicao = (produto) => {
+                document.getElementById('editarProdutoId').value = produto.id;
+                document.getElementById('editarProdutoNome').value = produto.nome || '';
+                document.getElementById('editarProdutoPreco').value = parseFloat(produto.preco ?? 0).toFixed(2).replace('.', ',');
+                document.getElementById('editarProdutoPrecoPromocional').value =
+                    produto.preco_promocional ? parseFloat(produto.preco_promocional).toFixed(2).replace('.', ',') : '';
+                document.getElementById('editarProdutoCategoria').value = produto.categoria_id || '';
+                document.getElementById('editarProdutoSku').value = produto.sku || '';
+                document.getElementById('editarProdutoEstoque').value = produto.estoque || 0;
+                document.getElementById('editarProdutoDescricao').value = produto.descricao || '';
+                document.getElementById('editarProdutoAtivo').checked = String(produto.ativo) === '1';
+
+                const inputArquivo = document.getElementById('editarProdutoImagem');
+                if (inputArquivo) {
+                    inputArquivo.value = '';
+                }
+
+                const imagemAtualInput = document.getElementById('editarProdutoImagemAtual');
+                if (imagemAtualInput) {
+                    imagemAtualInput.value = produto.imagem || '';
+                }
+
+                const imagemInfo = document.getElementById('editarProdutoImagemInfo');
+                if (imagemInfo) {
+                    imagemInfo.textContent = produto.imagem ? 'Imagem atual: ' + produto.imagem : 'Nenhuma imagem cadastrada.';
+                }
+            };
+
+            const prepararModalExclusao = (produto) => {
+                document.getElementById('excluirProdutoId').value = produto.id;
+            };
+
+            document.querySelectorAll('.servico-card').forEach((card) => {
+                const dados = card.dataset.produto ? JSON.parse(card.dataset.produto) : null;
+                if (!dados) {
+                    return;
+                }
+
+                const botaoEditar = card.querySelector('.acao-editar');
+                const botaoExcluir = card.querySelector('.acao-excluir');
+
+                if (botaoEditar) {
+                    botaoEditar.addEventListener('click', () => preencherModalEdicao(dados));
+                }
+
+                if (botaoExcluir) {
+                    botaoExcluir.addEventListener('click', () => prepararModalExclusao(dados));
+                }
+            });
+
+            if (editarModal) {
+                editarModal.addEventListener('hidden.bs.modal', () => {
+                    const form = editarModal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                    }
+                });
+            }
+
+            if (excluirModal) {
+                excluirModal.addEventListener('hidden.bs.modal', () => {
+                    const form = excluirModal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

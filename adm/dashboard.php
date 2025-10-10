@@ -27,6 +27,11 @@ $modules = [
         'description' => 'Organize os produtos e materiais disponibilizados.',
         'src' => 'modules/produtos.php',
     ],
+    'categorias_produtos' => [
+        'label' => 'Categorias de produtos',
+        'description' => 'Gerencie as categorias utilizadas para classificar os produtos.',
+        'src' => 'modules/categorias_produtos.php',
+    ],
     'ordenar_servicos' => [
         'label' => 'Ordenar serviços',
         'description' => 'Defina manualmente a ordem de exibição dos serviços ativos no site.',
@@ -46,7 +51,7 @@ $navigation = [
     ],
     [
         'title' => 'Inserir',
-        'items' => ['videos', 'servicos', 'produtos'],
+        'items' => ['videos', 'servicos', 'produtos', 'categorias_produtos'],
     ],
     [
         'title' => 'Operação',
