@@ -375,49 +375,71 @@ function renderizarServicosGrid(array $servicosLista): void
                 ENT_QUOTES,
                 'UTF-8'
             );
+
+            $imagemSrc = '';
+            if (!empty($servico['imagem'])) {
+                $imagemValor = (string) $servico['imagem'];
+                if (preg_match('/^(https?:)?\/\//i', $imagemValor)) {
+                    $imagemSrc = $imagemValor;
+                } elseif (strpos($imagemValor, '../') === 0) {
+                    $imagemSrc = $imagemValor;
+                } elseif ($imagemValor !== '' && $imagemValor[0] === '/') {
+                    $imagemSrc = $imagemValor;
+                } else {
+                    $imagemSrc = '../' . ltrim($imagemValor, '/');
+                }
+            }
+
+            $temImagem = $imagemSrc !== '';
+            $descricaoFormatada = !empty($servico['descricao'])
+                ? nl2br(htmlspecialchars($servico['descricao'], ENT_QUOTES, 'UTF-8'))
+                : '<span class="texto-suave">Sem descricao cadastrada.</span>';
             ?>
             <article class="servico-card" data-servico='<?= $servicoJson; ?>'>
-                <div class="servico-card-header">
-                    <div>
-                        <h3><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                        <?php if (!empty($servico['categoria'])): ?>
-                            <span class="servico-categoria"><?= htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8'); ?></span>
-                        <?php endif; ?>
+                <div class="servico-card-inner">
+                    <div class="servico-card-info">
+                        <header class="servico-card-top">
+                            <div>
+                                <h3 class="servico-nome"><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                <?php if (!empty($servico['categoria'])): ?>
+                                    <span class="servico-categoria-pill"><?= htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <span class="servico-status-pill <?= $servico['ativo'] ? 'ativo' : 'inativo'; ?>">
+                                <?= $servico['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                            </span>
+                        </header>
+
+                        <dl class="servico-propriedades">
+                            <div>
+                                <dt>Categoria:</dt>
+                                <dd><?= !empty($servico['categoria']) ? htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8') : 'Não informada'; ?></dd>
+                            </div>
+                            <div>
+                                <dt>Tempo:</dt>
+                                <dd><?= (int) $servico['duracao']; ?> min</dd>
+                            </div>
+                            <div>
+                                <dt>Valor:</dt>
+                                <dd class="servico-propriedade-valor"><?= formatarPreco((float) $servico['preco']); ?></dd>
+                            </div>
+                            <div class="servico-descricao-bloco">
+                                <dt>Descrição:</dt>
+                                <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
+                            </div>
+                        </dl>
+
+                        <div class="servico-card-acoes">
+                            <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarServico">Editar</button>
+                            <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirServico">Excluir</button>
+                        </div>
                     </div>
-                    <span class="servico-status <?= $servico['ativo'] ? 'ativo' : 'inativo'; ?>">
-                        <?= $servico['ativo'] ? 'Ativo' : 'Inativo'; ?>
-                    </span>
-                </div>
-                <?php
-                    $imagemSrc = '';
-                    if (!empty($servico['imagem'])) {
-                        $imagemValor = (string) $servico['imagem'];
-                        if (preg_match('/^(https?:)?\/\//i', $imagemValor)) {
-                            $imagemSrc = $imagemValor;
-                        } elseif (strpos($imagemValor, '../') === 0) {
-                            $imagemSrc = $imagemValor;
-                        } elseif ($imagemValor !== '' && $imagemValor[0] === '/') {
-                            $imagemSrc = $imagemValor;
-                        } else {
-                            $imagemSrc = '../' . ltrim($imagemValor, '/');
-                        }
-                    }
-                ?>
-                <?php if ($imagemSrc !== ''): ?>
-                    <div class="servico-imagem">
-                        <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
-                    </div>
-                <?php endif; ?>
-                <div class="servico-detalhes">
-                    <p class="servico-preco"><?= formatarPreco((float) $servico['preco']); ?></p>
-                    <p class="servico-duracao"><?= (int) $servico['duracao']; ?> min</p>
-                </div>
-                <?php if (!empty($servico['descricao'])): ?>
-                    <p class="servico-descricao"><?= nl2br(htmlspecialchars($servico['descricao'], ENT_QUOTES, 'UTF-8')); ?></p>
-                <?php endif; ?>
-                <div class="servico-acoes">
-                    <button type="button" class="btn btn-light btn-sm acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarServico">Editar</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirServico">Excluir</button>
+
+                    <?php if ($temImagem): ?>
+                        <figure class="servico-card-imagem">
+                            <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                        </figure>
+                    <?php endif; ?>
                 </div>
             </article>
         <?php endforeach; ?>
