@@ -35,9 +35,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Produtos</span>
                     <ul class="submenu">
-                        <li class="submenu-item">Um</li>
-                        <li class="submenu-item">Dois</li>
-                        <li class="submenu-item">Três</li>
+                        <li class="submenu-item">Meus Produtos</li>
                     </ul>
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Resultados</span>
