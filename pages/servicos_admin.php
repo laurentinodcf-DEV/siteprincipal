@@ -381,19 +381,11 @@ function renderizarServicosGrid(array $servicosLista): void
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="mb-3">Para confirmar a exclusao definitiva, digite o nome do servico abaixo.</p>
-                        <p class="fw-semibold" id="excluirServicoNome"></p>
-                        <div class="mb-3">
-                            <label class="form-label">Digite o nome do servico</label>
-                            <input type="text" class="form-control" id="confirmarNomeExclusao" placeholder="Digite exatamente como acima">
-                        </div>
-                        <div class="alerta alerta-erro d-none" id="avisoConfirmacao">
-                            O nome digitado nao corresponde. Corrija para liberar a exclusao.
-                        </div>
+                        <p class="mb-0">Deseja mesmo excluir esse servico?</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger" id="botaoConfirmarExclusao" disabled>Excluir servico</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Nao</button>
+                        <button type="submit" class="btn btn-danger" id="botaoConfirmarExclusao">Sim</button>
                     </div>
                 </form>
             </div>
@@ -419,32 +411,6 @@ function renderizarServicosGrid(array $servicosLista): void
 
             const prepararModalExclusao = (servico) => {
                 document.getElementById('excluirServicoId').value = servico.id;
-                document.getElementById('excluirServicoNome').textContent = servico.nome || '';
-                const campoConfirmacao = document.getElementById('confirmarNomeExclusao');
-                const botaoExcluir = document.getElementById('botaoConfirmarExclusao');
-                const aviso = document.getElementById('avisoConfirmacao');
-
-                campoConfirmacao.value = '';
-                botaoExcluir.disabled = true;
-                aviso.classList.add('d-none');
-
-                const validar = () => {
-                    if (campoConfirmacao.value.trim() === (servico.nome || '')) {
-                        botaoExcluir.disabled = false;
-                        aviso.classList.add('d-none');
-                    } else {
-                        botaoExcluir.disabled = true;
-                        if (campoConfirmacao.value.trim().length > 0) {
-                            aviso.classList.remove('d-none');
-                        } else {
-                            aviso.classList.add('d-none');
-                        }
-                    }
-                };
-
-                campoConfirmacao.removeEventListener('input', campoConfirmacao._servicoHandler || (() => {}));
-                campoConfirmacao._servicoHandler = validar;
-                campoConfirmacao.addEventListener('input', validar);
             };
 
             document.querySelectorAll('.servico-card').forEach((card) => {
@@ -474,8 +440,6 @@ function renderizarServicosGrid(array $servicosLista): void
             if (excluirModal) {
                 excluirModal.addEventListener('hidden.bs.modal', () => {
                     excluirModal.querySelector('form').reset();
-                    document.getElementById('botaoConfirmarExclusao').disabled = true;
-                    document.getElementById('avisoConfirmacao').classList.add('d-none');
                 });
             }
         });
