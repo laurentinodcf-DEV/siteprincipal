@@ -6,11 +6,6 @@
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/estilo.css">
 
-  <?php
-session_start();
-include __DIR__ . '/../class/menu.php';
-?>
-
   <style>
     .secao {
       padding: 80px 0;
@@ -51,6 +46,9 @@ include __DIR__ . '/../class/menu.php';
   </style>
 </head>
 <body>
+<?php
+include '../class/menu.php';
+?>
 
 <!-- Seção Alisamentos -->
 <section class="secao secao-alisamentos" id="alisamentos">
