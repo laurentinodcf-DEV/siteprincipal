@@ -359,7 +359,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <button type="button" class="close-btn login-modal-close" id="closeLoginModal" aria-label="Fechar modal">&times;</button>
                 <div class="login-modal-card">
                     <div class="login-welcome-panel">
-                        <h2>Login administrativo!</h2>
+                        <h2>Painel administrativo!</h2>
                         <p>Login com credenciais administrativas.</p>
                     </div>
                     <div class="login-form-panel">
