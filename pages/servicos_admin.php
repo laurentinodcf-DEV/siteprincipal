@@ -424,51 +424,63 @@ function renderizarServicosGrid(array $servicosLista): void
                 ? nl2br(htmlspecialchars($servico['descricao'], ENT_QUOTES, 'UTF-8'))
                 : '<span class="texto-suave">Sem descricao cadastrada.</span>';
             ?>
-            <article class="servico-card" data-servico='<?= $servicoJson; ?>'>
-                <div class="servico-card-inner">
-                    <div class="servico-card-info">
-                        <header class="servico-card-top">
-                            <div>
-                                <h3 class="servico-nome"><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                                <?php if (!empty($servico['categoria'])): ?>
-                                    <span class="servico-categoria-pill"><?= htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <span class="servico-status-pill <?= $servico['ativo'] ? 'ativo' : 'inativo'; ?>">
-                                <?= $servico['ativo'] ? 'Ativo' : 'Inativo'; ?>
-                            </span>
-                        </header>
+            <article class="servico-accordion-item">
+                <header class="servico-accordion-header">
+                    <button type="button" class="servico-accordion-toggle" aria-expanded="false">
+                        <span class="servico-accordion-title">
+                            <strong><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></strong>
+                        </span>
+                        <span class="servico-status-pill <?= $servico['ativo'] ? 'ativo' : 'inativo'; ?>">
+                            <?= $servico['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                        </span>
+                        <span class="servico-accordion-icon">+</span>
+                    </button>
+                </header>
+                <div class="servico-accordion-content" aria-hidden="true">
+                    <div class="servico-card" data-servico='<?= $servicoJson; ?>'>
+                        <div class="servico-card-inner">
+                            <div class="servico-card-info">
+                                <header class="servico-card-top">
+                                    <div>
+                                        <h3 class="servico-nome"><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                        <?php if (!empty($servico['categoria'])): ?>
+                                            <span class="servico-categoria-pill"><?= htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                </header>
 
-                        <dl class="servico-propriedades">
-                            <div>
-                                <dt>Categoria:</dt>
-                                <dd><?= !empty($servico['categoria']) ? htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8') : 'Não informada'; ?></dd>
-                            </div>
-                            <div>
-                                <dt>Tempo:</dt>
-                                <dd><?= (int) $servico['duracao']; ?> min</dd>
-                            </div>
-                            <div>
-                                <dt>Valor:</dt>
-                                <dd class="servico-propriedade-valor"><?= formatarPreco((float) $servico['preco']); ?></dd>
-                            </div>
-                            <div class="servico-descricao-bloco">
-                                <dt>Descrição:</dt>
-                                <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
-                            </div>
-                        </dl>
+                                <dl class="servico-propriedades">
+                                    <div>
+                                        <dt>Categoria:</dt>
+                                        <dd><?= !empty($servico['categoria']) ? htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8') : 'Nao informada'; ?></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Tempo:</dt>
+                                        <dd><?= (int) $servico['duracao']; ?> min</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Valor:</dt>
+                                        <dd class="servico-propriedade-valor"><?= formatarPreco((float) $servico['preco']); ?></dd>
+                                    </div>
+                                    <div class="servico-descricao-bloco">
+                                        <dt>Descricao:</dt>
+                                        <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
+                                    </div>
+                                </dl>
 
-                        <div class="servico-card-acoes">
-                            <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarServico">Editar</button>
-                            <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirServico">Excluir</button>
+                                <div class="servico-card-acoes">
+                                    <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarServico">Editar</button>
+                                    <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirServico">Excluir</button>
+                                </div>
+                            </div>
+
+                            <?php if ($temImagem): ?>
+                                <figure class="servico-card-imagem">
+                                    <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                                </figure>
+                            <?php endif; ?>
                         </div>
                     </div>
-
-                    <?php if ($temImagem): ?>
-                        <figure class="servico-card-imagem">
-                            <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
-                        </figure>
-                    <?php endif; ?>
                 </div>
             </article>
         <?php endforeach; ?>
@@ -664,6 +676,26 @@ function renderizarServicosGrid(array $servicosLista): void
         document.addEventListener('DOMContentLoaded', () => {
             const editarModal = document.getElementById('modalEditarServico');
             const excluirModal = document.getElementById('modalExcluirServico');
+
+            document.querySelectorAll('.servico-accordion-toggle').forEach((toggle) => {
+                const item = toggle.closest('.servico-accordion-item');
+                if (!item) {
+                    return;
+                }
+                const content = item.querySelector('.servico-accordion-content');
+                const icon = toggle.querySelector('.servico-accordion-icon');
+                if (!content || !icon) {
+                    return;
+                }
+
+                toggle.addEventListener('click', () => {
+                    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                    const newState = !expanded;
+                    toggle.setAttribute('aria-expanded', String(newState));
+                    content.setAttribute('aria-hidden', String(!newState));
+                    icon.textContent = newState ? '-' : '+';
+                });
+            });
 
             const preencherModalEdicao = (servico) => {
                 document.getElementById('editarServicoId').value = servico.id;

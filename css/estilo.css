@@ -2016,9 +2016,68 @@ nav ul ul li {
 }
 
 .servicos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.servico-accordion-item {
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.servico-accordion-header {
+  background: linear-gradient(90deg, rgba(79, 70, 229, 0.08), rgba(59, 130, 246, 0));
+  padding: 14px 20px;
+}
+
+.servico-accordion-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.servico-accordion-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.servico-accordion-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #475569;
+  transition: transform 0.2s ease;
+}
+
+.servico-accordion-toggle[aria-expanded="true"] .servico-accordion-icon {
+  transform: rotate(45deg);
+}
+
+.servico-accordion-content {
+  padding: 0 20px 20px;
+  display: none;
+}
+
+.servico-accordion-content[aria-hidden="false"] {
+  display: block;
 }
 
 .servico-card {
@@ -2027,10 +2086,6 @@ nav ul ul li {
   border: 1px solid rgba(148, 163, 184, 0.35);
   padding: 22px;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-}
-
-.servico-card + .servico-card {
-  margin-top: 18px;
 }
 
 @media (max-width: 992px) {
