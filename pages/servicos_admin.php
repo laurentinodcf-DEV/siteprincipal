@@ -11,6 +11,14 @@ require '../conexao.php';
 $mensagemSucesso = '';
 $mensagemErro = '';
 
+$diretorioImagensServicos = __DIR__ . '/../img/servicos/imgcadastro';
+if (!is_dir($diretorioImagensServicos)) {
+    mkdir($diretorioImagensServicos, 0775, true);
+}
+$diretorioImagensServicos = realpath($diretorioImagensServicos) ?: $diretorioImagensServicos;
+$webBaseImagensServicos = 'img/servicos/imgcadastro';
+$tamanhoMaximoImagemBytes = 2 * 1024 * 1024; // 2 MB
+
 function normalizarPreco(string $valorBruto): float
 {
     $limpo = preg_replace('/[^0-9,\.]/', '', $valorBruto);
@@ -22,6 +30,100 @@ function normalizarPreco(string $valorBruto): float
     return (float) $limpo;
 }
 
+function tratarUploadImagemServico(string $campo, string $destinoDir, string $webBaseDir, int $tamanhoMaximo, ?string &$erro): ?array
+{
+    if (!isset($_FILES[$campo]) || !is_array($_FILES[$campo])) {
+        return null;
+    }
+
+    $arquivo = $_FILES[$campo];
+
+    if ($arquivo['error'] === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    if ($arquivo['error'] !== UPLOAD_ERR_OK) {
+        $erro = 'Erro ao fazer upload da imagem.';
+        return null;
+    }
+
+    if ($arquivo['size'] > $tamanhoMaximo) {
+        $erro = 'A imagem deve ter no maximo 2MB.';
+        return null;
+    }
+
+    $mapaMime = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp',
+    ];
+
+    $extFinal = null;
+    if (class_exists('finfo')) {
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo ? $finfo->file($arquivo['tmp_name']) : null;
+        if ($mime && isset($mapaMime[$mime])) {
+            $extFinal = $mapaMime[$mime];
+        }
+    }
+
+    if ($extFinal === null) {
+        $extOriginal = strtolower((string) pathinfo((string) $arquivo['name'], PATHINFO_EXTENSION));
+        if ($extOriginal === 'jpeg') {
+            $extOriginal = 'jpg';
+        }
+        if ($extOriginal !== '' && in_array($extOriginal, $mapaMime, true)) {
+            $extFinal = $extOriginal;
+        }
+    }
+
+    if ($extFinal === null) {
+        $erro = 'Formato de imagem nao suportado. Utilize JPG, PNG, GIF ou WEBP.';
+        return null;
+    }
+
+    $nomeArquivo = uniqid('servico_', true) . '.' . $extFinal;
+    $destinoFisico = rtrim($destinoDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $nomeArquivo;
+
+    if (!move_uploaded_file($arquivo['tmp_name'], $destinoFisico)) {
+        $erro = 'Nao foi possivel salvar a imagem enviada.';
+        return null;
+    }
+
+    $webBaseNormalizado = rtrim(str_replace('\\', '/', $webBaseDir), '/');
+
+    return [
+        'web'    => $webBaseNormalizado . '/' . $nomeArquivo,
+        'fisico' => $destinoFisico,
+    ];
+}
+
+function removerImagemServico(?string $webPath, string $destinoDir, string $webBaseDir): void
+{
+    if ($webPath === null || $webPath === '') {
+        return;
+    }
+
+    $normalizado = ltrim(str_replace('\\', '/', $webPath), '/');
+    $baseNormalizada = ltrim(str_replace('\\', '/', $webBaseDir), '/');
+
+    if ($baseNormalizada === '' || strpos($normalizado, $baseNormalizada) !== 0) {
+        return;
+    }
+
+    $relativo = ltrim(substr($normalizado, strlen($baseNormalizada)), '/');
+    if ($relativo === '') {
+        return;
+    }
+
+    $caminhoFisico = rtrim($destinoDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativo);
+
+    if (is_file($caminhoFisico)) {
+        @unlink($caminhoFisico);
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['action'] ?? '';
 
@@ -31,42 +133,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $duracao = (int) ($_POST['duracao'] ?? 0);
         $preco = normalizarPreco((string) ($_POST['preco'] ?? '0'));
         $categoria = trim((string) ($_POST['categoria'] ?? ''));
-        $imagem = trim((string) ($_POST['imagem'] ?? ''));
         $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($nome === '' || $duracao <= 0 || $preco < 0) {
             $mensagemErro = 'Preencha nome, duracao (em minutos) e preco valido.';
         } else {
-            $stmt = $conn->prepare(
-                'INSERT INTO salao_servicos (nome, descricao, duracao, preco, categoria, imagem, ativo)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)'
+            $uploadErro = null;
+            $infoUpload = tratarUploadImagemServico(
+                'imagem',
+                $diretorioImagensServicos,
+                $webBaseImagensServicos,
+                $tamanhoMaximoImagemBytes,
+                $uploadErro
             );
 
-            if ($stmt === false) {
-                $mensagemErro = 'Erro ao preparar insercao.';
+            if ($uploadErro !== null) {
+                $mensagemErro = $uploadErro;
             } else {
-                $descricaoParam = $descricao !== '' ? $descricao : null;
-                $categoriaParam = $categoria !== '' ? $categoria : null;
-                $imagemParam = $imagem !== '' ? $imagem : null;
-
-                $stmt->bind_param(
-                    'ssidssi',
-                    $nome,
-                    $descricaoParam,
-                    $duracao,
-                    $preco,
-                    $categoriaParam,
-                    $imagemParam,
-                    $ativo
-                );
-
-                if ($stmt->execute()) {
-                    $mensagemSucesso = 'Servico cadastrado com sucesso.';
-                } else {
-                    $mensagemErro = 'Erro ao inserir servico: ' . $stmt->error;
+                $imagemWebPath = null;
+                $imagemFisicaNova = null;
+                if ($infoUpload !== null) {
+                    $imagemWebPath = $infoUpload['web'] ?? null;
+                    $imagemFisicaNova = $infoUpload['fisico'] ?? null;
                 }
 
-                $stmt->close();
+                $stmt = $conn->prepare(
+                    'INSERT INTO salao_servicos (nome, descricao, duracao, preco, categoria, imagem, ativo)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)'
+                );
+
+                if ($stmt === false) {
+                    $mensagemErro = 'Erro ao preparar insercao.';
+                    if ($imagemFisicaNova) {
+                        @unlink($imagemFisicaNova);
+                    }
+                } else {
+                    $descricaoParam = $descricao !== '' ? $descricao : null;
+                    $categoriaParam = $categoria !== '' ? $categoria : null;
+                    $imagemParam = $imagemWebPath !== null && $imagemWebPath !== '' ? $imagemWebPath : null;
+
+                    $stmt->bind_param(
+                        'ssidssi',
+                        $nome,
+                        $descricaoParam,
+                        $duracao,
+                        $preco,
+                        $categoriaParam,
+                        $imagemParam,
+                        $ativo
+                    );
+
+                    if ($stmt->execute()) {
+                        $mensagemSucesso = 'Servico cadastrado com sucesso.';
+                    } else {
+                        $mensagemErro = 'Erro ao inserir servico: ' . $stmt->error;
+                        if ($imagemFisicaNova) {
+                            @unlink($imagemFisicaNova);
+                        }
+                    }
+
+                    $stmt->close();
+                }
             }
         }
     } elseif ($acao === 'update') {
@@ -76,7 +203,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $duracao = (int) ($_POST['duracao'] ?? 0);
         $preco = normalizarPreco((string) ($_POST['preco'] ?? '0'));
         $categoria = trim((string) ($_POST['categoria'] ?? ''));
-        $imagem = trim((string) ($_POST['imagem'] ?? ''));
         $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($id <= 0) {
@@ -84,56 +210,128 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($nome === '' || $duracao <= 0 || $preco < 0) {
             $mensagemErro = 'Preencha nome, duracao (em minutos) e preco valido.';
         } else {
-            $stmt = $conn->prepare(
-                'UPDATE salao_servicos
-                 SET nome = ?, descricao = ?, duracao = ?, preco = ?, categoria = ?, imagem = ?, ativo = ?
-                 WHERE id = ?'
-            );
-
-            if ($stmt === false) {
-                $mensagemErro = 'Erro ao preparar atualizacao.';
+            $imagemAtual = null;
+            $stmtBusca = $conn->prepare('SELECT imagem FROM salao_servicos WHERE id = ?');
+            if ($stmtBusca === false) {
+                $mensagemErro = 'Erro ao localizar servico para edicao.';
             } else {
-                $descricaoParam = $descricao !== '' ? $descricao : null;
-                $categoriaParam = $categoria !== '' ? $categoria : null;
-                $imagemParam = $imagem !== '' ? $imagem : null;
+                $stmtBusca->bind_param('i', $id);
+                if ($stmtBusca->execute()) {
+                    $stmtBusca->bind_result($imagemAtual);
+                    if (!$stmtBusca->fetch()) {
+                        $mensagemErro = 'Servico nao encontrado.';
+                    }
+                } else {
+                    $mensagemErro = 'Erro ao localizar servico para edicao.';
+                }
+                $stmtBusca->close();
+            }
 
-                $stmt->bind_param(
-                    'ssidssii',
-                    $nome,
-                    $descricaoParam,
-                    $duracao,
-                    $preco,
-                    $categoriaParam,
-                    $imagemParam,
-                    $ativo,
-                    $id
+            if ($mensagemErro === '') {
+                $uploadErro = null;
+                $infoUpload = tratarUploadImagemServico(
+                    'imagem',
+                    $diretorioImagensServicos,
+                    $webBaseImagensServicos,
+                    $tamanhoMaximoImagemBytes,
+                    $uploadErro
                 );
 
-                if ($stmt->execute()) {
-                    $mensagemSucesso = 'Servico atualizado.';
+                if ($uploadErro !== null) {
+                    $mensagemErro = $uploadErro;
                 } else {
-                    $mensagemErro = 'Erro ao atualizar servico: ' . $stmt->error;
-                }
+                    $imagemWebPath = $imagemAtual;
+                    $imagemFisicaNova = null;
 
-                $stmt->close();
+                    if ($infoUpload !== null) {
+                        $imagemWebPath = $infoUpload['web'] ?? null;
+                        $imagemFisicaNova = $infoUpload['fisico'] ?? null;
+                    }
+
+                    $stmt = $conn->prepare(
+                        'UPDATE salao_servicos
+                         SET nome = ?, descricao = ?, duracao = ?, preco = ?, categoria = ?, imagem = ?, ativo = ?
+                         WHERE id = ?'
+                    );
+
+                    if ($stmt === false) {
+                        $mensagemErro = 'Erro ao preparar atualizacao.';
+                        if ($imagemFisicaNova) {
+                            @unlink($imagemFisicaNova);
+                        }
+                    } else {
+                        $descricaoParam = $descricao !== '' ? $descricao : null;
+                        $categoriaParam = $categoria !== '' ? $categoria : null;
+                        $imagemParam = $imagemWebPath !== null && $imagemWebPath !== '' ? $imagemWebPath : null;
+
+                        $stmt->bind_param(
+                            'ssidssii',
+                            $nome,
+                            $descricaoParam,
+                            $duracao,
+                            $preco,
+                            $categoriaParam,
+                            $imagemParam,
+                            $ativo,
+                            $id
+                        );
+
+                        if ($stmt->execute()) {
+                            $mensagemSucesso = 'Servico atualizado.';
+                            if ($infoUpload !== null) {
+                                removerImagemServico($imagemAtual, $diretorioImagensServicos, $webBaseImagensServicos);
+                            }
+                        } else {
+                            $mensagemErro = 'Erro ao atualizar servico: ' . $stmt->error;
+                            if ($imagemFisicaNova) {
+                                @unlink($imagemFisicaNova);
+                            }
+                        }
+
+                        $stmt->close();
+                    }
+                }
             }
         }
     } elseif ($acao === 'delete') {
         $id = (int) ($_POST['id'] ?? 0);
         if ($id <= 0) {
-        $mensagemErro = 'Servico invalido para exclusao.';
+            $mensagemErro = 'Servico invalido para exclusao.';
         } else {
-            $stmt = $conn->prepare('DELETE FROM salao_servicos WHERE id = ?');
-            if ($stmt === false) {
-                $mensagemErro = 'Erro ao preparar exclusao.';
+            $imagemParaRemover = null;
+            $registroEncontrado = false;
+            $stmtBusca = $conn->prepare('SELECT imagem FROM salao_servicos WHERE id = ?');
+            if ($stmtBusca === false) {
+                $mensagemErro = 'Erro ao localizar servico para exclusao.';
             } else {
-                $stmt->bind_param('i', $id);
-                if ($stmt->execute()) {
-                    $mensagemSucesso = 'Servico removido.';
+                $stmtBusca->bind_param('i', $id);
+                if ($stmtBusca->execute()) {
+                    $stmtBusca->bind_result($imagemParaRemover);
+                    $registroEncontrado = (bool) $stmtBusca->fetch();
                 } else {
-                    $mensagemErro = 'Erro ao excluir servico: ' . $stmt->error;
+                    $mensagemErro = 'Erro ao localizar servico para exclusao.';
                 }
-                $stmt->close();
+                $stmtBusca->close();
+            }
+
+            if ($mensagemErro === '' && !$registroEncontrado) {
+                $mensagemErro = 'Servico nao encontrado.';
+            }
+
+            if ($mensagemErro === '') {
+                $stmt = $conn->prepare('DELETE FROM salao_servicos WHERE id = ?');
+                if ($stmt === false) {
+                    $mensagemErro = 'Erro ao preparar exclusao.';
+                } else {
+                    $stmt->bind_param('i', $id);
+                    if ($stmt->execute()) {
+                        $mensagemSucesso = 'Servico removido.';
+                        removerImagemServico($imagemParaRemover, $diretorioImagensServicos, $webBaseImagensServicos);
+                    } else {
+                        $mensagemErro = 'Erro ao excluir servico: ' . $stmt->error;
+                    }
+                    $stmt->close();
+                }
             }
         }
     }
@@ -190,9 +388,24 @@ function renderizarServicosGrid(array $servicosLista): void
                         <?= $servico['ativo'] ? 'Ativo' : 'Inativo'; ?>
                     </span>
                 </div>
-                <?php if (!empty($servico['imagem'])): ?>
+                <?php
+                    $imagemSrc = '';
+                    if (!empty($servico['imagem'])) {
+                        $imagemValor = (string) $servico['imagem'];
+                        if (preg_match('/^(https?:)?\/\//i', $imagemValor)) {
+                            $imagemSrc = $imagemValor;
+                        } elseif (strpos($imagemValor, '../') === 0) {
+                            $imagemSrc = $imagemValor;
+                        } elseif ($imagemValor !== '' && $imagemValor[0] === '/') {
+                            $imagemSrc = $imagemValor;
+                        } else {
+                            $imagemSrc = '../' . ltrim($imagemValor, '/');
+                        }
+                    }
+                ?>
+                <?php if ($imagemSrc !== ''): ?>
                     <div class="servico-imagem">
-                        <img src="<?= htmlspecialchars($servico['imagem'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                 <?php endif; ?>
                 <div class="servico-detalhes">
@@ -237,7 +450,7 @@ function renderizarServicosGrid(array $servicosLista): void
 
         <section class="servico-form-section">
             <h2 class="secao-titulo">Novo servico</h2>
-            <form method="post" class="servico-formulario card">
+            <form method="post" class="servico-formulario card" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="create">
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -257,8 +470,9 @@ function renderizarServicosGrid(array $servicosLista): void
                         <input type="text" name="categoria" class="form-control" maxlength="50" placeholder="Ex: Cabelo, Estetica">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Imagem (URL ou caminho)</label>
-                        <input type="text" name="imagem" class="form-control" maxlength="255" placeholder="https://...">
+                        <label class="form-label">Upload imagem</label>
+                        <input type="file" name="imagem" class="form-control" accept="image/*">
+                        <small class="form-text text-muted">Tamanho maximo: 2 MB.</small>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Descricao</label>
@@ -317,7 +531,7 @@ function renderizarServicosGrid(array $servicosLista): void
     <div class="modal fade" id="modalEditarServico" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-                <form method="post" class="modal-body-form">
+                <form method="post" class="modal-body-form" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="id" id="editarServicoId">
                     <div class="modal-header">
@@ -343,8 +557,10 @@ function renderizarServicosGrid(array $servicosLista): void
                                 <input type="text" name="categoria" class="form-control" id="editarServicoCategoria" maxlength="50">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Imagem (URL ou caminho)</label>
-                                <input type="text" name="imagem" class="form-control" id="editarServicoImagem" maxlength="255">
+                                <label class="form-label">Upload imagem</label>
+                                <input type="file" name="imagem" class="form-control" id="editarServicoImagem" accept="image/*">
+                                <input type="hidden" name="imagem_atual" id="editarServicoImagemAtual">
+                                <small class="form-text text-muted" id="editarServicoImagemInfo"></small>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Descricao</label>
@@ -404,9 +620,23 @@ function renderizarServicosGrid(array $servicosLista): void
                 document.getElementById('editarServicoDuracao').value = servico.duracao || '';
                 document.getElementById('editarServicoPreco').value = parseFloat(servico.preco ?? 0).toFixed(2).replace('.', ',');
                 document.getElementById('editarServicoCategoria').value = servico.categoria || '';
-                document.getElementById('editarServicoImagem').value = servico.imagem || '';
                 document.getElementById('editarServicoDescricao').value = servico.descricao || '';
                 document.getElementById('editarServicoAtivo').checked = String(servico.ativo) === '1';
+
+                const inputArquivo = document.getElementById('editarServicoImagem');
+                if (inputArquivo) {
+                    inputArquivo.value = '';
+                }
+
+                const imagemAtualInput = document.getElementById('editarServicoImagemAtual');
+                if (imagemAtualInput) {
+                    imagemAtualInput.value = servico.imagem || '';
+                }
+
+                const imagemInfo = document.getElementById('editarServicoImagemInfo');
+                if (imagemInfo) {
+                    imagemInfo.textContent = servico.imagem ? `Imagem atual: ${servico.imagem}` : 'Nenhuma imagem cadastrada.';
+                }
             };
 
             const prepararModalExclusao = (servico) => {
@@ -433,7 +663,14 @@ function renderizarServicosGrid(array $servicosLista): void
 
             if (editarModal) {
                 editarModal.addEventListener('hidden.bs.modal', () => {
-                    editarModal.querySelector('form').reset();
+                    const form = editarModal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                    }
+                    const imagemInfo = document.getElementById('editarServicoImagemInfo');
+                    if (imagemInfo) {
+                        imagemInfo.textContent = '';
+                    }
                 });
             }
 
