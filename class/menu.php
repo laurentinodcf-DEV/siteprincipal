@@ -41,15 +41,11 @@
             </ul>
         </li>
         <li class="li-menu-principal" id="home">
-            <span class="menu-principal"><a href="../index.php">Home</a></span>
+            <a href="../index.php" class="menu-principal home-link" aria-label="Página inicial">
+                <img src="../img/icons/botao_home.png" alt="Página inicial" class="admin-menu-icon">
+            </a>
         </li>
     </ul>
-
-    <div class="admin-icon-container">
-        <button type="button" id="adminAccessTrigger" class="menu-principal admin-menu-trigger" aria-label="Área administrativa">
-            <img src="../img/icons/person_login.png" alt="Área administrativa" class="admin-menu-icon">
-        </button>
-    </div>
 
     <div id="container-logo">
         <img src="../img/logosomente.png" id="logo-menu" class="logo-menu" alt="Logomarca">
