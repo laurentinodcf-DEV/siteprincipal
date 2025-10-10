@@ -4,49 +4,81 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
 require '../conexao.php';
 
-$categorias = [];
+$categoriasBrutas = [];
 $resultadoCategorias = $conn->query(
     'SELECT id, nome, descricao FROM salao_categorias_produtos WHERE ativo = 1 ORDER BY COALESCE(ordem, 2147483647), nome ASC'
 );
 if ($resultadoCategorias) {
     while ($linha = $resultadoCategorias->fetch_assoc()) {
         $linha['id'] = (int) $linha['id'];
-        $categorias[] = $linha;
+        $categoriasBrutas[] = $linha;
     }
     $resultadoCategorias->free();
 }
 
-$produtosPorCategoria = [];
-$produtosSemCategoria = [];
+$produtosBrutos = [];
 $resultadoProdutos = $conn->query(
-    'SELECT id, categoria_id, nome, descricao, preco, preco_promocional, imagem
+    'SELECT id, categoria_id, nome, descricao, preco, preco_promocional, sku, imagem
      FROM salao_produtos
      WHERE ativo = 1
      ORDER BY COALESCE(ordem, 2147483647), nome ASC'
 );
 if ($resultadoProdutos) {
     while ($linha = $resultadoProdutos->fetch_assoc()) {
-        $categoriaId = isset($linha['categoria_id']) ? (int) $linha['categoria_id'] : null;
-        if ($categoriaId !== null) {
-            if (!isset($produtosPorCategoria[$categoriaId])) {
-                $produtosPorCategoria[$categoriaId] = [];
-            }
-            $produtosPorCategoria[$categoriaId][] = $linha;
-        } else {
-            $produtosSemCategoria[] = $linha;
-        }
+        $linha['id'] = (int) $linha['id'];
+        $linha['categoria_id'] = isset($linha['categoria_id']) ? (int) $linha['categoria_id'] : null;
+        $produtosBrutos[] = $linha;
     }
     $resultadoProdutos->free();
 }
 
-$temProdutosCategorizados = false;
-foreach ($produtosPorCategoria as $lista) {
-    if (!empty($lista)) {
-        $temProdutosCategorizados = true;
-        break;
+$categoriasDados = [];
+$categoriasIndex = [];
+foreach ($categoriasBrutas as $categoria) {
+    $slug = 'cat-' . $categoria['id'];
+    $categoriasDados[] = [
+        'id'          => $categoria['id'],
+        'nome'        => $categoria['nome'],
+        'descricao'   => $categoria['descricao'],
+        'slug'        => $slug,
+        'produtos'    => [],
+        'quantidade'  => 0,
+    ];
+    $categoriasIndex[$categoria['id']] = count($categoriasDados) - 1;
+}
+
+$produtosSemCategoria = [];
+foreach ($produtosBrutos as $produto) {
+    $categoriaId = $produto['categoria_id'];
+    if ($categoriaId !== null && isset($categoriasIndex[$categoriaId])) {
+        $indice = $categoriasIndex[$categoriaId];
+        $categoriasDados[$indice]['produtos'][] = $produto;
+    } else {
+        $produtosSemCategoria[] = $produto;
     }
 }
-$temProdutos = $temProdutosCategorizados || !empty($produtosSemCategoria);
+
+$totalProdutos = 0;
+foreach ($categoriasDados as &$categoria) {
+    $categoria['quantidade'] = count($categoria['produtos']);
+    $totalProdutos += $categoria['quantidade'];
+}
+unset($categoria);
+
+$categoriaOutros = null;
+if (!empty($produtosSemCategoria)) {
+    $categoriaOutros = [
+        'id'         => null,
+        'nome'       => 'Outros produtos',
+        'descricao'  => '',
+        'slug'       => 'sem-categoria',
+        'produtos'   => $produtosSemCategoria,
+        'quantidade' => count($produtosSemCategoria),
+    ];
+    $totalProdutos += $categoriaOutros['quantidade'];
+}
+
+$temProdutos = $totalProdutos > 0;
 
 function resolverImagemProduto(?string $valor): string
 {
@@ -68,6 +100,17 @@ function resolverImagemProduto(?string $valor): string
     }
 
     return '../' . ltrim($valor, '/');
+}
+
+function formatarCodigoProduto(array $produto): string
+{
+    $sku = trim((string) ($produto['sku'] ?? ''));
+    if ($sku !== '') {
+        return $sku;
+    }
+
+    $id = isset($produto['id']) ? (int) $produto['id'] : 0;
+    return str_pad((string) $id, 6, '0', STR_PAD_LEFT);
 }
 ?>
 <!DOCTYPE html>
@@ -114,67 +157,156 @@ function resolverImagemProduto(?string $valor): string
     }
 
     .produtos-publico-wrapper {
-      padding: 90px 0 80px;
+      padding: 70px 0 90px;
       background: linear-gradient(180deg, #f7ecc2 0%, #fef8ec 100%);
     }
 
     .produtos-container {
-      max-width: 1120px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 26px;
     }
 
-    .categoria-bloco {
-      margin-bottom: 70px;
+    .produtos-layout {
+      display: flex;
+      gap: 44px;
+      align-items: flex-start;
     }
 
-    .categoria-titulo {
+    .categoria-sidebar {
+      flex: 0 0 280px;
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 28px;
+      box-shadow: 0 24px 48px rgba(68, 48, 115, 0.12);
+      padding: 24px 0 26px;
+      position: sticky;
+      top: 96px;
+    }
+
+    .categoria-lista {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-bottom: 32px;
-      color: #2d1753;
+      gap: 0;
+      padding: 0;
     }
 
-    .categoria-titulo h2 {
-      font-size: 2.3rem;
+    .categoria-divisor {
+      height: 1px;
+      margin: 14px 26px 12px;
+      background: rgba(104, 84, 150, 0.16);
+      border-radius: 1px;
+    }
+
+    .categoria-item {
+      border: none;
+      background: transparent;
+      text-align: left;
+      margin: 0 26px;
+      padding: 14px 20px;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #423169;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .categoria-item .categoria-nome {
+      flex: 1;
+    }
+
+    .categoria-item .categoria-quantidade {
+      font-size: 0.9rem;
+      color: #8c82b1;
+      margin-left: 12px;
+    }
+
+    .categoria-item--todos {
+      margin-bottom: 6px;
+    }
+
+    .categoria-item--todos .categoria-quantidade {
+      color: #6b5baa;
+      font-weight: 500;
+    }
+
+    .categoria-item--todos .categoria-quantidade::before {
+      content: '(';
+    }
+
+    .categoria-item--todos .categoria-quantidade::after {
+      content: ')';
+    }
+
+    .categoria-item:hover,
+    .categoria-item.active {
+      background: rgba(118, 88, 180, 0.16);
+      color: #2d1753;
+      box-shadow: inset 0 0 0 1px rgba(118, 88, 180, 0.25);
+    }
+
+    .categoria-item.active .categoria-quantidade {
+      color: #4c3a85;
+    }
+
+    .produtos-area {
+      flex: 1;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .produtos-area-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .produtos-area-header h2 {
+      font-size: 2rem;
       font-weight: 700;
+      color: #2d1753;
       margin: 0;
     }
 
-    .categoria-descricao {
+    .produtos-area-header span {
       font-size: 1rem;
-      color: #4c3d72;
-      max-width: 640px;
+      color: #746a98;
     }
 
-    .categoria-produtos-grid {
+    .produtos-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 26px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 28px;
     }
 
     .produto-card {
-      background: #fff;
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 26px;
+      border: 1px solid rgba(120, 99, 176, 0.08);
+      box-shadow: 0 22px 40px rgba(71, 52, 132, 0.15);
       overflow: hidden;
-      box-shadow: 0 20px 40px rgba(33, 26, 86, 0.12);
       display: flex;
       flex-direction: column;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .produto-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 28px 48px rgba(33, 26, 86, 0.18);
+      transform: translateY(-4px);
+      box-shadow: 0 28px 52px rgba(71, 52, 132, 0.2);
     }
 
     .produto-card figure {
-      margin: 0;
       width: 100%;
-      padding-top: 62%;
-      background: #f0f0f0;
+      margin: 0;
+      padding-top: 60%;
       position: relative;
+      background: linear-gradient(135deg, rgba(118, 88, 180, 0.08), rgba(255, 255, 255, 0.2));
       overflow: hidden;
     }
 
@@ -187,75 +319,102 @@ function resolverImagemProduto(?string $valor): string
     }
 
     .produto-card-body {
-      padding: 24px;
+      padding: 22px 24px 28px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       flex: 1;
+      background: #fff;
     }
 
     .produto-card-body h3 {
-      font-size: 1.4rem;
+      font-size: 1.21rem;
       font-weight: 700;
-      color: #2d1753;
+      color: #341a70;
       margin: 0;
     }
 
     .produto-descricao {
       font-size: 0.95rem;
-      line-height: 1.6;
-      color: #5f5f72;
+      line-height: 1.55;
+      color: #62569a;
+    }
+
+    .produto-codigo {
+      font-size: 0.9rem;
+      color: #7a6caa;
+      font-weight: 600;
     }
 
     .produto-preco {
+      margin-top: auto;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: auto;
-      font-weight: 600;
-      color: #2f215b;
-      font-size: 1.1rem;
-    }
-
-    .produto-preco span {
-      display: inline-block;
+      font-size: 1.08rem;
+      color: #35246d;
+      font-weight: 700;
     }
 
     .produto-preco .preco-original {
-      color: #8072a6;
+      font-size: 0.92rem;
+      color: #9a90c7;
       text-decoration: line-through;
-      font-size: 0.95rem;
       font-weight: 500;
     }
 
     .produtos-vazio {
-      min-height: 40vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       text-align: center;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       color: #5f5f72;
       font-weight: 600;
     }
 
-    .produtos-banner-descricao{
-      text-transform: uppercase;
-    }
+    @media (max-width: 992px) {
+      .produtos-layout {
+        flex-direction: column;
+      }
 
+      .categoria-sidebar {
+        width: 100%;
+        position: static;
+      }
+
+      .categoria-lista {
+        padding: 14px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .categoria-divisor {
+        display: none;
+      }
+
+      .categoria-item {
+        margin: 0;
+        flex: 1 1 calc(50% - 12px);
+        justify-content: space-between;
+      }
+    }
 
     @media (max-width: 768px) {
       .produtos-banner {
         min-height: 260px;
-        padding: 60px 20px;
       }
 
       .produtos-banner-conteudo h1 {
         font-size: 2.2rem;
       }
 
-      .categoria-titulo h2 {
-        font-size: 1.8rem;
+      .produtos-cards {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+
+      .categoria-item {
+        flex: 1 1 100%;
+        justify-content: space-between;
+        padding: 12px 16px;
       }
     }
   </style>
@@ -268,9 +427,8 @@ include __DIR__ . '/../class/menu.php';
 
 <section class="produtos-banner">
   <div class="produtos-banner-conteudo">
-    <p class="produtos-banner-descricao">Qualidade Garantida</p>
     <h1>Nossos produtos</h1>
-    <p>Conheca as linhas que entregam cuidado e beleza com a assinatura do Studio Salomé.</p>
+    <p>Conheca as linhas que entregam cuidado e beleza com a assinatura do Salome Beleza.</p>
   </div>
 </section>
 
@@ -279,114 +437,190 @@ include __DIR__ . '/../class/menu.php';
     <?php if (!$temProdutos): ?>
       <div class="produtos-vazio">Nenhum produto disponivel no momento. Volte em breve!</div>
     <?php else: ?>
-      <?php foreach ($categorias as $categoria): ?>
-        <?php
-          $lista = $produtosPorCategoria[$categoria['id']] ?? [];
-          if (empty($lista)) {
-              continue;
-          }
-          $descricaoCategoria = !empty($categoria['descricao'])
-              ? nl2br(htmlspecialchars($categoria['descricao'], ENT_QUOTES, 'UTF-8'))
-              : '';
-        ?>
-        <section class="categoria-bloco">
-          <header class="categoria-titulo">
-            <h2><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></h2>
-            <?php if ($descricaoCategoria !== ''): ?>
-              <p class="categoria-descricao"><?= $descricaoCategoria; ?></p>
+      <div class="produtos-layout">
+        <aside class="categoria-sidebar">
+          <nav class="categoria-lista" aria-label="Categorias de produtos">
+            <button
+              type="button"
+              class="categoria-item categoria-item--todos active"
+              data-categoria="todos"
+              data-nome="Todos os produtos"
+            >
+              <span class="categoria-nome">Todos os produtos</span>
+              <span class="categoria-quantidade"><?= $totalProdutos; ?></span>
+            </button>
+            <div class="categoria-divisor" aria-hidden="true"></div>
+            <?php foreach ($categoriasDados as $categoria): ?>
+              <button
+                type="button"
+                class="categoria-item"
+                data-categoria="<?= htmlspecialchars($categoria['slug'], ENT_QUOTES, 'UTF-8'); ?>"
+                data-nome="<?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?>"
+              >
+                <span class="categoria-nome"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="categoria-quantidade"><?= $categoria['quantidade']; ?></span>
+              </button>
+            <?php endforeach; ?>
+            <?php if ($categoriaOutros !== null): ?>
+              <button
+                type="button"
+                class="categoria-item"
+                data-categoria="<?= htmlspecialchars($categoriaOutros['slug'], ENT_QUOTES, 'UTF-8'); ?>"
+                data-nome="<?= htmlspecialchars($categoriaOutros['nome'], ENT_QUOTES, 'UTF-8'); ?>"
+              >
+                <span class="categoria-nome"><?= htmlspecialchars($categoriaOutros['nome'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="categoria-quantidade"><?= $categoriaOutros['quantidade']; ?></span>
+              </button>
             <?php endif; ?>
-          </header>
-          <div class="categoria-produtos-grid">
-            <?php foreach ($lista as $produto): ?>
-              <?php
-                $imagemSrc = resolverImagemProduto($produto['imagem'] ?? null);
-                $descricaoProduto = !empty($produto['descricao'])
-                    ? nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'))
-                    : 'Descricao em breve.';
-                $preco = 'R$ ' . number_format((float) $produto['preco'], 2, ',', '.');
-                $precoPromocional = null;
-                if (
-                    isset($produto['preco_promocional']) &&
-                    is_numeric($produto['preco_promocional']) &&
-                    (float) $produto['preco_promocional'] > 0
-                ) {
-                    $precoPromocional = 'R$ ' . number_format((float) $produto['preco_promocional'], 2, ',', '.');
-                }
-              ?>
-              <article class="produto-card">
-                <?php if ($imagemSrc !== ''): ?>
-                  <figure>
-                    <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?>">
-                  </figure>
-                <?php endif; ?>
-                <div class="produto-card-body">
-                  <h3><?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                  <div class="produto-descricao"><?= $descricaoProduto; ?></div>
-                  <div class="produto-preco">
-                    <?php if ($precoPromocional !== null): ?>
-                      <span><?= $precoPromocional; ?></span>
-                      <span class="preco-original"><?= $preco; ?></span>
-                    <?php else: ?>
-                      <span><?= $preco; ?></span>
-                    <?php endif; ?>
-                  </div>
-                </div>
-              </article>
-            <?php endforeach; ?>
-          </div>
-        </section>
-      <?php endforeach; ?>
+          </nav>
+        </aside>
 
-      <?php if (!empty($produtosSemCategoria)): ?>
-        <section class="categoria-bloco">
-          <header class="categoria-titulo">
-            <h2>Outros produtos</h2>
+        <section class="produtos-area" aria-live="polite">
+          <header class="produtos-area-header">
+            <h2 id="produtosAreaTitulo">Todos os produtos</h2>
+            <span id="produtosAreaTotal"><?= $totalProdutos; ?> produto(s)</span>
           </header>
-          <div class="categoria-produtos-grid">
-            <?php foreach ($produtosSemCategoria as $produto): ?>
-              <?php
-                $imagemSrc = resolverImagemProduto($produto['imagem'] ?? null);
-                $descricaoProduto = !empty($produto['descricao'])
-                    ? nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'))
-                    : 'Descricao em breve.';
-                $preco = 'R$ ' . number_format((float) $produto['preco'], 2, ',', '.');
-                $precoPromocional = null;
-                if (
-                    isset($produto['preco_promocional']) &&
-                    is_numeric($produto['preco_promocional']) &&
-                    (float) $produto['preco_promocional'] > 0
-                ) {
-                    $precoPromocional = 'R$ ' . number_format((float) $produto['preco_promocional'], 2, ',', '.');
-                }
-              ?>
-              <article class="produto-card">
-                <?php if ($imagemSrc !== ''): ?>
-                  <figure>
-                    <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?>">
-                  </figure>
-                <?php endif; ?>
-                <div class="produto-card-body">
-                  <h3><?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                  <div class="produto-descricao"><?= $descricaoProduto; ?></div>
-                  <div class="produto-preco">
-                    <?php if ($precoPromocional !== null): ?>
-                      <span><?= $precoPromocional; ?></span>
-                      <span class="preco-original"><?= $preco; ?></span>
-                    <?php else: ?>
-                      <span><?= $preco; ?></span>
-                    <?php endif; ?>
+
+          <div class="produtos-cards" id="produtosCards">
+            <?php foreach ($categoriasDados as $categoria): ?>
+              <?php foreach ($categoria['produtos'] as $produto): ?>
+                <?php
+                  $imagemSrc = resolverImagemProduto($produto['imagem'] ?? null);
+                  $descricaoProduto = !empty($produto['descricao'])
+                      ? nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'))
+                      : 'Descricao em breve.';
+                  $preco = 'R$ ' . number_format((float) $produto['preco'], 2, ',', '.');
+                  $precoPromocional = null;
+                  if (
+                      isset($produto['preco_promocional']) &&
+                      is_numeric($produto['preco_promocional']) &&
+                      (float) $produto['preco_promocional'] > 0
+                  ) {
+                      $precoPromocional = 'R$ ' . number_format((float) $produto['preco_promocional'], 2, ',', '.');
+                  }
+                  $codigo = formatarCodigoProduto($produto);
+                ?>
+                <article class="produto-card" data-categoria="<?= htmlspecialchars($categoria['slug'], ENT_QUOTES, 'UTF-8'); ?>">
+                  <?php if ($imagemSrc !== ''): ?>
+                    <figure>
+                      <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                    </figure>
+                  <?php endif; ?>
+                  <div class="produto-card-body">
+                    <h3><?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <div class="produto-descricao"><?= $descricaoProduto; ?></div>
+                    <div class="produto-codigo">Cod.: <?= htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8'); ?></div>
+                    <div class="produto-preco">
+                      <?php if ($precoPromocional !== null): ?>
+                        <span><?= $precoPromocional; ?></span>
+                        <span class="preco-original"><?= $preco; ?></span>
+                      <?php else: ?>
+                        <span><?= $preco; ?></span>
+                      <?php endif; ?>
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              <?php endforeach; ?>
             <?php endforeach; ?>
+
+            <?php if ($categoriaOutros !== null): ?>
+              <?php foreach ($categoriaOutros['produtos'] as $produto): ?>
+                <?php
+                  $imagemSrc = resolverImagemProduto($produto['imagem'] ?? null);
+                  $descricaoProduto = !empty($produto['descricao'])
+                      ? nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'))
+                      : 'Descricao em breve.';
+                  $preco = 'R$ ' . number_format((float) $produto['preco'], 2, ',', '.');
+                  $precoPromocional = null;
+                  if (
+                      isset($produto['preco_promocional']) &&
+                      is_numeric($produto['preco_promocional']) &&
+                      (float) $produto['preco_promocional'] > 0
+                  ) {
+                      $precoPromocional = 'R$ ' . number_format((float) $produto['preco_promocional'], 2, ',', '.');
+                  }
+                  $codigo = formatarCodigoProduto($produto);
+                ?>
+                <article class="produto-card" data-categoria="<?= htmlspecialchars($categoriaOutros['slug'], ENT_QUOTES, 'UTF-8'); ?>">
+                  <?php if ($imagemSrc !== ''): ?>
+                    <figure>
+                      <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                    </figure>
+                  <?php endif; ?>
+                  <div class="produto-card-body">
+                    <h3><?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <div class="produto-descricao"><?= $descricaoProduto; ?></div>
+                    <div class="produto-codigo">Cod.: <?= htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8'); ?></div>
+                    <div class="produto-preco">
+                      <?php if ($precoPromocional !== null): ?>
+                        <span><?= $precoPromocional; ?></span>
+                        <span class="preco-original"><?= $preco; ?></span>
+                      <?php else: ?>
+                        <span><?= $preco; ?></span>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                </article>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
+
+          <div class="produtos-vazio" id="produtosVazio" hidden>Nenhum produto disponivel nesta categoria.</div>
         </section>
-      <?php endif; ?>
+      </div>
     <?php endif; ?>
   </div>
 </main>
 
 <?php include __DIR__ . '/../class/contatoFooter.php'; ?>
 <?php include __DIR__ . '/../class/modais.php'; ?>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const categoriaBotoes = Array.from(document.querySelectorAll('.categoria-item'));
+    const cards = Array.from(document.querySelectorAll('.produto-card'));
+    const titulo = document.getElementById('produtosAreaTitulo');
+    const total = document.getElementById('produtosAreaTotal');
+    const vazio = document.getElementById('produtosVazio');
+
+    const atualizarVisibilidade = (categoriaSlug) => {
+      let visiveis = 0;
+      cards.forEach((card) => {
+        const corresponde = categoriaSlug === 'todos' || card.dataset.categoria === categoriaSlug;
+        card.hidden = !corresponde;
+        if (corresponde) {
+          visiveis += 1;
+        }
+      });
+
+      if (visiveis === 0) {
+        vazio.hidden = false;
+      } else {
+        vazio.hidden = true;
+      }
+
+      const textoQuantidade = visiveis === 1 ? '1 produto' : visiveis + ' produtos';
+      total.textContent = textoQuantidade;
+    };
+
+    categoriaBotoes.forEach((botao) => {
+      botao.addEventListener('click', () => {
+        if (botao.classList.contains('active')) {
+          return;
+        }
+
+        categoriaBotoes.forEach((item) => item.classList.remove('active'));
+        botao.classList.add('active');
+
+        const categoriaSlug = botao.dataset.categoria;
+        const categoriaNome = botao.dataset.nome || 'Produtos';
+
+        titulo.textContent = categoriaNome;
+        atualizarVisibilidade(categoriaSlug);
+      });
+    });
+
+    atualizarVisibilidade('todos');
+  });
+</script>
 </body>
 </html>
