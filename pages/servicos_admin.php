@@ -45,14 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt === false) {
                 $mensagemErro = 'Erro ao preparar insercao.';
             } else {
+                $descricaoParam = $descricao !== '' ? $descricao : null;
+                $categoriaParam = $categoria !== '' ? $categoria : null;
+                $imagemParam = $imagem !== '' ? $imagem : null;
+
                 $stmt->bind_param(
                     'ssidssi',
                     $nome,
-                    $descricao !== '' ? $descricao : null,
+                    $descricaoParam,
                     $duracao,
                     $preco,
-                    $categoria !== '' ? $categoria : null,
-                    $imagem !== '' ? $imagem : null,
+                    $categoriaParam,
+                    $imagemParam,
                     $ativo
                 );
 
@@ -89,14 +93,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt === false) {
                 $mensagemErro = 'Erro ao preparar atualizacao.';
             } else {
+                $descricaoParam = $descricao !== '' ? $descricao : null;
+                $categoriaParam = $categoria !== '' ? $categoria : null;
+                $imagemParam = $imagem !== '' ? $imagem : null;
+
                 $stmt->bind_param(
                     'ssidssii',
                     $nome,
-                    $descricao !== '' ? $descricao : null,
+                    $descricaoParam,
                     $duracao,
                     $preco,
-                    $categoria !== '' ? $categoria : null,
-                    $imagem !== '' ? $imagem : null,
+                    $categoriaParam,
+                    $imagemParam,
                     $ativo,
                     $id
                 );
@@ -140,9 +148,68 @@ if ($resultado) {
     $resultado->free();
 }
 
+$servicosAtivos = [];
+$servicosInativos = [];
+foreach ($servicos as $servico) {
+    if ((int) ($servico['ativo'] ?? 0) === 1) {
+        $servicosAtivos[] = $servico;
+    } else {
+        $servicosInativos[] = $servico;
+    }
+}
+
 function formatarPreco(float $valor): string
 {
     return 'R$ ' . number_format($valor, 2, ',', '.');
+}
+
+function renderizarServicosGrid(array $servicosLista): void
+{
+    if (empty($servicosLista)) {
+        return;
+    }
+    ?>
+    <div class="servicos-grid">
+        <?php foreach ($servicosLista as $servico): ?>
+            <?php
+            $servicoJson = htmlspecialchars(
+                json_encode($servico, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP),
+                ENT_QUOTES,
+                'UTF-8'
+            );
+            ?>
+            <article class="servico-card" data-servico='<?= $servicoJson; ?>'>
+                <div class="servico-card-header">
+                    <div>
+                        <h3><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                        <?php if (!empty($servico['categoria'])): ?>
+                            <span class="servico-categoria"><?= htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="servico-status <?= $servico['ativo'] ? 'ativo' : 'inativo'; ?>">
+                        <?= $servico['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                    </span>
+                </div>
+                <?php if (!empty($servico['imagem'])): ?>
+                    <div class="servico-imagem">
+                        <img src="<?= htmlspecialchars($servico['imagem'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                    </div>
+                <?php endif; ?>
+                <div class="servico-detalhes">
+                    <p class="servico-preco"><?= formatarPreco((float) $servico['preco']); ?></p>
+                    <p class="servico-duracao"><?= (int) $servico['duracao']; ?> min</p>
+                </div>
+                <?php if (!empty($servico['descricao'])): ?>
+                    <p class="servico-descricao"><?= nl2br(htmlspecialchars($servico['descricao'], ENT_QUOTES, 'UTF-8')); ?></p>
+                <?php endif; ?>
+                <div class="servico-acoes">
+                    <button type="button" class="btn btn-light btn-sm acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarServico">Editar</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirServico">Excluir</button>
+                </div>
+            </article>
+        <?php endforeach; ?>
+    </div>
+    <?php
 }
 ?>
 <!DOCTYPE html>
@@ -219,38 +286,28 @@ function formatarPreco(float $valor): string
             <?php if (empty($servicos)): ?>
                 <div class="alerta alerta-informacao">Nenhum servico cadastrado ate o momento.</div>
             <?php else: ?>
-                <div class="servicos-grid">
-                    <?php foreach ($servicos as $servico): ?>
-                        <article class="servico-card" data-servico='<?= htmlspecialchars(json_encode($servico, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8'); ?>'>
-                            <div class="servico-card-header">
-                                <div>
-                                    <h3><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                                    <?php if (!empty($servico['categoria'])): ?>
-                                        <span class="servico-categoria"><?= htmlspecialchars($servico['categoria'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php endif; ?>
-                                </div>
-                                <span class="servico-status <?= $servico['ativo'] ? 'ativo' : 'inativo'; ?>">
-                                    <?= $servico['ativo'] ? 'Ativo' : 'Inativo'; ?>
-                                </span>
-                            </div>
-                            <?php if (!empty($servico['imagem'])): ?>
-                                <div class="servico-imagem">
-                                    <img src="<?= htmlspecialchars($servico['imagem'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
-                                </div>
-                            <?php endif; ?>
-                            <div class="servico-detalhes">
-                                <p class="servico-preco"><?= formatarPreco((float) $servico['preco']); ?></p>
-                                <p class="servico-duracao"><?= (int) $servico['duracao']; ?> min</p>
-                            </div>
-                            <?php if (!empty($servico['descricao'])): ?>
-                                <p class="servico-descricao"><?= nl2br(htmlspecialchars($servico['descricao'], ENT_QUOTES, 'UTF-8')); ?></p>
-                            <?php endif; ?>
-                            <div class="servico-acoes">
-                                <button type="button" class="btn btn-light btn-sm acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarServico">Editar</button>
-                                <button type="button" class="btn btn-outline-danger btn-sm acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirServico">Excluir</button>
-                            </div>
-                        </article>
-                    <?php endforeach; ?>
+                <div class="servico-subsecao">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Servicos ativos</h3>
+                        <span class="texto-suave"><?= count($servicosAtivos); ?> ativo(s)</span>
+                    </div>
+                    <?php if (empty($servicosAtivos)): ?>
+                        <div class="alerta alerta-informacao">Nenhum servico ativo cadastrado.</div>
+                    <?php else: ?>
+                        <?php renderizarServicosGrid($servicosAtivos); ?>
+                    <?php endif; ?>
+                </div>
+
+                <div class="servico-subsecao mt-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Servicos inativos</h3>
+                        <span class="texto-suave"><?= count($servicosInativos); ?> inativo(s)</span>
+                    </div>
+                    <?php if (empty($servicosInativos)): ?>
+                        <div class="alerta alerta-informacao">Nenhum servico marcado como inativo.</div>
+                    <?php else: ?>
+                        <?php renderizarServicosGrid($servicosInativos); ?>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>

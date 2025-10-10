@@ -919,7 +919,6 @@ img#logo-menu{ /* tamanho imagem se adaptando ao container */
 .submenu {
     display: none;
     position: absolute;
-    top: 100%; /* garante que abre logo abaixo */
     left: 0;
     min-width: 200px;
     background: #f9f9f9;
@@ -2465,10 +2464,10 @@ nav ul ul li {
 }
 
 .modal-content {
-    background: #fffaf5;
+    background: radial-gradient(circle,rgba(179, 174, 238, 1) 0%, rgba(37, 127, 230, 1) 100%);
     padding: 30px;
     border-radius: 12px;
-    width: 400px;
+    width: 100%;
     max-width: 90%;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     position: relative;
