@@ -159,10 +159,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const senhaInput = loginForm.querySelector('input[name="password"]');
-        const showPasswordCheckbox = document.getElementById("showPassword");
-        if (showPasswordCheckbox && senhaInput) {
-            showPasswordCheckbox.addEventListener("change", () => {
-                senhaInput.type = showPasswordCheckbox.checked ? "text" : "password";
+        const togglePasswordButton = loginForm.querySelector(".toggle-password");
+        if (togglePasswordButton && senhaInput) {
+            togglePasswordButton.addEventListener("click", () => {
+                const isMasked = senhaInput.type === "password";
+                senhaInput.type = isMasked ? "text" : "password";
+                togglePasswordButton.classList.toggle("is-active", !isMasked);
+                togglePasswordButton.setAttribute(
+                    "aria-label",
+                    isMasked ? "Ocultar senha" : "Mostrar senha"
+                );
             });
         }
     }
