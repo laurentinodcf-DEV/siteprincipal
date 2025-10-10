@@ -367,7 +367,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $servicos = [];
-$resultado = $conn->query('SELECT * FROM salao_servicos ORDER BY criado_em DESC');
+$resultado = $conn->query('SELECT * FROM salao_servicos ORDER BY COALESCE(ordem, 2147483647), criado_em DESC');
 if ($resultado) {
     while ($linha = $resultado->fetch_assoc()) {
         $servicos[] = $linha;

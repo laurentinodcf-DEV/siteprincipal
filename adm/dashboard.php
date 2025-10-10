@@ -27,6 +27,11 @@ $modules = [
         'description' => 'Organize os produtos e materiais disponibilizados.',
         'src' => 'modules/produtos.php',
     ],
+    'ordenar_servicos' => [
+        'label' => 'Ordenar serviços',
+        'description' => 'Defina manualmente a ordem de exibição dos serviços ativos no site.',
+        'src' => '../pages/servicos_ordem.php',
+    ],
     'horarios' => [
         'label' => 'Horário de funcionamento',
         'description' => 'Configure meses, dias e períodos de atendimento.',
@@ -45,7 +50,7 @@ $navigation = [
     ],
     [
         'title' => 'Operação',
-        'items' => ['horarios'],
+        'items' => ['horarios', 'ordenar_servicos'],
     ],
 ];
 
