@@ -126,6 +126,13 @@ document.addEventListener("DOMContentLoaded", () => {
             loginModal.style.display = "none";
             loginError.style.display = "none";
         });
+
+        loginModal.addEventListener("click", (event) => {
+            if (event.target === loginModal) {
+                loginModal.style.display = "none";
+                loginError.style.display = "none";
+            }
+        });
     }
 
     if (loginForm && loginError) {
