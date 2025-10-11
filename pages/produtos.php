@@ -286,7 +286,7 @@ function formatarCodigoProduto(array $produto): string
       color: #746a98;
     }
 
-    .produtos-cards { /* cards produtos */
+    .produtos-cards { /* container produtos */
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 28px;
