@@ -272,15 +272,28 @@ document.addEventListener("DOMContentLoaded", () => {
         stopCodeTimer();
 
         let expiration = null;
+        const limitDurationMs = 2 * 60 * 1000;
+        const now = Date.now();
+
         if (expiresAt) {
-            const parsed = new Date(expiresAt.replace(" ", "T"));
-            expiration = Number.isNaN(parsed.getTime())
-                ? null
-                : parsed;
+            const numericExpires = Number(expiresAt);
+            if (!Number.isNaN(numericExpires) && numericExpires > 0) {
+                expiration = new Date(now + numericExpires * 1000);
+            } else {
+                const parsed = new Date(String(expiresAt).replace(" ", "T"));
+                expiration = Number.isNaN(parsed.getTime())
+                    ? null
+                    : parsed;
+            }
         }
 
         if (!expiration) {
-            expiration = new Date(Date.now() + 5 * 60 * 1000);
+            expiration = new Date(now + limitDurationMs);
+        }
+
+        const maxExpiration = now + limitDurationMs;
+        if (expiration.getTime() > maxExpiration) {
+            expiration = new Date(maxExpiration);
         }
 
         const updateTimer = () => {
@@ -296,9 +309,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const minutes = Math.floor(diff / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
-            codeTimerElement.textContent = `Expira em ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+            const totalSeconds = Math.floor(diff / 1000);
+            const displayMinutes = Math.floor(totalSeconds / 60);
+            const displaySeconds = totalSeconds % 60;
+            codeTimerElement.textContent = `${String(displayMinutes).padStart(2, "0")}:${String(displaySeconds).padStart(2, "0")}`;
         };
 
         updateTimer();
