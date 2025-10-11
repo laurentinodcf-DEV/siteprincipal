@@ -14,7 +14,7 @@
         </li>
         <li class="li-menu-principal"><span class="menu-principal">Produtos</span>
             <ul class="submenu">
-                <li class="submenu-item"><a href="pages/produtos.php">Meus Produtos</a></li>
+                <li class="submenu-item"><a href="../pages/produtos.php">Meus Produtos</a></li>
             </ul>
         </li>
         <li class="li-menu-principal"><span class="menu-principal">Resultados</span>
