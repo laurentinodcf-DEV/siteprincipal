@@ -374,6 +374,10 @@ function formatarCodigoProduto(array $produto): string
       font-weight: 600;
     }
 
+    .title-banner-pequeno{
+      text-transform: uppercase;
+    }
+
     @media (max-width: 992px) { /* telas menores que 992px */
       .produtos-layout {
         display: flex;
@@ -434,8 +438,9 @@ include __DIR__ . '/../class/menu.php';
 
 <section class="produtos-banner">
   <div class="produtos-banner-conteudo">
+    <p class="title-banner-pequeno">Qualidade Garantida</p>
     <h1>Nossos produtos</h1>
-    <p>Conheca as linhas que entregam cuidado e beleza com a assinatura do Salome Beleza.</p>
+    <p>Conheca as linhas que entregam cuidado e beleza com a assinatura do Studio.</p>
   </div>
 </section>
 
