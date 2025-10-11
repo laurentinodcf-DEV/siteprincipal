@@ -332,7 +332,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
 
                 <div class="avatar-destaque">
-                    <img src="img/avatar/07.png" alt="Cliente destaque" class="avatar-destaque-img">
+                    <img src="img/avatar/avatar-demonstrando.png" alt="Cliente destaque" class="avatar-destaque-img">
                 </div>
 
                 <!-- Foto da Profissional -->
