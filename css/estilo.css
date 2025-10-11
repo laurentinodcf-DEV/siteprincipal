@@ -1586,7 +1586,7 @@ nav ul ul li {
   padding: 48px 38px;
 }
 
-.reset-info-inner {
+.reset-info-inner {/* conteudo do lado esquerdo azul */
   text-align: left;
   max-width: 240px;
 }
