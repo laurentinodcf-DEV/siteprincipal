@@ -21,8 +21,7 @@ if ($identifier === '') {
 $user = fetch_user_by_identifier($conn, $identifier);
 
 if ($user === null) {
-    // Mensagem genérica para evitar revelar quais logins existem.
-    format_reset_response(true, 'Se os dados estiverem corretos, enviaremos o código em instantes.');
+    format_reset_response(false, 'Usuário ou e-mail não encontrado.');
     exit;
 }
 
