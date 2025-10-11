@@ -407,25 +407,48 @@ $adminLogado = isset($_SESSION['usuario_id']);
         </div>
 
         <!-- Modal de Confirmação Logout -->
-        <div id="forgotPasswordModal" class="modal" style="display:none;">
-            <div class="modal-content reset-modal-content">
-                <div class="modal-header">
-                    <h2>Recuperar senha</h2>
-                    <span class="close-btn" id="closeForgotPasswordModal">&times;</span>
-                </div>
-                <div class="modal-body modal-body-form">
-                    <p class="reset-description">
-                        Informe o seu usuário ou e-mail cadastrado para enviarmos um código de verificação.
-                    </p>
-                    <form id="forgotPasswordForm" class="reset-form">
-                        <label for="resetIdentifier" class="form-label">Usuário ou e-mail</label>
-                        <input type="text" id="resetIdentifier" name="identifier" class="form-control" required autocomplete="username">
-                        <div class="reset-feedback" id="forgotPasswordFeedback" role="alert" style="display:none;"></div>
-                        <div class="reset-actions">
-                            <button type="button" class="btn-reset-secondary" id="cancelForgotPassword">Fechar</button>
-                            <button type="submit" class="btn-reset-primary">Enviar código</button>
+        <div id="forgotPasswordModal" class="modal-recupera" style="display:none;">
+            <div class="modal-content reset-modal-content reset-split-modal">
+                <div class="reset-layout">
+                    <div class="reset-info-panel">
+                        <div class="reset-info-inner">
+                            <h2>Recuperação de senha</h2>
+                            <p>
+                                Informe o seu usuário ou e-mail cadastrado para enviarmos um código de verificação.
+                            </p>
                         </div>
-                    </form>
+                    </div>
+                    <div class="reset-form-panel">
+                        <button type="button" class="reset-close-button" id="closeForgotPasswordModal" aria-label="Fechar modal">
+                            &times;
+                        </button>
+                        <form id="forgotPasswordForm" class="reset-form" autocomplete="off">
+                            <div class="reset-input-group">
+                                <label for="resetIdentifier" class="reset-form-label">Usuário / Email</label>
+                                <div class="reset-input-wrapper">
+                                    <span class="reset-input-icon" aria-hidden="true">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        id="resetIdentifier"
+                                        name="identifier"
+                                        class="reset-input"
+                                        required
+                                        autocomplete="username"
+                                        placeholder="Digite seu usuário ou e-mail"
+                                    >
+                                </div>
+                            </div>
+                            <div class="reset-feedback" id="forgotPasswordFeedback" role="alert" style="display:none;"></div>
+                            <div class="reset-actions">
+                                <button type="submit" class="btn-reset-primary">Enviar código</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
