@@ -157,16 +157,14 @@ function formatarCodigoProduto(array $produto): string
     }
 
     .produtos-publico-wrapper { /* wrapper principal */
-      padding: 1%;
+      padding: 70px 0 160px;
       background: linear-gradient(180deg, #f7ecc2 0%, #fef8ec 100%);
     }
 
     .produtos-container { /* container principal */
-      max-width: 100%;
-      height: 100vh;
-      top: 0;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 0;
+      padding: 0 26px;
     }
 
     .produtos-layout { /* layout principal */
@@ -175,7 +173,6 @@ function formatarCodigoProduto(array $produto): string
       gap: 44px;
       align-items: start;
       width: 100%;
-      height: 100vh;
     }
 
     .categoria-sidebar { /* caixa de categorias */
@@ -288,15 +285,15 @@ function formatarCodigoProduto(array $produto): string
 
     .produtos-cards { /* container produtos */
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 28px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
     }
 
     .produto-card { /* card individual produto */
       background: rgba(255, 255, 255, 0.96);
-      border-radius: 26px;
+      border-radius: 22px;
       border: 1px solid rgba(120, 99, 176, 0.08);
-      box-shadow: 0 22px 40px rgba(71, 52, 132, 0.15);
+      box-shadow: 0 18px 34px rgba(71, 52, 132, 0.14);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -311,7 +308,7 @@ function formatarCodigoProduto(array $produto): string
     .produto-card figure { /* imagem produto */
       width: 100%;
       margin: 0;
-      padding-top: 60%;
+      padding-top: 56%;
       position: relative;
       background: linear-gradient(135deg, rgba(118, 88, 180, 0.08), rgba(255, 255, 255, 0.2));
       overflow: hidden;
@@ -326,10 +323,10 @@ function formatarCodigoProduto(array $produto): string
     }
 
     .produto-card-body { /* corpo do card produto */
-      padding: 22px 24px 28px;
+      padding: 18px 20px 24px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       flex: 1;
       background: #fff;
     }
