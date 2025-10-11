@@ -200,7 +200,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                             <div class="depoimentos-carousel">
                                 <!-- Depoimento 1 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">?????</div>
+                                    <div class="avaliacao">★★★★★</div>
                                     <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
                                     <p class="texto-depoimento">
                                     O Servi�o foi excepcional e superou minhas expectativas em todos os aspectos.
@@ -213,7 +213,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                                 <!-- Depoimento 2 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">?????</div>
+                                    <div class="avaliacao">★★★★★</div>
                                     <h3 class="titulo-depoimento">Estou admirada!</h3>
                                     <p class="texto-depoimento">
                                     A experi�ncia foi incr�vel, definitivamente voltarei e recomendarei a todos!
@@ -226,7 +226,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                                 
                                 <!-- Depoimento 3 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">?????</div>
+                                    <div class="avaliacao">★★★★★</div>
                                     <h3 class="titulo-depoimento">Impressionada!</h3>
                                     <p class="texto-depoimento">
                                     Impressionada com meu novo brilho e liso, voltarei e recomendarei a todos!
@@ -454,11 +454,11 @@ $adminLogado = isset($_SESSION['usuario_id']);
         </div>
 
                 <div id="verifyCodeModal" class="modal" style="display:none;">
-            <div class="modal-content reset-modal-content reset-split-modal">
+            <div class="modal-content-numero reset-modal-content-numero reset-split-modal">
                 <div class="reset-layout">
                     <div class="reset-info-panel">
                         <div class="reset-info-inner">
-                            <h2>Digite o c�digo enviado</h2>
+                            <h2>Digite o código enviado</h2>
                             <p id="codeTimer" class="reset-timer"></p>
                         </div>
                     </div>

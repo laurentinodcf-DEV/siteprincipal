@@ -1577,7 +1577,7 @@ nav ul ul li {
 }
 
 .reset-info-panel {/* lado esquerdo azul */
-  flex: 1;
+  flex: 0.1; /* 1 + 1 = 2 - 50% azul / 50% branco */
   background: linear-gradient(135deg, #00c2ff, #00b4f3);
   color: #ffffff;
   display: flex;
@@ -1605,8 +1605,8 @@ nav ul ul li {
   font-weight: 500;
 }
 
-.reset-form-panel {
-  flex: 1.1;
+.reset-form-panel {/* lado direito branco */
+  flex: 1.9; /* 1 + 1 = 2 - 50% azul / 50% branco */
   background: #ffffff;
   position: relative;
   left: 1%;
