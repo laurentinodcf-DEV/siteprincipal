@@ -168,19 +168,18 @@ function formatarCodigoProduto(array $produto): string
     }
 
     .produtos-layout {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
       gap: 44px;
-      align-items: flex-start;
+      align-items: start;
     }
 
     .categoria-sidebar {
-      flex: 0 0 280px;
       background: rgba(255, 255, 255, 0.94);
       border-radius: 28px;
       box-shadow: 0 24px 48px rgba(68, 48, 115, 0.12);
       padding: 24px 0 26px;
-      position: sticky;
-      top: 96px;
+      align-self: start;
     }
 
     .categoria-lista {
@@ -253,11 +252,12 @@ function formatarCodigoProduto(array $produto): string
     }
 
     .produtos-area {
-      flex: 1;
       background: transparent;
       display: flex;
       flex-direction: column;
       gap: 24px;
+      align-self: start;
+      min-width: 0;
     }
 
     .produtos-area-header {
@@ -372,12 +372,15 @@ function formatarCodigoProduto(array $produto): string
 
     @media (max-width: 992px) {
       .produtos-layout {
+        display: flex;
         flex-direction: column;
+        gap: 32px;
       }
 
       .categoria-sidebar {
         width: 100%;
         position: static;
+        align-self: stretch;
       }
 
       .categoria-lista {
