@@ -407,6 +407,62 @@ $adminLogado = isset($_SESSION['usuario_id']);
         </div>
 
         <!-- Modal de Confirmação Logout -->
+        <div id="forgotPasswordModal" class="modal" style="display:none;">
+            <div class="modal-content reset-modal-content">
+                <div class="modal-header">
+                    <h2>Recuperar senha</h2>
+                    <span class="close-btn" id="closeForgotPasswordModal">&times;</span>
+                </div>
+                <div class="modal-body modal-body-form">
+                    <p class="reset-description">
+                        Informe o seu usuário ou e-mail cadastrado para enviarmos um código de verificação.
+                    </p>
+                    <form id="forgotPasswordForm" class="reset-form">
+                        <label for="resetIdentifier" class="form-label">Usuário ou e-mail</label>
+                        <input type="text" id="resetIdentifier" name="identifier" class="form-control" required autocomplete="username">
+                        <div class="reset-feedback" id="forgotPasswordFeedback" role="alert" style="display:none;"></div>
+                        <div class="reset-actions">
+                            <button type="button" class="btn-reset-secondary" id="cancelForgotPassword">Fechar</button>
+                            <button type="submit" class="btn-reset-primary">Enviar código</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="verifyCodeModal" class="modal" style="display:none;">
+            <div class="modal-content reset-modal-content">
+                <div class="modal-header">
+                    <h2>Digite o código</h2>
+                    <span class="close-btn" id="closeVerifyCodeModal">&times;</span>
+                </div>
+                <div class="modal-body modal-body-form">
+                    <p class="reset-description">
+                        Informe os 6 dígitos enviados para o seu e-mail. <span id="codeTimer" class="reset-timer"></span>
+                    </p>
+                    <form id="verifyCodeForm" class="reset-form">
+                        <label for="resetCode" class="form-label">Código de 6 dígitos</label>
+                        <input
+                            type="text"
+                            id="resetCode"
+                            name="code"
+                            class="form-control code-input"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            required
+                            autocomplete="one-time-code"
+                        >
+                        <div class="reset-feedback" id="verifyCodeFeedback" role="alert" style="display:none;"></div>
+                        <div class="reset-actions">
+                            <button type="button" class="btn-reset-secondary" id="cancelVerifyCode">Fechar</button>
+                            <button type="submit" class="btn-reset-primary">Ok</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div id="logoutModal" class="modal" style="display:none;">
             <div class="modal-content">
                 <div class="modal-header">

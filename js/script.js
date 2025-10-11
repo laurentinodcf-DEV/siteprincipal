@@ -179,6 +179,333 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     }
+
+    const forgotPasswordLink = document.querySelector(".login-forgot-link");
+    const forgotPasswordModal = document.getElementById("forgotPasswordModal");
+    const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+    const forgotPasswordFeedback = document.getElementById("forgotPasswordFeedback");
+    const closeForgotPasswordModal = document.getElementById("closeForgotPasswordModal");
+    const cancelForgotPasswordBtn = document.getElementById("cancelForgotPassword");
+    const resetIdentifierInput = document.getElementById("resetIdentifier");
+
+    const verifyCodeModal = document.getElementById("verifyCodeModal");
+    const verifyCodeForm = document.getElementById("verifyCodeForm");
+    const verifyCodeFeedback = document.getElementById("verifyCodeFeedback");
+    const closeVerifyCodeModal = document.getElementById("closeVerifyCodeModal");
+    const cancelVerifyCodeBtn = document.getElementById("cancelVerifyCode");
+    const codeTimerElement = document.getElementById("codeTimer");
+    const resetCodeInput = document.getElementById("resetCode");
+
+    const forgotSubmitButton = forgotPasswordForm
+        ? forgotPasswordForm.querySelector(".btn-reset-primary")
+        : null;
+    const verifySubmitButton = verifyCodeForm
+        ? verifyCodeForm.querySelector(".btn-reset-primary")
+        : null;
+
+    let lastIdentifier = "";
+    let codeTimerInterval = null;
+
+    const toggleModalVisibility = (modal, show) => {
+        if (!modal) {
+            return;
+        }
+        modal.style.display = show ? "flex" : "none";
+    };
+
+    const resetFeedbackState = (element) => {
+        if (!element) {
+            return;
+        }
+        element.textContent = "";
+        element.style.display = "none";
+        element.classList.remove("is-error", "is-success");
+    };
+
+    const showFeedback = (element, message, type) => {
+        if (!element) {
+            return;
+        }
+        element.textContent = message;
+        element.style.display = "block";
+        element.classList.remove("is-error", "is-success");
+        element.classList.add(type === "success" ? "is-success" : "is-error");
+    };
+
+    const stopCodeTimer = () => {
+        if (codeTimerInterval) {
+            clearInterval(codeTimerInterval);
+            codeTimerInterval = null;
+        }
+        if (codeTimerElement) {
+            codeTimerElement.textContent = "";
+        }
+    };
+
+    const startCodeTimer = (expiresAt) => {
+        if (!codeTimerElement) {
+            return;
+        }
+
+        stopCodeTimer();
+
+        let expiration = null;
+        if (expiresAt) {
+            const parsed = new Date(expiresAt.replace(" ", "T"));
+            expiration = Number.isNaN(parsed.getTime())
+                ? null
+                : parsed;
+        }
+
+        if (!expiration) {
+            expiration = new Date(Date.now() + 5 * 60 * 1000);
+        }
+
+        const updateTimer = () => {
+            const diff = expiration.getTime() - Date.now();
+            if (diff <= 0) {
+                codeTimerElement.textContent = "Código expirado";
+                stopCodeTimer();
+                showFeedback(
+                    verifyCodeFeedback,
+                    "O código expirou. Solicite um novo para continuar.",
+                    "error"
+                );
+                return;
+            }
+
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            codeTimerElement.textContent = `Expira em ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        };
+
+        updateTimer();
+        codeTimerInterval = setInterval(updateTimer, 1000);
+    };
+
+    const closeForgotModal = () => {
+        toggleModalVisibility(forgotPasswordModal, false);
+        resetFeedbackState(forgotPasswordFeedback);
+        if (forgotPasswordForm) {
+            forgotPasswordForm.reset();
+        }
+    };
+
+    const closeVerifyModal = () => {
+        toggleModalVisibility(verifyCodeModal, false);
+        resetFeedbackState(verifyCodeFeedback);
+        stopCodeTimer();
+        if (verifyCodeForm) {
+            verifyCodeForm.reset();
+        }
+    };
+
+    if (forgotPasswordLink && forgotPasswordModal) {
+        forgotPasswordLink.addEventListener("click", (event) => {
+            event.preventDefault();
+            toggleModalVisibility(loginModal, false);
+            resetFeedbackState(forgotPasswordFeedback);
+            if (forgotPasswordForm) {
+                forgotPasswordForm.reset();
+            }
+            toggleModalVisibility(forgotPasswordModal, true);
+            if (resetIdentifierInput) {
+                resetIdentifierInput.focus();
+            }
+        });
+    }
+
+    if (closeForgotPasswordModal) {
+        closeForgotPasswordModal.addEventListener("click", closeForgotModal);
+    }
+
+    if (cancelForgotPasswordBtn) {
+        cancelForgotPasswordBtn.addEventListener("click", closeForgotModal);
+    }
+
+    if (forgotPasswordModal) {
+        forgotPasswordModal.addEventListener("click", (event) => {
+            if (event.target === forgotPasswordModal) {
+                closeForgotModal();
+            }
+        });
+    }
+
+    if (verifyCodeModal) {
+        verifyCodeModal.addEventListener("click", (event) => {
+            if (event.target === verifyCodeModal) {
+                closeVerifyModal();
+            }
+        });
+    }
+
+    if (closeVerifyCodeModal) {
+        closeVerifyCodeModal.addEventListener("click", closeVerifyModal);
+    }
+
+    if (cancelVerifyCodeBtn) {
+        cancelVerifyCodeBtn.addEventListener("click", closeVerifyModal);
+    }
+
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            resetFeedbackState(forgotPasswordFeedback);
+
+            const identifier = resetIdentifierInput
+                ? resetIdentifierInput.value.trim()
+                : "";
+
+            if (identifier === "") {
+                showFeedback(forgotPasswordFeedback, "Informe seu usuário ou e-mail cadastrado.", "error");
+                return;
+            }
+
+            if (forgotSubmitButton) {
+                forgotSubmitButton.disabled = true;
+                forgotSubmitButton.textContent = "Enviando...";
+            }
+
+            const body = new URLSearchParams({ identifier });
+
+            fetch(resolveAdminUrl("adm/forgot_password_request.php"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: body.toString(),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (forgotSubmitButton) {
+                        forgotSubmitButton.disabled = false;
+                        forgotSubmitButton.textContent = "Enviar código";
+                    }
+
+                    if (data.success) {
+                        showFeedback(
+                            forgotPasswordFeedback,
+                            data.message || "Enviamos um código para o e-mail informado.",
+                            "success"
+                        );
+                        lastIdentifier = identifier;
+                        toggleModalVisibility(forgotPasswordModal, false);
+                        resetFeedbackState(forgotPasswordFeedback);
+                        toggleModalVisibility(verifyCodeModal, true);
+                        resetFeedbackState(verifyCodeFeedback);
+                        if (resetCodeInput) {
+                            resetCodeInput.value = "";
+                            resetCodeInput.focus();
+                        }
+                        startCodeTimer(data.expiresAt || null);
+                        if (data.codePreview) {
+                            console.info("Código de teste:", data.codePreview);
+                        }
+                    } else {
+                        showFeedback(
+                            forgotPasswordFeedback,
+                            data.message || "Não foi possível enviar o código. Tente novamente.",
+                            "error"
+                        );
+                        if (data.codePreview) {
+                            console.info("Código de teste:", data.codePreview);
+                        }
+                    }
+                })
+                .catch(() => {
+                    if (forgotSubmitButton) {
+                        forgotSubmitButton.disabled = false;
+                        forgotSubmitButton.textContent = "Enviar código";
+                    }
+                    showFeedback(
+                        forgotPasswordFeedback,
+                        "Não foi possível solicitar o código agora. Tente novamente em instantes.",
+                        "error"
+                    );
+                });
+        });
+    }
+
+    if (verifyCodeForm) {
+        verifyCodeForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            resetFeedbackState(verifyCodeFeedback);
+
+            if (!lastIdentifier) {
+                showFeedback(
+                    verifyCodeFeedback,
+                    "Solicite um novo código antes de prosseguir.",
+                    "error"
+                );
+                return;
+            }
+
+            const code = resetCodeInput ? resetCodeInput.value.trim() : "";
+
+            if (!/^[0-9]{6}$/.test(code)) {
+                showFeedback(
+                    verifyCodeFeedback,
+                    "Digite um código válido de 6 dígitos.",
+                    "error"
+                );
+                return;
+            }
+
+            if (verifySubmitButton) {
+                verifySubmitButton.disabled = true;
+                verifySubmitButton.textContent = "Validando...";
+            }
+
+            const body = new URLSearchParams({ identifier: lastIdentifier, code });
+
+            fetch(resolveAdminUrl("adm/forgot_password_verify.php"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: body.toString(),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (verifySubmitButton) {
+                        verifySubmitButton.disabled = false;
+                        verifySubmitButton.textContent = "Ok";
+                    }
+
+                    if (data.success) {
+                        showFeedback(
+                            verifyCodeFeedback,
+                            data.message || "Código validado com sucesso.",
+                            "success"
+                        );
+                        stopCodeTimer();
+                        const redirectTarget = data.redirect
+                            ? resolveAdminUrl(data.redirect)
+                            : resolveAdminUrl("adm/reset_password.php");
+                        setTimeout(() => {
+                            window.location.href = redirectTarget;
+                        }, 600);
+                    } else {
+                        showFeedback(
+                            verifyCodeFeedback,
+                            data.message || "Não foi possível validar o código informado.",
+                            "error"
+                        );
+                    }
+                })
+                .catch(() => {
+                    if (verifySubmitButton) {
+                        verifySubmitButton.disabled = false;
+                        verifySubmitButton.textContent = "Ok";
+                    }
+                    showFeedback(
+                        verifyCodeFeedback,
+                        "Erro ao validar o código. Tente novamente.",
+                        "error"
+                    );
+                });
+        });
+    }
 });
 
 
