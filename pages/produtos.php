@@ -121,7 +121,7 @@ function formatarCodigoProduto(array $produto): string
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/estilo.css">
   <style>
-    .produtos-banner {
+    .produtos-banner { /* banner principal */
       position: relative;
       min-height: 320px;
       display: flex;
@@ -131,50 +131,54 @@ function formatarCodigoProduto(array $produto): string
       background: url('../img/produtos/imagens/baner_alisamento.png') center/cover no-repeat;
     }
 
-    .produtos-banner::before {
+    .produtos-banner::before { /* overlay escuro */
       content: '';
       position: absolute;
       inset: 0;
       background: rgba(0, 0, 0, 0.45);
     }
 
-    .produtos-banner-conteudo {
+    .produtos-banner-conteudo { /* conteudo banner */
       position: relative;
       max-width: 720px;
       text-align: center;
       color: #fff;
     }
 
-    .produtos-banner-conteudo h1 {
+    .produtos-banner-conteudo h1 { /* titulo banner */
       font-size: 3rem;
       font-weight: 700;
       margin-bottom: 18px;
     }
 
-    .produtos-banner-conteudo p {
+    .produtos-banner-conteudo p { /* descricao banner */
       font-size: 1.1rem;
       margin-bottom: 0;
     }
 
-    .produtos-publico-wrapper {
-      padding: 70px 0 90px;
+    .produtos-publico-wrapper { /* wrapper principal */
+      padding: 1%;
       background: linear-gradient(180deg, #f7ecc2 0%, #fef8ec 100%);
     }
 
-    .produtos-container {
-      max-width: 1180px;
+    .produtos-container { /* container principal */
+      max-width: 100%;
+      height: 100vh;
+      top: 0;
       margin: 0 auto;
-      padding: 0 26px;
+      padding: 0;
     }
 
-    .produtos-layout {
+    .produtos-layout { /* layout principal */
       display: grid;
       grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
       gap: 44px;
       align-items: start;
+      width: 100%;
+      height: 100vh;
     }
 
-    .categoria-sidebar {
+    .categoria-sidebar { /* caixa de categorias */
       background: rgba(255, 255, 255, 0.94);
       border-radius: 28px;
       box-shadow: 0 24px 48px rgba(68, 48, 115, 0.12);
@@ -182,21 +186,21 @@ function formatarCodigoProduto(array $produto): string
       align-self: start;
     }
 
-    .categoria-lista {
+    .categoria-lista { /* lista de categorias */
       display: flex;
       flex-direction: column;
       gap: 0;
       padding: 0;
     }
 
-    .categoria-divisor {
+    .categoria-divisor { /* divisor entre categorias */
       height: 1px;
       margin: 14px 26px 12px;
       background: rgba(104, 84, 150, 0.16);
       border-radius: 1px;
     }
 
-    .categoria-item {
+    .categoria-item { 
       border: none;
       background: transparent;
       text-align: left;
@@ -213,45 +217,45 @@ function formatarCodigoProduto(array $produto): string
       transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .categoria-item .categoria-nome {
+    .categoria-item .categoria-nome { /* nome categoria */
       flex: 1;
     }
 
-    .categoria-item .categoria-quantidade {
+    .categoria-item .categoria-quantidade { /* quantidade produtos */
       font-size: 0.9rem;
       color: #8c82b1;
       margin-left: 12px;
     }
 
-    .categoria-item--todos {
+    .categoria-item--todos { /* estilo especial categoria "Todos" */
       margin-bottom: 6px;
     }
 
-    .categoria-item--todos .categoria-quantidade {
+    .categoria-item--todos .categoria-quantidade { /* quantidade categoria "Todos" */
       color: #6b5baa;
       font-weight: 500;
     }
 
-    .categoria-item--todos .categoria-quantidade::before {
+    .categoria-item--todos .categoria-quantidade::before { /* parenteses quantidade "Todos" */
       content: '(';
     }
 
-    .categoria-item--todos .categoria-quantidade::after {
+    .categoria-item--todos .categoria-quantidade::after { /* parenteses quantidade "Todos" */
       content: ')';
     }
 
     .categoria-item:hover,
-    .categoria-item.active {
+    .categoria-item.active { /* hover e ativo categoria */
       background: rgba(118, 88, 180, 0.16);
       color: #2d1753;
       box-shadow: inset 0 0 0 1px rgba(118, 88, 180, 0.25);
     }
 
-    .categoria-item.active .categoria-quantidade {
+    .categoria-item.active .categoria-quantidade { /* quantidade categoria ativa */
       color: #4c3a85;
     }
 
-    .produtos-area {
+    .produtos-area { /* area dos produtos */
       background: transparent;
       display: flex;
       flex-direction: column;
@@ -260,32 +264,35 @@ function formatarCodigoProduto(array $produto): string
       min-width: 0;
     }
 
-    .produtos-area-header {
+    .produtos-area-header { /* header area produtos */
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 12px;
+      background: linear-gradient(6deg,rgba(211, 175, 55, 1) 0%, rgba(255, 255, 255, 1) 52%, rgba(255, 255, 255, 1) 63%, rgba(211, 175, 55, 1) 92%);
+      padding: 2px;
+      border-radius: 10px;
     }
 
-    .produtos-area-header h2 {
+    .produtos-area-header h2 { /* titulo area produtos */
       font-size: 2rem;
       font-weight: 700;
       color: #2d1753;
       margin: 0;
     }
 
-    .produtos-area-header span {
+    .produtos-area-header span { /* total produtos */
       font-size: 1rem;
       color: #746a98;
     }
 
-    .produtos-cards {
+    .produtos-cards { /* cards produtos */
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 28px;
     }
 
-    .produto-card {
+    .produto-card { /* card individual produto */
       background: rgba(255, 255, 255, 0.96);
       border-radius: 26px;
       border: 1px solid rgba(120, 99, 176, 0.08);
@@ -296,12 +303,12 @@ function formatarCodigoProduto(array $produto): string
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .produto-card:hover {
+    .produto-card:hover { /* efeito hover card produto */
       transform: translateY(-4px);
       box-shadow: 0 28px 52px rgba(71, 52, 132, 0.2);
     }
 
-    .produto-card figure {
+    .produto-card figure { /* imagem produto */
       width: 100%;
       margin: 0;
       padding-top: 60%;
@@ -310,7 +317,7 @@ function formatarCodigoProduto(array $produto): string
       overflow: hidden;
     }
 
-    .produto-card figure img {
+    .produto-card figure img { /* imagem produto */
       position: absolute;
       inset: 0;
       width: 100%;
@@ -318,7 +325,7 @@ function formatarCodigoProduto(array $produto): string
       object-fit: cover;
     }
 
-    .produto-card-body {
+    .produto-card-body { /* corpo do card produto */
       padding: 22px 24px 28px;
       display: flex;
       flex-direction: column;
@@ -327,26 +334,26 @@ function formatarCodigoProduto(array $produto): string
       background: #fff;
     }
 
-    .produto-card-body h3 {
+    .produto-card-body h3 { /* nome produto */
       font-size: 1.21rem;
       font-weight: 700;
       color: #341a70;
       margin: 0;
     }
 
-    .produto-descricao {
+    .produto-descricao {  /* descricao produto */
       font-size: 0.95rem;
       line-height: 1.55;
       color: #62569a;
     }
 
-    .produto-codigo {
+    .produto-codigo { /* codigo produto */
       font-size: 0.9rem;
       color: #7a6caa;
       font-weight: 600;
     }
 
-    .produto-preco {
+    .produto-preco { /* preco produto */
       margin-top: auto;
       display: flex;
       flex-direction: column;
@@ -356,21 +363,21 @@ function formatarCodigoProduto(array $produto): string
       font-weight: 700;
     }
 
-    .produto-preco .preco-original {
+    .produto-preco .preco-original { /* preco original riscado */
       font-size: 0.92rem;
       color: #9a90c7;
       text-decoration: line-through;
       font-weight: 500;
     }
 
-    .produtos-vazio {
+    .produtos-vazio { /* mensagem nenhum produto */
       text-align: center;
       font-size: 1.2rem;
       color: #5f5f72;
       font-weight: 600;
     }
 
-    @media (max-width: 992px) {
+    @media (max-width: 992px) { /* telas menores que 992px */
       .produtos-layout {
         display: flex;
         flex-direction: column;
