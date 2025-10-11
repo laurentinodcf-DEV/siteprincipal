@@ -24,12 +24,6 @@
                 <li class="submenu-item">Depoimentos</li>
             </ul>
         </li>
-        <li class="li-menu-principal"><span class="menu-principal">Agenda</span>
-            <ul class="submenu">
-                <li class="submenu-item">Um</li>
-                <li class="submenu-item">Dois</li>
-            </ul>
-        </li>
         <li class="li-menu-principal"><span class="menu-principal">Sobre</span>
             <ul class="submenu">
                 <li class="submenu-item" id="openModal">Contato</li>
