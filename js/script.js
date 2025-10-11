@@ -185,16 +185,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const forgotPasswordForm = document.getElementById("forgotPasswordForm");
     const forgotPasswordFeedback = document.getElementById("forgotPasswordFeedback");
     const closeForgotPasswordModal = document.getElementById("closeForgotPasswordModal");
-    const cancelForgotPasswordBtn = document.getElementById("cancelForgotPassword");
     const resetIdentifierInput = document.getElementById("resetIdentifier");
 
     const verifyCodeModal = document.getElementById("verifyCodeModal");
     const verifyCodeForm = document.getElementById("verifyCodeForm");
     const verifyCodeFeedback = document.getElementById("verifyCodeFeedback");
     const closeVerifyCodeModal = document.getElementById("closeVerifyCodeModal");
-    const cancelVerifyCodeBtn = document.getElementById("cancelVerifyCode");
     const codeTimerElement = document.getElementById("codeTimer");
     const resetCodeInput = document.getElementById("resetCode");
+    const resetCodeGrid = document.querySelector(".reset-code-grid");
+    const codeDigitPreviews = document.querySelectorAll(".code-digit-preview");
 
     const forgotSubmitButton = forgotPasswordForm
         ? forgotPasswordForm.querySelector(".btn-reset-primary")
@@ -230,6 +230,28 @@ document.addEventListener("DOMContentLoaded", () => {
         element.style.display = "block";
         element.classList.remove("is-error", "is-success");
         element.classList.add(type === "success" ? "is-success" : "is-error");
+    };
+
+    const sanitizeCodeValue = (value) => {
+        return (value || "").replace(/\D/g, "").slice(0, 6);
+    };
+
+    const updateCodePreview = (value) => {
+        if (!codeDigitPreviews || codeDigitPreviews.length === 0) {
+            return;
+        }
+        const digits = value.split("");
+        codeDigitPreviews.forEach((preview, index) => {
+            preview.value = digits[index] || "";
+            preview.classList.toggle("is-filled", Boolean(digits[index]));
+        });
+    };
+
+    const clearCodeInput = () => {
+        if (resetCodeInput) {
+            resetCodeInput.value = "";
+        }
+        updateCodePreview("");
     };
 
     const stopCodeTimer = () => {
@@ -298,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (verifyCodeForm) {
             verifyCodeForm.reset();
         }
+        clearCodeInput();
     };
 
     if (forgotPasswordLink && forgotPasswordModal) {
@@ -317,10 +340,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (closeForgotPasswordModal) {
         closeForgotPasswordModal.addEventListener("click", closeForgotModal);
-    }
-
-    if (cancelForgotPasswordBtn) {
-        cancelForgotPasswordBtn.addEventListener("click", closeForgotModal);
     }
 
     if (forgotPasswordModal) {
@@ -343,8 +362,39 @@ document.addEventListener("DOMContentLoaded", () => {
         closeVerifyCodeModal.addEventListener("click", closeVerifyModal);
     }
 
-    if (cancelVerifyCodeBtn) {
-        cancelVerifyCodeBtn.addEventListener("click", closeVerifyModal);
+    if (resetCodeGrid) {
+        resetCodeGrid.addEventListener("click", () => {
+            if (resetCodeInput) {
+                resetCodeInput.focus();
+            }
+        });
+    }
+
+    if (verifyCodeForm) {
+        verifyCodeForm.addEventListener("click", (event) => {
+            if (!resetCodeInput) {
+                return;
+            }
+            const target = event.target;
+            if (target && target.classList && target.classList.contains("btn-reset-primary")) {
+                return;
+            }
+            resetCodeInput.focus();
+        });
+    }
+
+    if (resetCodeInput) {
+        resetCodeInput.addEventListener("input", () => {
+            const sanitized = sanitizeCodeValue(resetCodeInput.value);
+            if (sanitized !== resetCodeInput.value) {
+                resetCodeInput.value = sanitized;
+            }
+            updateCodePreview(sanitized);
+        });
+
+        resetCodeInput.addEventListener("focus", () => {
+            updateCodePreview(sanitizeCodeValue(resetCodeInput.value));
+        });
     }
 
     if (forgotPasswordForm) {
@@ -393,8 +443,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         resetFeedbackState(forgotPasswordFeedback);
                         toggleModalVisibility(verifyCodeModal, true);
                         resetFeedbackState(verifyCodeFeedback);
+                        clearCodeInput();
                         if (resetCodeInput) {
-                            resetCodeInput.value = "";
                             resetCodeInput.focus();
                         }
                         startCodeTimer(data.expiresAt || null);
@@ -440,7 +490,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const code = resetCodeInput ? resetCodeInput.value.trim() : "";
+            const code = resetCodeInput
+                ? sanitizeCodeValue(resetCodeInput.value)
+                : "";
+            if (resetCodeInput) {
+                resetCodeInput.value = code;
+            }
+            updateCodePreview(code);
 
             if (!/^[0-9]{6}$/.test(code)) {
                 showFeedback(
@@ -448,6 +504,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Digite um código válido de 6 dígitos.",
                     "error"
                 );
+                if (resetCodeInput) {
+                    resetCodeInput.focus();
+                }
                 return;
             }
 

@@ -25,7 +25,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
       <!----- CONTAINER GERAL DA PAGINA -------------------------->
       <div id="container-page">
 
-                    <!----- MENU DE NAVEGAÇÃO -------------------------->
+                    <!----- MENU DE NAVEGA��O -------------------------->
           <nav class="nav-menu-principal">
             <ul class="ul-menu-principal">
                 <li class="li-menu-principal"><span class="menu-principal">Serviços</span>
@@ -48,7 +48,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <li class="li-menu-principal"><span class="menu-principal">Sobre</span>
                     <ul class="submenu">
                         <li class="submenu-item" id="openModal">Contato</li>
-                        <li class="submenu-item" id="openMapModal">Endereço</li>
+                        <li class="submenu-item" id="openMapModal">Endere�o</li>
                         <li class="submenu-item">Profissional</li>
                         <li class="submenu-item">Fotos</li>
                     </ul>
@@ -61,9 +61,9 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     type="button"
                     id="adminAccessTrigger"
                     class="menu-principal admin-menu-trigger"
-                    aria-label="Área administrativa"
+                    aria-label="�rea administrativa"
                 >
-                    <img src="img/icons/person_login.png" alt="Área administrativa" class="admin-menu-icon">
+                    <img src="img/icons/person_login.png" alt="�rea administrativa" class="admin-menu-icon">
                 </button>
             </div>
             <div id="container-logo">
@@ -100,7 +100,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 </div>
             </div>
 
-            <!-- MODAL DO LOCAL, IMAGENS DO LOCAL E Endereço -->
+            <!-- MODAL DO LOCAL, IMAGENS DO LOCAL E Endere�o -->
             <div id="mapModal" class="mapModal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -122,10 +122,10 @@ $adminLogado = isset($_SESSION['usuario_id']);
                         </div>
 
                         <p>
-                            <!-- Endereço LIGADO AO GOOGLE -->
-                            <strong>Endereço:</strong>
+                            <!-- Endere�o LIGADO AO GOOGLE -->
+                            <strong>Endere�o:</strong>
                             <a href="https://www.google.com/maps/search/?api=1&query=Av.+Professor+Lucas+Machado,+442,+Asteca,+Santa+Luzia+-+MG" target="_blank">
-                                Av. Professor Lucas Machado - Nº 442 - Asteca, Santa Luzia - MG
+                                Av. Professor Lucas Machado - N� 442 - Asteca, Santa Luzia - MG
                             </a>
                         </p>
                     </div>
@@ -163,12 +163,12 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     </div>
                 </section>
 
-                <!-- SEÇÃO 02 - Serviços -->
+                <!-- SE��O 02 - Servi�os -->
                 <section id="secao-02" class="secao-02">
                 <div class="container-sobre">
                     <!-- Coluna Imagem + Depoimento -->
                     <div class="sobre-imagem">
-                         <img src="img/salao/interior02.jpg" alt="Studio Salomé">
+                         <img src="img/salao/interior02.jpg" alt="Studio Salom�">
                     <div class="sobre-depoimento">
                         <p class="depoimento-texto">"Transformou meu visual!"</p>
                         <span class="depoimento-autor">Ana Clara</span>
@@ -179,31 +179,31 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     <div class="sobre-texto">
                         <h2>Sobre o Studio</h2>
                         <p>
-                            Oferecemos tratamentos exclusivos para cuidar da sua beleza com excelência, combinando o melhor da estética moderna e produtos de alta qualidade. Nossa equipe especializada está pronta para proporcionar experiências únicas em cada atendimento.
+                            Oferecemos tratamentos exclusivos para cuidar da sua beleza com excel�ncia, combinando o melhor da est�tica moderna e produtos de alta qualidade. Nossa equipe especializada est� pronta para proporcionar experi�ncias �nicas em cada atendimento.
                         </p>
-                        <a href="#servicos" class="btn-sobre">Conheça nossos Serviços</a>
+                        <a href="#servicos" class="btn-sobre">Conhe�a nossos Servi�os</a>
                     </div>
                 </div>
                 </section>
 
 
-                <!-- SEÇÃO 03 - Sobre o Studio -->
+                <!-- SE��O 03 - Sobre o Studio -->
                 <section id="secao-03" class="secao-03">
                     <div class="container-depoimentos">
                         <h2 class="titulo-depoimentos">O que nossos clientes dizem</h2>
 
                         <div class="depoimentos-carousel-container">
-                            <!-- Botão anterior -->
+                            <!-- Bot�o anterior -->
                             <button class="depoimentos-btn prev" aria-label="Depoimento anterior">&#10094;</button>
                             
                             <!-- Carrossel de depoimentos -->
                             <div class="depoimentos-carousel">
                                 <!-- Depoimento 1 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">★★★★★</div>
+                                    <div class="avaliacao">?????</div>
                                     <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
                                     <p class="texto-depoimento">
-                                    O Serviço foi excepcional e superou minhas expectativas em todos os aspectos.
+                                    O Servi�o foi excepcional e superou minhas expectativas em todos os aspectos.
                                     </p>
                                     <div class="autor">
                                     <img src="img/clientes/ana.jpg" alt="Ana L." class="foto-autor">
@@ -213,10 +213,10 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                                 <!-- Depoimento 2 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">★★★★★</div>
+                                    <div class="avaliacao">?????</div>
                                     <h3 class="titulo-depoimento">Estou admirada!</h3>
                                     <p class="texto-depoimento">
-                                    A experiência foi incrível, definitivamente voltarei e recomendarei a todos!
+                                    A experi�ncia foi incr�vel, definitivamente voltarei e recomendarei a todos!
                                     </p>
                                     <div class="autor">
                                     <img src="img/clientes/carla.jpg" alt="Carla M." class="foto-autor">
@@ -226,7 +226,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                                 
                                 <!-- Depoimento 3 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao">★★★★★</div>
+                                    <div class="avaliacao">?????</div>
                                     <h3 class="titulo-depoimento">Impressionada!</h3>
                                     <p class="texto-depoimento">
                                     Impressionada com meu novo brilho e liso, voltarei e recomendarei a todos!
@@ -238,8 +238,8 @@ $adminLogado = isset($_SESSION['usuario_id']);
                                 </div>
                             </div>
                             
-                            <!-- Botão Próximo -->
-                            <button class="depoimentos-btn next" aria-label="Próximo depoimento">&#10095;</button>
+                            <!-- Bot�o Pr�ximo -->
+                            <button class="depoimentos-btn next" aria-label="Pr�ximo depoimento">&#10095;</button>
                         </div>
                         
                         <!-- Indicadores de slide -->
@@ -250,23 +250,23 @@ $adminLogado = isset($_SESSION['usuario_id']);
                     </div>
                 </section>
 
-                <!-- SEÇÃO 04 - Nossos Serviços -->
+                <!-- SE��O 04 - Nossos Servi�os -->
                 <section id="secao-04" class="secao-04">
                 <div class="container-servicos-04">
 
-                    <!-- Título e descrição -->
+                    <!-- T�tulo e descri��o -->
                     <div class="servicos-header">
-                    <h2>Nossos Serviços</h2>
+                    <h2>Nossos Servi�os</h2>
                     <p>Oferecemos tratamentos de beleza para cabelos e sobrancelhas com qualidade excepcional.</p>
                     </div>
 
                     <!-- Wrapper do carrossel -->
                     <div class="carousel-wrapper">
 
-                    <!-- Botão anterior -->
-                    <button class="carousel-btn prev" aria-label="Serviço anterior">&#10094;</button>
+                    <!-- Bot�o anterior -->
+                    <button class="carousel-btn prev" aria-label="Servi�o anterior">&#10094;</button>
 
-                    <!-- Carrossel rolável -->
+                    <!-- Carrossel rol�vel -->
                     <div class="servicos-carousel">
                         <article class="card-servico-04">
                             <div class="card-servico-04-imagem">
@@ -294,7 +294,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                             </div>
                             <div class="card-servico-04-info">
                                 <h3>Spa Capilar</h3>
-                                <p>Relaxe e cuide da saúde dos seus fios com nossos tratamentos capilares premium.</p>
+                                <p>Relaxe e cuide da sa�de dos seus fios com nossos tratamentos capilares premium.</p>
                             </div>
                         </article>
 
@@ -304,24 +304,24 @@ $adminLogado = isset($_SESSION['usuario_id']);
                             </div>
                             <div class="card-servico-04-info">
                                 <h3>Produtos Exclusivos</h3>
-                                <p>Utilizamos apenas produtos de alta performance para garantir resultados impecáveis e duradouros.</p>
+                                <p>Utilizamos apenas produtos de alta performance para garantir resultados impec�veis e duradouros.</p>
                             </div>
                         </article>
 
                         <article class="card-servico-04">
                             <div class="card-servico-04-imagem">
-                                <img src="img/servicos/sobrancelha02.png" alt="estética de Sobrancelhas">
+                                <img src="img/servicos/sobrancelha02.png" alt="est�tica de Sobrancelhas">
                             </div>
                             <div class="card-servico-04-info">
-                                <h3>estética de Sobrancelhas</h3>
-                                <p>Realce sua beleza com nossos Serviços de design e cuidados especiais para sobrancelhas.</p>
+                                <h3>est�tica de Sobrancelhas</h3>
+                                <p>Realce sua beleza com nossos Servi�os de design e cuidados especiais para sobrancelhas.</p>
                             </div>
                         </article>
 
                     </div>
 
-                    <!-- Botão Próximo -->
-                    <button class="carousel-btn next" aria-label="Próximo Serviço">&#10095;</button>
+                    <!-- Bot�o Pr�ximo -->
+                    <button class="carousel-btn next" aria-label="Pr�ximo Servi�o">&#10095;</button>
                     </div>
                     <br>
                     <div class="sobre-texto-sesao-01">
@@ -337,7 +337,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                 <!-- Foto da Profissional -->
                 <section id="secao-foto" class="secao-foto">
-                    <img src="img/profissional/quenia01.png" alt="Quênia Salomé" class="foto-quenia">
+                    <img src="img/profissional/quenia01.png" alt="Qu�nia Salom�" class="foto-quenia">
                 </section>
 
                 <?php include 'class/contatoFooter.php'; ?>
@@ -364,7 +364,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
                         <form id="loginForm">
                             <div class="login-input-group">
-                                <label for="loginUsername">Usuário / Email</label>
+                                <label for="loginUsername">Usu�rio / Email</label>
                                 <div class="login-input-wrapper">
                                     <span class="login-input-icon" aria-hidden="true">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -406,7 +406,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
             </div>
         </div>
 
-        <!-- Modal de Confirmação Logout -->
+        <!-- Modal de Confirma��o Logout -->
         <div id="forgotPasswordModal" class="modal-recupera" style="display:none;">
             <div class="modal-content reset-modal-content reset-split-modal">
                 <div class="reset-layout">
@@ -414,7 +414,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                         <div class="reset-info-inner">
                             <h2>Recuperação de senha</h2>
                             <p>
-                                Informe o seu usuário ou e-mail cadastrado para enviarmos um código de verificação.
+                                Informe o seu usuário ou</br> e-mail cadastrado para enviarmos um código de verificão.
                             </p>
                         </div>
                     </div>
@@ -439,7 +439,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                                         class="reset-input"
                                         required
                                         autocomplete="username"
-                                        placeholder="Digite seu usuário ou e-mail"
+                                        placeholder="Digite seu usu�rio ou e-mail"
                                     >
                                 </div>
                             </div>
@@ -453,35 +453,47 @@ $adminLogado = isset($_SESSION['usuario_id']);
             </div>
         </div>
 
-        <div id="verifyCodeModal" class="modal" style="display:none;">
-            <div class="modal-content reset-modal-content">
-                <div class="modal-header">
-                    <h2>Digite o código</h2>
-                    <span class="close-btn" id="closeVerifyCodeModal">&times;</span>
-                </div>
-                <div class="modal-body modal-body-form">
-                    <p class="reset-description">
-                        Informe os 6 dígitos enviados para o seu e-mail. <span id="codeTimer" class="reset-timer"></span>
-                    </p>
-                    <form id="verifyCodeForm" class="reset-form">
-                        <label for="resetCode" class="form-label">Código de 6 dígitos</label>
-                        <input
-                            type="text"
-                            id="resetCode"
-                            name="code"
-                            class="form-control code-input"
-                            inputmode="numeric"
-                            pattern="[0-9]{6}"
-                            maxlength="6"
-                            required
-                            autocomplete="one-time-code"
-                        >
-                        <div class="reset-feedback" id="verifyCodeFeedback" role="alert" style="display:none;"></div>
-                        <div class="reset-actions">
-                            <button type="button" class="btn-reset-secondary" id="cancelVerifyCode">Fechar</button>
-                            <button type="submit" class="btn-reset-primary">Ok</button>
+                <div id="verifyCodeModal" class="modal" style="display:none;">
+            <div class="modal-content reset-modal-content reset-split-modal">
+                <div class="reset-layout">
+                    <div class="reset-info-panel">
+                        <div class="reset-info-inner">
+                            <h2>Digite o c�digo enviado</h2>
+                            <p id="codeTimer" class="reset-timer"></p>
                         </div>
-                    </form>
+                    </div>
+                    <div class="reset-form-panel">
+                        <button type="button" class="reset-close-button" id="closeVerifyCodeModal" aria-label="Fechar modal">
+                            &times;
+                        </button>
+                        <form id="verifyCodeForm" class="reset-form reset-code-form" autocomplete="off">
+                            <div class="reset-code-grid" aria-hidden="true">
+                                <input type="text" class="code-digit-preview" readonly>
+                                <input type="text" class="code-digit-preview" readonly>
+                                <input type="text" class="code-digit-preview" readonly>
+                                <input type="text" class="code-digit-preview" readonly>
+                                <input type="text" class="code-digit-preview" readonly>
+                                <input type="text" class="code-digit-preview" readonly>
+                            </div>
+                            <label class="visually-hidden" for="resetCode">C�digo de 6 d�gitos</label>
+                            <input
+                                type="text"
+                                id="resetCode"
+                                name="code"
+                                class="hidden-code-input"
+                                inputmode="numeric"
+                                pattern="[0-9]{6}"
+                                maxlength="6"
+                                required
+                                autocomplete="one-time-code"
+                                aria-label="C�digo de 6 d�gitos"
+                            >
+                            <div class="reset-feedback" id="verifyCodeFeedback" role="alert" style="display:none;"></div>
+                            <div class="reset-actions">
+                                <button type="submit" class="btn-reset-primary btn-pill">OK</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -495,7 +507,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                 <div class="modal-body">
                     <p>Tem certeza que deseja sair?</p>
                     <button id="confirmLogout">Sim</button>
-                    <button id="cancelLogout">não</button>
+                    <button id="cancelLogout">n�o</button>
                 </div>
             </div>
         </div>
@@ -515,6 +527,5 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
   </body>
 </html>
-
 
 
