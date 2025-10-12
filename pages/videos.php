@@ -229,9 +229,48 @@ if ($categoriaOutros !== null) {
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/estilo.css">
   <style>
+    .videos-banner {
+      position: relative;
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      background: url('../img/produtos/imagens/baner_alisamento.png') center / cover no-repeat;
+    }
+
+    .videos-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .videos-banner-conteudo {
+      position: relative;
+      max-width: 720px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .videos-banner-conteudo h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .videos-banner-conteudo p {
+      font-size: 1.1rem;
+      margin-bottom: 0;
+    }
+
+    .title-banner-pequeno {
+      text-transform: uppercase;
+    }
+
     .videos-wrapper {
       min-height: 100vh;
-      padding: 120px 0 80px;
+      padding: 70px 0 120px;
       background: linear-gradient(180deg, #0f172a 0%, #1f2937 60%, #0f172a 100%);
       color: #fff;
     }
@@ -438,6 +477,14 @@ if ($categoriaOutros !== null) {
     }
 
     @media (max-width: 768px) {
+      .videos-banner {
+        min-height: 260px;
+      }
+
+      .videos-banner-conteudo h1 {
+        font-size: 2.2rem;
+      }
+
       .videos-main {
         padding: 28px 20px;
       }
@@ -458,6 +505,14 @@ if ($categoriaOutros !== null) {
 $menuShowAdminIcon = false;
 include __DIR__ . '/../class/menu.php';
 ?>
+
+<section class="videos-banner">
+  <div class="videos-banner-conteudo">
+    <p class="title-banner-pequeno">Qualidade Garantida</p>
+    <h1>Nossos produtos</h1>
+    <p>Conheca as linhas que entregam cuidado e beleza com a assinatura do Studio.</p>
+  </div>
+</section>
 
 <main class="videos-wrapper">
   <?php if (!$temVideos): ?>
@@ -616,3 +671,4 @@ include __DIR__ . '/../class/menu.php';
 </script>
 </body>
 </html>
+

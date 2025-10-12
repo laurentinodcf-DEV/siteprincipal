@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // class/menu.php
 ?>
 
@@ -7,9 +7,9 @@
 
 <nav class="nav-menu-principal">
     <ul class="ul-menu-principal">
-        <li class="li-menu-principal"><span class="menu-principal">ServiÃ§os</span>
+        <li class="li-menu-principal"><span class="menu-principal">Serviços</span>
             <ul class="submenu">
-                <li class="submenu-item"><a href="../pages/servicos.php">ServiÃ§os oferecidos</a></li>
+                <li class="submenu-item"><a href="../pages/servicos.php">Serviços oferecidos</a></li>
             </ul>
         </li>
         <li class="li-menu-principal"><span class="menu-principal">Produtos</span>
@@ -19,7 +19,7 @@
         </li>
         <li class="li-menu-principal"><span class="menu-principal">Resultados</span>
             <ul class="submenu">
-                <li class="submenu-item"><a href="../pages/videos.php">VÃ­deos</a></li>
+                <li class="submenu-item"><a href="../pages/videos.php">Videos</a></li>
                 <li class="submenu-item">Imagens</li>
                 <li class="submenu-item">Depoimentos</li>
             </ul>
@@ -27,7 +27,7 @@
         <li class="li-menu-principal"><span class="menu-principal">Sobre</span>
             <ul class="submenu">
                 <li class="submenu-item" id="openModal">Contato</li>
-                <li class="submenu-item" id="openMapModal">EndereÃ§o</li>
+                <li class="submenu-item" id="openMapModal">Endereço</li>
                 <li class="submenu-item">Profissional</li>
                 <li class="submenu-item">Fotos</li>
             </ul>
