@@ -231,12 +231,12 @@ if ($categoriaOutros !== null) {
   <style>
     .videos-banner {
       position: relative;
-      min-height: 320px;
+      min-height: 350px;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 60px 20px;
-      background: url('../img/produtos/imagens/baner_alisamento.png') center / cover no-repeat;
+      background: url('../videos/imagens/banner-video.png') center / cover no-repeat;
     }
 
     .videos-banner::before {
@@ -508,9 +508,9 @@ include __DIR__ . '/../class/menu.php';
 
 <section class="videos-banner">
   <div class="videos-banner-conteudo">
-    <p class="title-banner-pequeno">Qualidade Garantida</p>
-    <h1>Nossos produtos</h1>
-    <p>Conheca as linhas que entregam cuidado e beleza com a assinatura do Studio.</p>
+    <p class="title-banner-pequeno">Veja a transformação acontecer</p>
+    <h1>Resultados que inspiram</h1>
+    <p>Resultados reais, conquistados com técnica, cuidado e paixão pela beleza</p>
   </div>
 </section>
 
