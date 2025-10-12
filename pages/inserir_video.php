@@ -5,6 +5,23 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 require '../conexao.php';
+
+$categoriasVideo = [];
+$resultadoCategorias = $conn->query(
+    'SELECT id, nome
+     FROM categoria_videos
+     WHERE ativo = 1
+     ORDER BY COALESCE(ordem, 2147483647), nome ASC'
+);
+if ($resultadoCategorias) {
+    while ($linha = $resultadoCategorias->fetch_assoc()) {
+        $categoriasVideo[] = [
+            'id' => (int) $linha['id'],
+            'nome' => $linha['nome'],
+        ];
+    }
+    $resultadoCategorias->free();
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -35,6 +52,16 @@ require '../conexao.php';
             <input type="text" name="titulo" class="form-control mb-3" required>
             <label class="form-label">Descricao:</label>
             <textarea name="descricao" class="form-control mb-3" rows="4"></textarea>
+            <label class="form-label">Categoria:</label>
+            <select name="categoria" class="form-select mb-3">
+                <option value="">Sem categoria</option>
+                <?php foreach ($categoriasVideo as $categoria): ?>
+                    <option value="<?= $categoria['id']; ?>"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <?php if (empty($categoriasVideo)): ?>
+                <p class="text-muted small mb-3">Nenhuma categoria ativa cadastrada.</p>
+            <?php endif; ?>
             <label class="form-label">Link do video:</label>
             <input type="url" name="link" class="form-control" required placeholder="https://">
         </div>
@@ -59,6 +86,16 @@ require '../conexao.php';
             <input type="text" name="titulo" class="form-control mb-3" required>
             <label class="form-label">Descricao:</label>
             <textarea name="descricao" class="form-control mb-3" rows="4"></textarea>
+            <label class="form-label">Categoria:</label>
+            <select name="categoria" class="form-select mb-3">
+                <option value="">Sem categoria</option>
+                <?php foreach ($categoriasVideo as $categoria): ?>
+                    <option value="<?= $categoria['id']; ?>"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <?php if (empty($categoriasVideo)): ?>
+                <p class="text-muted small mb-3">Nenhuma categoria ativa cadastrada.</p>
+            <?php endif; ?>
             <label class="form-label">Arquivo de video:</label>
             <input
                 type="file"

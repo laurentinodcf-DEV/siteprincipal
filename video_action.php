@@ -30,6 +30,26 @@ $categoriaId = isset($_POST['categoria']) && $_POST['categoria'] !== ''
     ? (int) $_POST['categoria']
     : null;
 
+if ($categoriaId !== null) {
+    $stmtCategoria = $conn->prepare(
+        'SELECT 1 FROM categoria_videos WHERE id = ? AND ativo = 1'
+    );
+    if ($stmtCategoria === false) {
+        respostaJson(false, 'Erro ao validar a categoria informada.');
+    }
+    $stmtCategoria->bind_param('i', $categoriaId);
+    if (!$stmtCategoria->execute()) {
+        $stmtCategoria->close();
+        respostaJson(false, 'Erro ao validar a categoria informada.');
+    }
+    $stmtCategoria->store_result();
+    if ($stmtCategoria->num_rows === 0) {
+        $stmtCategoria->close();
+        respostaJson(false, 'Categoria selecionada nao esta disponivel.');
+    }
+    $stmtCategoria->close();
+}
+
 if ($tipo === 'link') {
     $linkOriginal = trim((string) ($_POST['link'] ?? ''));
     if ($linkOriginal === '' || !filter_var($linkOriginal, FILTER_VALIDATE_URL)) {

@@ -17,6 +17,11 @@ $modules = [
         'description' => 'Cadastre novos vídeos para os destaques do site.',
         'src' => '../pages/inserir_video.php',
     ],
+    'categorias_videos' => [
+        'label' => 'Categorias de v�deos',
+        'description' => 'Gerencie as categorias utilizadas para organizar os v�deos.',
+        'src' => 'modules/categorias_videos.php',
+    ],
     'servicos' => [
         'label' => 'Serviços',
         'description' => 'Gerencie o catálogo de Serviços oferecidos.',
@@ -51,7 +56,7 @@ $navigation = [
     ],
     [
         'title' => 'Inserir',
-        'items' => ['videos', 'servicos', 'produtos', 'categorias_produtos'],
+        'items' => ['videos', 'categorias_videos', 'servicos', 'produtos', 'categorias_produtos'],
     ],
     [
         'title' => 'Operação',
