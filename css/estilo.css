@@ -1,4 +1,4 @@
-﻿/*--------------------------------- ZERANDO MARGENS E PADDINGS DEFALT --------------------------------------------------------------------*/
+/*--------------------------------- ZERANDO MARGENS E PADDINGS DEFALT --------------------------------------------------------------------*/
 *{
 	margin: 0;
 	padding: 0;
@@ -974,7 +974,7 @@ nav ul ul li {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
+    /* Quando aberto via JS, o display passa a 'flex' inline */
     align-items: center;
     justify-content: center;
     z-index: 1000;
@@ -2766,7 +2766,7 @@ nav ul ul li {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
+    /* Quando aberto via JS, o display passa a 'flex' inline */
     align-items: center;
     justify-content: center;
     z-index: 1000;
