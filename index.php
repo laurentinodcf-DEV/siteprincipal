@@ -1,6 +1,17 @@
 ﻿<?php
 session_start();
 $adminLogado = isset($_SESSION['usuario_id']);
+
+// Verificar se há depoimentos ativos para mostrar a seção
+$mostrarDepoimentos = false;
+require 'conexao.php';
+
+$resultado = $conn->query('SELECT COUNT(*) as total FROM salao_depoimentos WHERE ativo = 1');
+if ($resultado) {
+    $linha = $resultado->fetch_assoc();
+    $mostrarDepoimentos = (int) $linha['total'] > 0;
+    $resultado->free();
+}
 ?>
 
 <!DOCTYPE html>
@@ -188,6 +199,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
 
 
                 <!-- SE��O 03 - Sobre o Studio -->
+                <?php if ($mostrarDepoimentos): ?>
                 <section id="secao-03" class="secao-03">
                     <div class="container-depoimentos">
                         <h2 class="titulo-depoimentos">O que nossos clientes dizem</h2>
@@ -249,6 +261,7 @@ $adminLogado = isset($_SESSION['usuario_id']);
                         </div>
                     </div>
                 </section>
+                <?php endif; ?>
 
                 <!-- SE��O 04 - Nossos Servi�os -->
                 <section id="secao-04" class="secao-04">
