@@ -219,57 +219,20 @@ if ($resultado) {
                             
                             <!-- Carrossel de depoimentos -->
                             <div class="depoimentos-carousel">
-                                <?php foreach ($depoimentosAtivos as $depoimento): 
-                                    // Determinar qual imagem usar (priorizar imagem do cliente)
-                                    $imagemSrc = '';
-                                    if (!empty($depoimento['cliente_imagem'])) {
-                                        $p = str_replace('\\', '/', trim($depoimento['cliente_imagem']));
-                                        if ($p !== '') {
-                                            if (strpos($p, 'img/') === 0) {
-                                                $imagemSrc = $p;
-                                            } else {
-                                                $imagemSrc = 'img/clientes/imgcadastro/' . ltrim($p, '/');
-                                            }
-                                        }
-                                    } elseif (!empty($depoimento['imagem_reserva'])) {
-                                        $p = str_replace('\\', '/', trim($depoimento['imagem_reserva']));
-                                        if ($p !== '') {
-                                            if (strpos($p, 'img/') === 0) {
-                                                $imagemSrc = $p;
-                                            } else {
-                                                $imagemSrc = 'img/depoimentos/' . ltrim($p, '/');
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Gerar estrelas baseado na avaliação
-                                    $estrelas = (int) $depoimento['estrelas'];
-                                    $estrelasHtml = '';
-                                    for ($i = 1; $i <= 5; $i++) {
-                                        if ($i <= $estrelas) {
-                                            $estrelasHtml .= '★';
-                                        } else {
-                                            $estrelasHtml .= '☆';
-                                        }
-                                    }
-                                ?>
+                                <!-- Depoimento 1 -->
                                 <div class="card-depoimento">
-                                    <div class="avaliacao"><?= $estrelasHtml; ?></div>
-                                    <h3 class="titulo-depoimento"><?= htmlspecialchars($depoimento['titulo'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                    <div class="avaliacao">★★★★★</div>
+                                    <h3 class="titulo-depoimento">Transformou meu cabelo!</h3>
                                     <p class="texto-depoimento">
                                     O Servi�o foi excepcional e superou minhas expectativas em todos os aspectos.
                                     </p>
                                     <div class="autor">
-                                        <?php if ($imagemSrc !== ''): ?>
-                                            <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($depoimento['cliente_nome'], ENT_QUOTES, 'UTF-8'); ?>" class="foto-autor">
-                                        <?php else: ?>
-                                            <div class="foto-autor-placeholder">👤</div>
-                                        <?php endif; ?>
-                                        <p class="nome-autor"><?= htmlspecialchars($depoimento['cliente_nome'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                    <img src="img/clientes/ana.jpg" alt="Ana L." class="foto-autor">
+                                    <p class="nome-autor">Ana L.</p>
                                     </div>
                                 </div>
-                                <?php endforeach; ?>
 
+                                <!-- Depoimento 2 -->
                                 <div class="card-depoimento">
                                     <div class="avaliacao">★★★★★</div>
                                     <h3 class="titulo-depoimento">Estou admirada!</h3>
