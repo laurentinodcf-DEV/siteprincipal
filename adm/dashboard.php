@@ -37,6 +37,11 @@ $modules = [
         'description' => 'Gerencie as categorias utilizadas para classificar os produtos.',
         'src' => 'modules/categorias_produtos.php',
     ],
+    'clientes' => [
+        'label' => 'Clientes',
+        'description' => 'Gerencie o cadastro de clientes do salão.',
+        'src' => 'modules/clientes.php',
+    ],
     'ordenar_servicos' => [
         'label' => 'Ordenar serviços',
         'description' => 'Defina manualmente a ordem de exibição dos serviços ativos no site.',
@@ -56,7 +61,7 @@ $navigation = [
     ],
     [
         'title' => 'Inserir',
-        'items' => ['videos', 'categorias_videos', 'servicos', 'produtos', 'categorias_produtos'],
+        'items' => ['videos', 'categorias_videos', 'servicos', 'produtos', 'categorias_produtos', 'clientes'],
     ],
     [
         'title' => 'Operação',
