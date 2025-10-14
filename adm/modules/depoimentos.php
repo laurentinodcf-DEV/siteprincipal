@@ -228,6 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!$stmtBusca->fetch()) {
                         $mensagemErro = 'Depoimento não encontrado.';
                     } else {
+                        $stmtBusca->close(); // Fechar antes de preparar nova query
+                        
                         // Verificar se o cliente tem imagem
                         $stmtCliente = $conn->prepare('SELECT imagem FROM salao_clientes WHERE id = ?');
                         if ($stmtCliente === false) {
@@ -301,8 +303,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 } else {
                     $mensagemErro = 'Erro ao localizar depoimento para edição.';
+                    $stmtBusca->close();
                 }
-                $stmtBusca->close();
             }
         }
     } elseif ($acao === 'delete') {
