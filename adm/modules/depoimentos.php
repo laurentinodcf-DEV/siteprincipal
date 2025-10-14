@@ -168,9 +168,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             $stmtCliente->close(); // Fechar antes de preparar nova query
                             
+                            // Obter a próxima ordem (maior ordem + 1)
+                            $proximaOrdem = 1;
+                            $resultadoOrdem = $conn->query('SELECT MAX(ordem) as max_ordem FROM salao_depoimentos WHERE ordem IS NOT NULL');
+                            if ($resultadoOrdem) {
+                                $linhaOrdem = $resultadoOrdem->fetch_assoc();
+                                if ($linhaOrdem['max_ordem'] !== null) {
+                                    $proximaOrdem = (int) $linhaOrdem['max_ordem'] + 1;
+                                }
+                                $resultadoOrdem->free();
+                            }
+                            
                             $stmt = $conn->prepare(
-                                'INSERT INTO salao_depoimentos (id_cliente, estrelas, titulo, descricao, imagem_reserva, ativo)
-                                 VALUES (?, ?, ?, ?, ?, ?)'
+                                'INSERT INTO salao_depoimentos (id_cliente, estrelas, titulo, descricao, imagem_reserva, ativo, ordem)
+                                 VALUES (?, ?, ?, ?, ?, ?, ?)'
                             );
 
                             if ($stmt === false) {
@@ -179,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     @unlink($infoUpload['fisico']);
                                 }
                             } else {
-                                $stmt->bind_param('iisssi', $id_cliente, $estrelas, $titulo, $descricao, $imagemReserva, $ativo);
+                                $stmt->bind_param('iisssii', $id_cliente, $estrelas, $titulo, $descricao, $imagemReserva, $ativo, $proximaOrdem);
 
                                 if ($stmt->execute()) {
                                     $mensagemSucesso = 'Depoimento cadastrado com sucesso.';
@@ -265,9 +276,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     if ($mensagemErro === '') {
                                         $stmtCliente->close(); // Fechar antes de preparar nova query
                                         
+                                        // Gerenciar ordem baseado no status ativo
+                                        $novaOrdem = null;
+                                        if ($ativo == 1) {
+                                            // Se está ativando, verificar se já tem ordem
+                                            $stmtVerificarOrdem = $conn->prepare('SELECT ordem FROM salao_depoimentos WHERE id = ?');
+                                            $stmtVerificarOrdem->bind_param('i', $id);
+                                            $stmtVerificarOrdem->execute();
+                                            $stmtVerificarOrdem->bind_result($ordemAtual);
+                                            $stmtVerificarOrdem->fetch();
+                                            $stmtVerificarOrdem->close();
+                                            
+                                            if ($ordemAtual === null) {
+                                                // Não tem ordem, atribuir próxima ordem
+                                                $resultadoOrdem = $conn->query('SELECT MAX(ordem) as max_ordem FROM salao_depoimentos WHERE ordem IS NOT NULL');
+                                                if ($resultadoOrdem) {
+                                                    $linhaOrdem = $resultadoOrdem->fetch_assoc();
+                                                    $novaOrdem = $linhaOrdem['max_ordem'] !== null ? (int) $linhaOrdem['max_ordem'] + 1 : 1;
+                                                    $resultadoOrdem->free();
+                                                }
+                                            } else {
+                                                // Já tem ordem, manter
+                                                $novaOrdem = $ordemAtual;
+                                            }
+                                        } else {
+                                            // Se está desativando, ordem = null
+                                            $novaOrdem = null;
+                                        }
+                                        
                                         $stmt = $conn->prepare(
                                             'UPDATE salao_depoimentos
-                                             SET id_cliente = ?, estrelas = ?, titulo = ?, descricao = ?, imagem_reserva = ?, ativo = ?
+                                             SET id_cliente = ?, estrelas = ?, titulo = ?, descricao = ?, imagem_reserva = ?, ativo = ?, ordem = ?
                                              WHERE id = ?'
                                         );
 
@@ -277,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 @unlink($infoUpload['fisico']);
                                             }
                                         } else {
-                                            $stmt->bind_param('iisssii', $id_cliente, $estrelas, $titulo, $descricao, $imagemReserva, $ativo, $id);
+                                            $stmt->bind_param('iisssiii', $id_cliente, $estrelas, $titulo, $descricao, $imagemReserva, $ativo, $novaOrdem, $id);
 
                                             if ($stmt->execute()) {
                                                 $mensagemSucesso = 'Depoimento atualizado.';
@@ -351,10 +390,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Buscar depoimentos
 $depoimentos = [];
 $resultado = $conn->query(
-    'SELECT d.id, d.id_cliente, d.estrelas, d.titulo, d.descricao, d.imagem_reserva, d.ativo, c.nome as cliente_nome, c.imagem as cliente_imagem
+    'SELECT d.id, d.id_cliente, d.estrelas, d.titulo, d.descricao, d.imagem_reserva, d.ativo, d.ordem, c.nome as cliente_nome, c.imagem as cliente_imagem
      FROM salao_depoimentos d
      INNER JOIN salao_clientes c ON d.id_cliente = c.id
-     ORDER BY d.data_criacao DESC'
+     ORDER BY COALESCE(d.ordem, 2147483647), d.data_criacao DESC'
 );
 if ($resultado) {
     while ($linha = $resultado->fetch_assoc()) {
@@ -362,6 +401,7 @@ if ($resultado) {
         $linha['id_cliente'] = (int) $linha['id_cliente'];
         $linha['estrelas'] = (int) $linha['estrelas'];
         $linha['ativo'] = isset($linha['ativo']) ? (int) $linha['ativo'] : 1;
+        $linha['ordem'] = isset($linha['ordem']) ? (int) $linha['ordem'] : null;
         $depoimentos[] = $linha;
     }
     $resultado->free();
@@ -439,6 +479,10 @@ function renderizarDepoimentoCard(array $d): void {
                             <div>
                                 <dt>Descrição:</dt>
                                 <dd><?= htmlspecialchars($d['descricao'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></dd>
+                            </div>
+                            <div>
+                                <dt>Ordem:</dt>
+                                <dd><?= $d['ordem'] !== null ? '#' . $d['ordem'] : '—'; ?></dd>
                             </div>
                         </dl>
                         <div class="servico-card-acoes">

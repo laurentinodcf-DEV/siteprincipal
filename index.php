@@ -11,8 +11,8 @@ $resultado = $conn->query(
     'SELECT d.id, d.estrelas, d.titulo, d.descricao, d.imagem_reserva, c.nome as cliente_nome, c.imagem as cliente_imagem
      FROM salao_depoimentos d
      INNER JOIN salao_clientes c ON d.id_cliente = c.id
-     WHERE d.ativo = 1
-     ORDER BY d.data_criacao DESC'
+     WHERE d.ativo = 1 AND d.ordem IS NOT NULL
+     ORDER BY d.ordem ASC'
 );
 if ($resultado) {
     while ($linha = $resultado->fetch_assoc()) {
@@ -276,8 +276,9 @@ if ($resultado) {
                         
                         <!-- Indicadores de slide -->
                         <div class="depoimentos-indicadores">
-                            <span class="indicador active" data-slide="0"></span>
-                            <span class="indicador" data-slide="1"></span>
+                            <?php for ($i = 0; $i < count($depoimentosAtivos); $i++): ?>
+                                <span class="indicador <?= $i === 0 ? 'active' : ''; ?>" data-slide="<?= $i; ?>"></span>
+                            <?php endfor; ?>
                         </div>
                     </div>
                 </section>
