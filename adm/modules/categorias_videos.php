@@ -191,6 +191,18 @@ foreach ($categorias as $cat) {
     <link rel="stylesheet" href="../../css/estilo.css">
     <link rel="stylesheet" href="../css/painel.css">
     <style>
+        /* Corrigir sobreposição: garantir modal acima do backdrop */
+        .modal {
+            z-index: 1055 !important;
+        }
+        .modal-backdrop {
+            z-index: 1050 !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+        .modal-content {
+            background-color: #ffffff !important;
+            border: 1px solid #dee2e6 !important;
+        }
         /* Estilo personalizado para modais de categorias de vídeos */
         .modal-content {
             border-radius: 12px !important;
