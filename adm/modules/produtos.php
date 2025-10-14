@@ -671,24 +671,23 @@ if ($resultado) {
                                 'UTF-8'
                             );
                             $imagemSrc = '';
-                            $temImagem = false;
                             if (!empty($produto['imagem'])) {
                                 $imagemValor = (string) $produto['imagem'];
                                 if (preg_match('/^(https?:)?\/\//i', $imagemValor)) {
                                     $imagemSrc = $imagemValor;
-                                    $temImagem = true;
                                 } elseif (strpos($imagemValor, '../') === 0 || strpos($imagemValor, '../../') === 0) {
                                     $imagemSrc = $imagemValor;
-                                    $temImagem = true;
+                                } elseif ($imagemValor !== '' && $imagemValor[0] === '/') {
+                                    $imagemSrc = $imagemValor;
                                 } else {
-                                    $imagemSrc = '../' . ltrim($imagemValor, '/');
-                                    $temImagem = true;
+                                    $imagemSrc = '../../' . ltrim($imagemValor, '/');
                                 }
                             }
-                            $descricaoFormatada = '';
-                            if (!empty($produto['descricao'])) {
-                                $descricaoFormatada = nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'));
-                            }
+
+                            $temImagem = $imagemSrc !== '';
+                            $descricaoFormatada = !empty($produto['descricao'])
+                                ? nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'))
+                                : '<span class="texto-suave">Sem descrio cadastrada.</span>';
                             $temPromo = !empty($produto['preco_promocional']) && (float) $produto['preco_promocional'] > 0;
                         ?>
                         <article class="servico-accordion-item" data-produto='<?= $produtoJson; ?>'>
