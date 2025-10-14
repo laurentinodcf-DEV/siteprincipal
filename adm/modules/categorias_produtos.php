@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -163,6 +163,7 @@ if ($resultado) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../css/estilo.css">
+    <link rel="stylesheet" href="../css/painel.css">
     <style>
         body {
             margin: 0;
@@ -205,6 +206,15 @@ if ($resultado) {
             background: #1d4ed8;
         }
         
+        /* Corrigir sobreposição: garantir modal acima do backdrop */
+        .modal {
+            z-index: 1055 !important;
+        }
+        .modal-backdrop {
+            z-index: 1050 !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+
         /* Estilo personalizado para modais de categorias de produtos */
         .modal-content {
             border-radius: 12px !important;
@@ -282,7 +292,7 @@ if ($resultado) {
         }
     </style>
 </head>
-<body>
+<body class="painel-modulo">
     <div class="categorias-wrapper">
         <section class="categoria-form-section">
             <h2>Nova categoria</h2>
@@ -591,6 +601,21 @@ if ($resultado) {
                         form.reset();
                     }
                 });
+            }
+
+            // Remover backdrops restantes para evitar tela escura bloqueando cliques
+            const cleanupBackdrops = () => {
+                document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('paddingRight');
+            };
+
+            if (editarModal) {
+                editarModal.addEventListener('hidden.bs.modal', cleanupBackdrops);
+            }
+            if (excluirModal) {
+                excluirModal.addEventListener('hidden.bs.modal', cleanupBackdrops);
             }
         });
     </script>

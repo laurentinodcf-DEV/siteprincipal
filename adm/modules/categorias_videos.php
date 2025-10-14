@@ -573,12 +573,20 @@ foreach ($categorias as $cat) {
                 }
             });
 
+            const cleanupBackdrops = () => {
+                document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('paddingRight');
+            };
+
             if (editarModal) {
                 editarModal.addEventListener('hidden.bs.modal', () => {
                     const form = editarModal.querySelector('form');
                     if (form) {
                         form.reset();
                     }
+                    cleanupBackdrops();
                 });
             }
 
@@ -588,6 +596,7 @@ foreach ($categorias as $cat) {
                     if (form) {
                         form.reset();
                     }
+                    cleanupBackdrops();
                 });
             }
         });
