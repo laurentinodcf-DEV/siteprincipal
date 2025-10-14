@@ -6,6 +6,93 @@ if (!isset($_SESSION['usuario_id'])) {
 
 require '../conexao.php';
 
+// Processar acoes de edicao/exclusao (formulario dos modais)
+$mensagemSucesso = '';
+$mensagemErro = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $acao = $_POST['action'] ?? '';
+
+    if ($acao === 'update') {
+        $id = (int) ($_POST['id'] ?? 0);
+        $tituloPost = trim((string) ($_POST['titulo'] ?? ''));
+        $descricaoPost = trim((string) ($_POST['descricao'] ?? ''));
+        $idCategoriaPost = isset($_POST['id_categoria']) && $_POST['id_categoria'] !== '' ? (int) $_POST['id_categoria'] : null;
+        $ativoPost = isset($_POST['ativo']) ? 1 : 0;
+
+        if ($id > 0 && $tituloPost !== '') {
+            // Validar categoria, se informada
+            if ($idCategoriaPost !== null) {
+                $stmtCat = $conn->prepare('SELECT 1 FROM categoria_videos WHERE id = ? AND ativo = 1');
+                if ($stmtCat) {
+                    $stmtCat->bind_param('i', $idCategoriaPost);
+                    if (!$stmtCat->execute()) {
+                        $idCategoriaPost = null; // se falhar, nao utiliza
+                    }
+                    $stmtCat->close();
+                } else {
+                    $idCategoriaPost = null;
+                }
+            }
+
+            $stmt = $conn->prepare('UPDATE salao_videos SET titulo = ?, descricao = ?, id_categoria = ?, ativo = ? WHERE id = ?');
+            if ($stmt) {
+                $descricaoParam = $descricaoPost !== '' ? $descricaoPost : null;
+                $stmt->bind_param('ssiii', $tituloPost, $descricaoParam, $idCategoriaPost, $ativoPost, $id);
+                if ($stmt->execute()) {
+                    $mensagemSucesso = 'Vídeo atualizado.';
+                } else {
+                    $mensagemErro = 'Erro ao atualizar o vídeo.';
+                }
+                $stmt->close();
+            } else {
+                $mensagemErro = 'Erro ao preparar atualização do vídeo.';
+            }
+        } else {
+            $mensagemErro = 'Dados inválidos para atualização do vídeo.';
+        }
+    } elseif ($acao === 'delete') {
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id > 0) {
+            // Buscar caminho de arquivo (se houver) para remover apos exclusao
+            $caminhoArquivo = null;
+            $stmtBusca = $conn->prepare('SELECT caminho FROM salao_videos WHERE id = ?');
+            if ($stmtBusca) {
+                $stmtBusca->bind_param('i', $id);
+                if ($stmtBusca->execute()) {
+                    $stmtBusca->bind_result($caminhoArquivo);
+                    $stmtBusca->fetch();
+                }
+                $stmtBusca->close();
+            }
+
+            $stmt = $conn->prepare('DELETE FROM salao_videos WHERE id = ?');
+            if ($stmt) {
+                $stmt->bind_param('i', $id);
+                if ($stmt->execute()) {
+                    $mensagemSucesso = 'Vídeo excluído.';
+                    // Remover arquivo fisico se pertencer a pasta de uploads do sistema
+                    if ($caminhoArquivo) {
+                        $normalizado = str_replace('\\', '/', $caminhoArquivo);
+                        if (strpos($normalizado, 'videos/vdcadastro/') === 0) {
+                            $caminhoFisico = realpath(__DIR__ . '/../' . $normalizado);
+                            if ($caminhoFisico && is_file($caminhoFisico)) {
+                                @unlink($caminhoFisico);
+                            }
+                        }
+                    }
+                } else {
+                    $mensagemErro = 'Erro ao excluir o vídeo.';
+                }
+                $stmt->close();
+            } else {
+                $mensagemErro = 'Erro ao preparar exclusão do vídeo.';
+            }
+        } else {
+            $mensagemErro = 'Vídeo inválido para exclusão.';
+        }
+    }
+}
+
 // Categorias (ativas para o select)
 $categoriasVideo = [];
 $resultadoCategorias = $conn->query(
@@ -177,7 +264,14 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                 $categoriaNome = (string) $categoriasMapa[(int) $video['id_categoria']];
             }
             ?>
-            <article class="servico-accordion-item">
+            <?php
+            $videoJson = htmlspecialchars(
+                json_encode($video, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP),
+                ENT_QUOTES,
+                'UTF-8'
+            );
+            ?>
+            <article class="servico-accordion-item" data-video='<?= $videoJson; ?>'>
                 <header class="servico-accordion-header">
                     <button type="button" class="servico-accordion-toggle" aria-expanded="false">
                         <span class="servico-accordion-title">
@@ -399,8 +493,8 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                             <label class="form-label">Categoria</label>
                             <select name="id_categoria" id="editarVideoCategoria" class="form-control">
                                 <option value="">Selecione uma categoria</option>
-                                <?php foreach ($categorias as $cat): ?>
-                                    <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                <?php foreach ($categoriasVideo as $cat): ?>
+                                    <option value="<?= (int) $cat['id']; ?>"><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -545,44 +639,45 @@ document.getElementById('formUpload').addEventListener('submit', function (event
       });
     });
 
-    // Preencher modal de edição
-    document.querySelectorAll('.acao-editar').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.servico-accordion-item');
-            const titulo = item.querySelector('.servico-accordion-title strong').textContent;
-            const descricao = item.querySelector('.servico-descricao-texto').textContent;
-            const categoria = item.querySelector('.servico-categoria-pill')?.textContent || '';
-            const ativo = item.querySelector('.servico-status-pill').textContent === 'Ativo';
-            
-            // Encontrar o ID do vídeo (você pode precisar ajustar isso baseado na estrutura)
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
-            
-            document.getElementById('editarVideoId').value = videoId;
-            document.getElementById('editarVideoTitulo').value = titulo;
-            document.getElementById('editarVideoDescricao').value = descricao;
-            document.getElementById('editarVideoAtivo').checked = ativo;
-            
-            // Selecionar categoria
-            const categoriaSelect = document.getElementById('editarVideoCategoria');
-            for (let option of categoriaSelect.options) {
-                if (option.textContent === categoria) {
-                    option.selected = true;
-                    break;
-                }
-            }
-        });
+    // Preencher modal de edicao usando dataset com os dados do video
+    document.querySelectorAll('.acao-editar').forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const item = this.closest('.servico-accordion-item');
+        if (!item) return;
+        const data = item.dataset.video ? JSON.parse(item.dataset.video) : null;
+        if (!data) return;
+
+        const idInput = document.getElementById('editarVideoId');
+        const tituloInput = document.getElementById('editarVideoTitulo');
+        const descricaoInput = document.getElementById('editarVideoDescricao');
+        const ativoInput = document.getElementById('editarVideoAtivo');
+        const categoriaSelect = document.getElementById('editarVideoCategoria');
+
+        if (idInput) idInput.value = String(data.id || '');
+        if (tituloInput) tituloInput.value = data.titulo || '';
+        if (descricaoInput) descricaoInput.value = data.descricao || '';
+        if (ativoInput) ativoInput.checked = String(data.ativo) === '1';
+
+        if (categoriaSelect) {
+          const valorCategoria = data.id_categoria ? String(data.id_categoria) : '';
+          categoriaSelect.value = valorCategoria;
+        }
+      });
     });
 
-    // Preencher modal de exclusão
-    document.querySelectorAll('.acao-excluir').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.servico-accordion-item');
-            const titulo = item.querySelector('.servico-accordion-title strong').textContent;
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
-            
-            document.getElementById('excluirVideoId').value = videoId;
-            document.getElementById('excluirVideoTitulo').textContent = titulo;
-        });
+    // Preencher modal de exclusao
+    document.querySelectorAll('.acao-excluir').forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const item = this.closest('.servico-accordion-item');
+        if (!item) return;
+        const data = item.dataset.video ? JSON.parse(item.dataset.video) : null;
+        if (!data) return;
+
+        const idInput = document.getElementById('excluirVideoId');
+        const tituloSpan = document.getElementById('excluirVideoTitulo');
+        if (idInput) idInput.value = String(data.id || '');
+        if (tituloSpan) tituloSpan.textContent = data.titulo || '';
+      });
     });
   });
 </script>
