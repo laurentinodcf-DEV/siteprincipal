@@ -2915,7 +2915,7 @@ nav ul ul li {
     z-index: 10000;
 }
 
-.modal-content {/* Conteúdo do Modal */
+.modal-recupera .modal-content {/* Conteúdo do Modal (escopo apenas para modal de recuperação) */
     background: none;
     border: none;
     padding: 1%;
