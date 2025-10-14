@@ -462,6 +462,82 @@ if ($resultado) {
         .modal-footer {
             border-top: 1px solid #dee2e6 !important;
         }
+        
+        /* Estilo personalizado para modais de produtos */
+        .modal-content {
+            border-radius: 12px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border-radius: 12px 12px 0 0 !important;
+            border-bottom: none !important;
+        }
+        
+        .modal-title {
+            font-weight: 600 !important;
+            color: white !important;
+        }
+        
+        .btn-close {
+            filter: brightness(0) invert(1) !important;
+        }
+        
+        .form-label {
+            font-weight: 500 !important;
+            color: #374151 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px !important;
+            border: 1px solid #d1d5db !important;
+            padding: 0.75rem !important;
+            font-size: 0.875rem !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea !important;
+            border-color: #667eea !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 0.75rem 1.5rem !important;
+            font-weight: 500 !important;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+        }
+        
+        .btn-outline-secondary {
+            border-radius: 8px !important;
+            padding: 0.75rem 1.5rem !important;
+            font-weight: 500 !important;
+        }
+        
+        .btn-danger {
+            border-radius: 8px !important;
+            padding: 0.75rem 1.5rem !important;
+            font-weight: 500 !important;
+        }
+        
+        .text-muted {
+            font-size: 0.8rem !important;
+            color: #6b7280 !important;
+        }
     </style>
 </head>
 <body>
@@ -778,11 +854,11 @@ if ($resultado) {
                                     <input type="text" name="nome" class="form-control" id="editarProdutoNome" required maxlength="150">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Preco*</label>
+                                    <label class="form-label">Preço*</label>
                                     <input type="text" name="preco" class="form-control" id="editarProdutoPreco" required>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Preco promocional</label>
+                                    <label class="form-label">Preço promocional</label>
                                     <input type="text" name="preco_promocional" class="form-control" id="editarProdutoPrecoPromocional">
                                 </div>
                                 <div class="col-md-4">
@@ -803,7 +879,7 @@ if ($resultado) {
                                     <input type="number" name="estoque" class="form-control" id="editarProdutoEstoque" min="0">
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">Descricao</label>
+                                    <label class="form-label">Descrição</label>
                                     <textarea name="descricao" class="form-control" id="editarProdutoDescricao" rows="4"></textarea>
                                 </div>
                                 <div class="col-12">
@@ -824,7 +900,7 @@ if ($resultado) {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Salvar alteracoes</button>
+                            <button type="submit" class="btn btn-primary">Salvar alterações</button>
                         </div>
                     </form>
                 </div>
@@ -845,7 +921,7 @@ if ($resultado) {
                             <p class="mb-0">Deseja realmente excluir este produto?</p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Nao</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Não</button>
                             <button type="submit" class="btn btn-danger">Sim</button>
                         </div>
                     </form>
