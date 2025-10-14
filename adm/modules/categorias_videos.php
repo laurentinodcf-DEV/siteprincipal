@@ -171,6 +171,78 @@ if ($resultado) {
     }
     $resultado->free();
 }
+
+// Separa em listas de ativas e inativas para replicar o comportamento de servicos/produtos
+$categoriasAtivas = [];
+$categoriasInativas = [];
+foreach ($categorias as $categoria) {
+    if ((int) ($categoria['ativo'] ?? 0) === 1) {
+        $categoriasAtivas[] = $categoria;
+    } else {
+        $categoriasInativas[] = $categoria;
+    }
+}
+
+// Renderiza a grade de categorias reutilizando o mesmo layout do bloco atual
+function renderizarCategoriasVideoGrid(array $lista): void
+{
+    if (empty($lista)) {
+        return;
+    }
+    ?>
+    <div class="servicos-grid">
+        <?php foreach ($lista as $categoria): ?>
+            <?php
+                $categoriaJson = htmlspecialchars(
+                    json_encode($categoria, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP),
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
+                $descricaoFormatada = !empty($categoria['descricao'])
+                    ? nl2br(htmlspecialchars($categoria['descricao'], ENT_QUOTES, 'UTF-8'))
+                    : '<span class="texto-suave">Sem descricao cadastrada.</span>';
+            ?>
+            <article class="servico-accordion-item">
+                <header class="servico-accordion-header">
+                    <button type="button" class="servico-accordion-toggle" aria-expanded="false">
+                        <span class="servico-accordion-title">
+                            <strong><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></strong>
+                            <small class="d-block texto-suave"><?= (int) $categoria['total_videos']; ?> video(s)</small>
+                        </span>
+                        <span class="servico-status-pill <?= $categoria['ativo'] ? 'ativo' : 'inativo'; ?>">
+                            <?= $categoria['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                        </span>
+                        <span class="servico-accordion-icon">+</span>
+                    </button>
+                </header>
+                <div class="servico-accordion-content" aria-hidden="true">
+                    <div class="servico-card" data-categoria='<?= $categoriaJson; ?>'>
+                        <div class="servico-card-inner">
+                            <div class="servico-card-info" style="flex:1">
+                                <dl class="servico-propriedades">
+                                    <div>
+                                        <dt>Ordem:</dt>
+                                        <dd><?= $categoria['ordem'] !== null ? (int) $categoria['ordem'] : ''; ?></dd>
+                                    </div>
+                                    <div class="servico-descricao-bloco">
+                                        <dt>Descricao:</dt>
+                                        <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
+                                    </div>
+                                </dl>
+
+                                <div class="servico-card-acoes">
+                                    <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarCategoria">Editar</button>
+                                    <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirCategoria">Excluir</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        <?php endforeach; ?>
+    </div>
+    <?php
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -234,56 +306,28 @@ if ($resultado) {
             <?php if (empty($categorias)): ?>
                 <div class="alert alert-info">Nenhuma categoria cadastrada ate o momento.</div>
             <?php else: ?>
-                <div class="servicos-grid">
-                    <?php foreach ($categorias as $categoria): ?>
-                        <?php
-                            $categoriaJson = htmlspecialchars(
-                                json_encode($categoria, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP),
-                                ENT_QUOTES,
-                                'UTF-8'
-                            );
-                            $descricaoFormatada = !empty($categoria['descricao'])
-                                ? nl2br(htmlspecialchars($categoria['descricao'], ENT_QUOTES, 'UTF-8'))
-                                : '<span class="texto-suave">Sem descricao cadastrada.</span>';
-                        ?>
-                        <article class="servico-accordion-item">
-                            <header class="servico-accordion-header">
-                                <button type="button" class="servico-accordion-toggle" aria-expanded="false">
-                                    <span class="servico-accordion-title">
-                                        <strong><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></strong>
-                                        <small class="d-block texto-suave"><?= (int) $categoria['total_videos']; ?> video(s)</small>
-                                    </span>
-                                    <span class="servico-status-pill <?= $categoria['ativo'] ? 'ativo' : 'inativo'; ?>">
-                                        <?= $categoria['ativo'] ? 'Ativo' : 'Inativo'; ?>
-                                    </span>
-                                    <span class="servico-accordion-icon">+</span>
-                                </button>
-                            </header>
-                            <div class="servico-accordion-content" aria-hidden="true">
-                                <div class="servico-card" data-categoria='<?= $categoriaJson; ?>'>
-                                    <div class="servico-card-inner">
-                                        <div class="servico-card-info" style="flex:1">
-                                            <dl class="servico-propriedades">
-                                                <div>
-                                                    <dt>Ordem:</dt>
-                                                    <dd><?= $categoria['ordem'] !== null ? (int) $categoria['ordem'] : ''; ?></dd>
-                                                </div>
-                                                <div class="servico-descricao-bloco">
-                                                    <dt>Descricao:</dt>
-                                                    <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
-                                                </div>
-                                            </dl>
+                <div class="servico-subsecao">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Categorias ativas</h3>
+                        <span class="texto-suave"><?= count($categoriasAtivas); ?> ativa(s)</span>
+                    </div>
+                    <?php if (empty($categoriasAtivas)): ?>
+                        <div class="alert alert-info">Nenhuma categoria ativa cadastrada.</div>
+                    <?php else: ?>
+                        <?php renderizarCategoriasVideoGrid($categoriasAtivas); ?>
+                    <?php endif; ?>
+                </div>
 
-                                            <div class="servico-card-acoes">
-                                                <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarCategoria">Editar</button>
-                                                <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirCategoria">Excluir</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </article>
-                    <?php endforeach; ?>
+                <div class="servico-subsecao mt-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Categorias inativas</h3>
+                        <span class="texto-suave"><?= count($categoriasInativas); ?> inativa(s)</span>
+                    </div>
+                    <?php if (empty($categoriasInativas)): ?>
+                        <div class="alert alert-info">Nenhuma categoria marcada como inativa.</div>
+                    <?php else: ?>
+                        <?php renderizarCategoriasVideoGrid($categoriasInativas); ?>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>
