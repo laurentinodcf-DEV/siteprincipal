@@ -257,7 +257,7 @@ if ($resultado) {
                                     <div class="avaliacao"><?= $estrelasHtml; ?></div>
                                     <h3 class="titulo-depoimento"><?= htmlspecialchars($depoimento['titulo'], ENT_QUOTES, 'UTF-8'); ?></h3>
                                     <p class="texto-depoimento">
-                                    O Servi�o foi excepcional e superou minhas expectativas em todos os aspectos.
+                                        <?= htmlspecialchars($depoimento['descricao'], ENT_QUOTES, 'UTF-8'); ?>
                                     </p>
                                     <div class="autor">
                                         <?php if ($imagemSrc !== ''): ?>
