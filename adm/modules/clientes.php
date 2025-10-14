@@ -544,6 +544,16 @@ function renderizarClienteCard(array $c): void {
         .texto-suave {
             color: #64748b;
         }
+        .invalid-feedback {
+            display: block;
+            font-size: 0.875rem;
+            color: #dc3545;
+            margin-top: 0.25rem;
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -555,47 +565,51 @@ function renderizarClienteCard(array $c): void {
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Nome*</label>
-                        <input type="text" name="nome" class="form-control" required maxlength="100" autocomplete="off">
+                        <input type="text" name="nome" class="form-control" required maxlength="100" autocomplete="off" value="<?= htmlspecialchars($_POST['nome'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="nome@exemplo.com" data-bs-toggle="tooltip" title="Informe um email válido">
+                        <input type="email" name="email" id="email" class="form-control" placeholder="nome@exemplo.com" value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="invalid-feedback" id="email-error"></div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Telefone</label>
-                        <input type="tel" name="telefone" class="form-control" pattern="[0-9()+\-\s]{8,}" data-bs-toggle="tooltip" title="Apenas números, espaços e símbolos ( ) + -">
+                        <input type="tel" name="telefone" id="telefone" class="form-control" value="<?= htmlspecialchars($_POST['telefone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="invalid-feedback" id="telefone-error"></div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Data de nascimento</label>
-                        <input type="date" name="data_nascimento" class="form-control" data-bs-toggle="tooltip" title="Informe uma data válida">
+                        <input type="date" name="data_nascimento" id="data_nascimento" class="form-control" value="<?= htmlspecialchars($_POST['data_nascimento'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="invalid-feedback" id="data_nascimento-error"></div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Idade (calculada)</label>
-                        <input type="number" name="idade" class="form-control" readonly>
+                        <input type="number" name="idade" id="idade" class="form-control" readonly value="<?= htmlspecialchars($_POST['idade'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Logradouro</label>
-                        <input type="text" name="logradouro" class="form-control">
+                        <input type="text" name="logradouro" class="form-control" value="<?= htmlspecialchars($_POST['logradouro'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Número</label>
-                        <input type="text" name="numero" class="form-control" inputmode="numeric" pattern="[0-9]*" data-bs-toggle="tooltip" title="Apenas números">
+                        <input type="text" name="numero" id="numero" class="form-control" inputmode="numeric" value="<?= htmlspecialchars($_POST['numero'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="invalid-feedback" id="numero-error"></div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Bairro</label>
-                        <input type="text" name="bairro" class="form-control">
+                        <input type="text" name="bairro" class="form-control" value="<?= htmlspecialchars($_POST['bairro'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Cidade</label>
-                        <input type="text" name="cidade" class="form-control">
+                        <input type="text" name="cidade" class="form-control" value="<?= htmlspecialchars($_POST['cidade'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Estado</label>
-                        <input type="text" name="estado" class="form-control">
+                        <input type="text" name="estado" class="form-control" value="<?= htmlspecialchars($_POST['estado'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Indicação</label>
-                        <input type="text" name="indicacao" class="form-control">
+                        <input type="text" name="indicacao" class="form-control" value="<?= htmlspecialchars($_POST['indicacao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Imagem (até 3 MB)</label>
@@ -735,9 +749,98 @@ function renderizarClienteCard(array $c): void {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.forEach(function (tooltipTriggerEl) { new bootstrap.Tooltip(tooltipTriggerEl); });
 
-            // Cálculo automático de idade
+            // Validações em tempo real
+            const emailInput = document.getElementById('email');
+            const telefoneInput = document.getElementById('telefone');
+            const numeroInput = document.getElementById('numero');
             const dataNascInput = document.getElementById('data_nascimento');
             const idadeInput = document.getElementById('idade');
+
+            // Validação de email
+            if (emailInput) {
+                emailInput.addEventListener('input', function() {
+                    const email = this.value.trim();
+                    const emailError = document.getElementById('email-error');
+                    
+                    if (email === '') {
+                        this.classList.remove('is-invalid');
+                        emailError.textContent = '';
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        this.classList.add('is-invalid');
+                        emailError.textContent = 'Digite um email válido (ex: nome@exemplo.com)';
+                    } else {
+                        this.classList.remove('is-invalid');
+                        emailError.textContent = '';
+                    }
+                });
+            }
+
+            // Validação de telefone
+            if (telefoneInput) {
+                telefoneInput.addEventListener('input', function() {
+                    const telefone = this.value.trim();
+                    const telefoneError = document.getElementById('telefone-error');
+                    
+                    if (telefone === '') {
+                        this.classList.remove('is-invalid');
+                        telefoneError.textContent = '';
+                    } else if (!/^[\d\s\(\)\+\-]{8,}$/.test(telefone)) {
+                        this.classList.add('is-invalid');
+                        telefoneError.textContent = 'Use apenas números, espaços e símbolos ( ) + - (mínimo 8 caracteres)';
+                    } else {
+                        this.classList.remove('is-invalid');
+                        telefoneError.textContent = '';
+                    }
+                });
+            }
+
+            // Validação de número
+            if (numeroInput) {
+                numeroInput.addEventListener('input', function() {
+                    const numero = this.value.trim();
+                    const numeroError = document.getElementById('numero-error');
+                    
+                    if (numero === '') {
+                        this.classList.remove('is-invalid');
+                        numeroError.textContent = '';
+                    } else if (!/^\d+$/.test(numero)) {
+                        this.classList.add('is-invalid');
+                        numeroError.textContent = 'Digite apenas números';
+                    } else {
+                        this.classList.remove('is-invalid');
+                        numeroError.textContent = '';
+                    }
+                });
+            }
+
+            // Validação de data de nascimento
+            if (dataNascInput) {
+                dataNascInput.addEventListener('change', function() {
+                    const dataNascError = document.getElementById('data_nascimento-error');
+                    const data = this.value;
+                    
+                    if (data === '') {
+                        this.classList.remove('is-invalid');
+                        dataNascError.textContent = '';
+                    } else {
+                        const dataObj = new Date(data + 'T00:00:00');
+                        const hoje = new Date();
+                        
+                        if (dataObj > hoje) {
+                            this.classList.add('is-invalid');
+                            dataNascError.textContent = 'A data não pode ser futura';
+                        } else if (hoje.getFullYear() - dataObj.getFullYear() > 120) {
+                            this.classList.add('is-invalid');
+                            dataNascError.textContent = 'Data muito antiga (máximo 120 anos)';
+                        } else {
+                            this.classList.remove('is-invalid');
+                            dataNascError.textContent = '';
+                        }
+                    }
+                });
+            }
+
+            // Cálculo automático de idade
             const editarDataNascInput = document.getElementById('editarClienteDataNascimento');
             const editarIdadeInput = document.getElementById('editarClienteIdade');
 
@@ -754,7 +857,13 @@ function renderizarClienteCard(array $c): void {
 
             const updateAge = (input, output) => {
                 if (input && output) {
-                    const update = () => { output.value = calcAge(input.value); };
+                    const update = () => { 
+                        output.value = calcAge(input.value);
+                        // Trigger validação da data se necessário
+                        if (input === dataNascInput) {
+                            input.dispatchEvent(new Event('change'));
+                        }
+                    };
                     input.addEventListener('change', update);
                     input.addEventListener('input', update);
                 }
