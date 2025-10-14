@@ -215,7 +215,9 @@ if ($resultado) {
 
                         <div class="depoimentos-carousel-container">
                             <!-- Bot�o anterior -->
+                            <?php if (count($depoimentosAtivos) > 2): ?>
                             <button class="depoimentos-btn prev" aria-label="Depoimento anterior">&#10094;</button>
+                            <?php endif; ?>
                             
                             <!-- Carrossel de depoimentos -->
                             <div class="depoimentos-carousel">
@@ -270,16 +272,26 @@ if ($resultado) {
                                 </div>
                                 <?php endforeach; ?>
                             
+                            <?php if (count($depoimentosAtivos) > 2): ?>
+
+                            
                             <!-- Bot�o Pr�ximo -->
+
+                            
                             <button class="depoimentos-btn next" aria-label="Pr�ximo depoimento">&#10095;</button>
+
+                            
+                            <?php endif; ?>
                         </div>
                         
+                        <?php if (count($depoimentosAtivos) > 2): ?>
                         <!-- Indicadores de slide -->
                         <div class="depoimentos-indicadores">
                             <?php for ($i = 0; $i < count($depoimentosAtivos); $i++): ?>
                                 <span class="indicador <?= $i === 0 ? 'active' : ''; ?>" data-slide="<?= $i; ?>"></span>
                             <?php endfor; ?>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </section>
                 <?php endif; ?>
