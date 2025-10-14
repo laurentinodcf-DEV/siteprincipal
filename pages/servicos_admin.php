@@ -378,7 +378,7 @@ if ($resultado) {
 $servicosAtivos = [];
 $servicosInativos = [];
 foreach ($servicos as $servico) {
-    if ((int) ($servico['ativo'] ?? 0) === 1) {
+    if ((int) ($servico['ativo'] ?? 1) === 1) {
         $servicosAtivos[] = $servico;
     } else {
         $servicosInativos[] = $servico;

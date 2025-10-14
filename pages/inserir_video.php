@@ -183,8 +183,8 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                         <span class="servico-accordion-title">
                             <strong><?= htmlspecialchars($video['titulo'], ENT_QUOTES, 'UTF-8'); ?></strong>
                         </span>
-                        <span class="servico-status-pill <?= (int) ($video['ativo'] ?? 0) === 1 ? 'ativo' : 'inativo'; ?>">
-                            <?= (int) ($video['ativo'] ?? 0) === 1 ? 'Ativo' : 'Inativo'; ?>
+                        <span class="servico-status-pill <?= (int) ($video['ativo'] ?? 1) === 1 ? 'ativo' : 'inativo'; ?>">
+                            <?= (int) ($video['ativo'] ?? 1) === 1 ? 'Ativo' : 'Inativo'; ?>
                         </span>
                         <span class="servico-accordion-icon">+</span>
                     </button>

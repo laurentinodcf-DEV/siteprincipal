@@ -535,11 +535,31 @@ if ($resultado) {
                 <span class="texto-suave"><?= count($produtos); ?> produto(s) no sistema</span>
             </div>
 
+            <?php 
+            $produtosAtivos = [];
+            $produtosInativos = [];
+            foreach ($produtos as $prod) {
+                if ((int) ($prod['ativo'] ?? 1) === 1) {
+                    $produtosAtivos[] = $prod;
+                } else {
+                    $produtosInativos[] = $prod;
+                }
+            }
+            ?>
+
             <?php if (empty($produtos)): ?>
                 <div class="alert alert-info">Nenhum produto cadastrado at o momento.</div>
             <?php else: ?>
-                <div class="servicos-grid">
-                    <?php foreach ($produtos as $produto): ?>
+                <div class="servico-subsecao">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Produtos ativos</h3>
+                        <span class="texto-suave"><?= count($produtosAtivos); ?> ativo(s)</span>
+                    </div>
+                    <?php if (empty($produtosAtivos)): ?>
+                        <div class="alert alert-info">Nenhum produto ativo cadastrado.</div>
+                    <?php else: ?>
+                        <div class="servicos-grid">
+                            <?php foreach ($produtosAtivos as $produto): ?>
                         <?php
                             $produtoJson = htmlspecialchars(
                                 json_encode($produto, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP),
@@ -566,7 +586,7 @@ if ($resultado) {
                                 : '<span class="texto-suave">Sem descrio cadastrada.</span>';
                             $temPromo = $produto['preco_promocional'] !== null && (float) $produto['preco_promocional'] > 0;
                         ?>
-                        <article class="servico-accordion-item">
+                        <article class="servico-accordion-item" data-produto='<?= $produtoJson; ?>'>
                             <header class="servico-accordion-header">
                                 <button type="button" class="servico-accordion-toggle" aria-expanded="false">
                                     <span class="servico-accordion-title">
@@ -579,7 +599,7 @@ if ($resultado) {
                                 </button>
                             </header>
                             <div class="servico-accordion-content" aria-hidden="true">
-                                <div class="servico-card" data-produto='<?= $produtoJson; ?>'>
+                                <div class="servico-card">
                                     <div class="servico-card-inner">
                                         <div class="servico-card-info">
                                             <header class="servico-card-top">
@@ -630,6 +650,113 @@ if ($resultado) {
                             </div>
                         </article>
                     <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="servico-subsecao mt-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Produtos inativos</h3>
+                        <span class="texto-suave"><?= count($produtosInativos); ?> inativo(s)</span>
+                    </div>
+                    <?php if (empty($produtosInativos)): ?>
+                        <div class="alert alert-info">Nenhum produto marcado como inativo.</div>
+                    <?php else: ?>
+                        <div class="servicos-grid">
+                            <?php foreach ($produtosInativos as $produto): ?>
+                        <?php
+                            $produtoJson = htmlspecialchars(
+                                json_encode($produto, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            );
+                            $imagemSrc = '';
+                            $temImagem = false;
+                            if (!empty($produto['imagem'])) {
+                                $imagemValor = (string) $produto['imagem'];
+                                if (preg_match('/^(https?:)?\/\//i', $imagemValor)) {
+                                    $imagemSrc = $imagemValor;
+                                    $temImagem = true;
+                                } elseif (strpos($imagemValor, '../') === 0 || strpos($imagemValor, '../../') === 0) {
+                                    $imagemSrc = $imagemValor;
+                                    $temImagem = true;
+                                } else {
+                                    $imagemSrc = '../' . ltrim($imagemValor, '/');
+                                    $temImagem = true;
+                                }
+                            }
+                            $descricaoFormatada = '';
+                            if (!empty($produto['descricao'])) {
+                                $descricaoFormatada = nl2br(htmlspecialchars($produto['descricao'], ENT_QUOTES, 'UTF-8'));
+                            }
+                            $temPromo = !empty($produto['preco_promocional']) && (float) $produto['preco_promocional'] > 0;
+                        ?>
+                        <article class="servico-accordion-item" data-produto='<?= $produtoJson; ?>'>
+                            <header class="servico-accordion-header">
+                                <button type="button" class="servico-accordion-toggle" aria-expanded="false">
+                                    <span class="servico-accordion-title">
+                                        <strong><?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?></strong>
+                                    </span>
+                                    <span class="servico-status-pill <?= $produto['ativo'] ? 'ativo' : 'inativo'; ?>">
+                                        <?= $produto['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                                    </span>
+                                    <span class="servico-accordion-icon">+</span>
+                                </button>
+                            </header>
+                            <div class="servico-accordion-content" aria-hidden="true">
+                                <div class="servico-card">
+                                    <div class="servico-card-inner">
+                                        <div class="servico-card-info">
+                                            <header class="servico-card-top">
+                                                <div>
+                                                    <h3 class="servico-nome"><?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                                    <?php if (!empty($produto['categoria_nome'])): ?>
+                                                        <span class="servico-categoria-pill"><?= htmlspecialchars($produto['categoria_nome'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </header>
+
+                                            <dl class="servico-propriedades">
+                                                <div>
+                                                    <dt>Preo:</dt>
+                                                    <dd class="servico-propriedade-valor"><?= 'R$ ' . number_format((float) $produto['preco'], 2, ',', '.'); ?></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Promoo:</dt>
+                                                    <dd><?= $temPromo ? 'R$ ' . number_format((float) $produto['preco_promocional'], 2, ',', '.') : ''; ?></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>SKU:</dt>
+                                                    <dd><?= $produto['sku'] !== null && $produto['sku'] !== '' ? htmlspecialchars($produto['sku'], ENT_QUOTES, 'UTF-8') : ''; ?></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Estoque:</dt>
+                                                    <dd><?= (int) $produto['estoque']; ?></dd>
+                                                </div>
+                                                <div class="servico-descricao-bloco">
+                                                    <dt>Descrio:</dt>
+                                                    <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
+                                                </div>
+                                            </dl>
+
+                                            <div class="servico-card-acoes">
+                                                <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarProduto">Editar</button>
+                                                <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirProduto">Excluir</button>
+                                            </div>
+                                        </div>
+
+                                        <?php if ($temImagem): ?>
+                                            <figure class="servico-card-imagem">
+                                                <img src="<?= htmlspecialchars($imagemSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($produto['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            </figure>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                        <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>
@@ -786,14 +913,14 @@ if ($resultado) {
                 document.getElementById('excluirProdutoId').value = produto.id;
             };
 
-            document.querySelectorAll('.servico-card').forEach((card) => {
-                const dados = card.dataset.produto ? JSON.parse(card.dataset.produto) : null;
+            document.querySelectorAll('.servico-accordion-item').forEach((item) => {
+                const dados = item.dataset.produto ? JSON.parse(item.dataset.produto) : null;
                 if (!dados) {
                     return;
                 }
 
-                const botaoEditar = card.querySelector('.acao-editar');
-                const botaoExcluir = card.querySelector('.acao-excluir');
+                const botaoEditar = item.querySelector('.acao-editar');
+                const botaoExcluir = item.querySelector('.acao-excluir');
 
                 if (botaoEditar) {
                     botaoEditar.addEventListener('click', () => preencherModalEdicao(dados));

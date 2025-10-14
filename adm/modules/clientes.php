@@ -127,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cidade = trim((string) ($_POST['cidade'] ?? ''));
         $estado = trim((string) ($_POST['estado'] ?? ''));
         $indicacao = trim((string) ($_POST['indicacao'] ?? ''));
+        $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($nome === '') {
             $mensagemErro = 'Informe o nome do cliente.';
@@ -171,8 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
 
                     $stmt = $conn->prepare(
-                        'INSERT INTO salao_clientes (nome, logradouro, numero, bairro, cidade, estado, email, data_nascimento, telefone, indicacao, idade, imagem)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                        'INSERT INTO salao_clientes (nome, logradouro, numero, bairro, cidade, estado, email, data_nascimento, telefone, indicacao, idade, imagem, ativo)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
                     );
 
                     if ($stmt === false) {
@@ -193,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $imagemParam = $imagemWebPath !== null && $imagemWebPath !== '' ? $imagemWebPath : null;
 
                         $stmt->bind_param(
-                            'ssssssssssis',
+                            'ssssssssssisi',
                             $nome,
                             $logradouroParam,
                             $numeroParam,
@@ -205,7 +206,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $telefoneParam,
                             $indicacaoParam,
                             $idade,
-                            $imagemParam
+                            $imagemParam,
+                            $ativo
                         );
 
                         if ($stmt->execute()) {
@@ -234,6 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cidade = trim((string) ($_POST['cidade'] ?? ''));
         $estado = trim((string) ($_POST['estado'] ?? ''));
         $indicacao = trim((string) ($_POST['indicacao'] ?? ''));
+        $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($id <= 0 || $nome === '') {
             $mensagemErro = 'Cliente inválido ou dados obrigatórios faltando.';
@@ -299,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         $stmt = $conn->prepare(
                             'UPDATE salao_clientes
-                             SET nome = ?, logradouro = ?, numero = ?, bairro = ?, cidade = ?, estado = ?, email = ?, data_nascimento = ?, telefone = ?, indicacao = ?, idade = ?, imagem = ?
+                             SET nome = ?, logradouro = ?, numero = ?, bairro = ?, cidade = ?, estado = ?, email = ?, data_nascimento = ?, telefone = ?, indicacao = ?, idade = ?, imagem = ?, ativo = ?
                              WHERE id = ?'
                         );
 
@@ -321,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $imagemParam = $imagemWebPath !== null && $imagemWebPath !== '' ? $imagemWebPath : null;
 
                             $stmt->bind_param(
-                                'ssssssssssisi',
+                                'ssssssssssisii',
                                 $nome,
                                 $logradouroParam,
                                 $numeroParam,
@@ -334,6 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $indicacaoParam,
                                 $idade,
                                 $imagemParam,
+                                $ativo,
                                 $id
                             );
 
@@ -398,7 +402,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $clientes = [];
 $resultado = $conn->query(
-    'SELECT id, nome, logradouro, numero, bairro, cidade, estado, endereco, email, data_nascimento, telefone, indicacao, idade, imagem
+    'SELECT id, nome, logradouro, numero, bairro, cidade, estado, endereco, email, data_nascimento, telefone, indicacao, idade, imagem, ativo
      FROM salao_clientes
      ORDER BY nome ASC'
 );
@@ -406,7 +410,7 @@ if ($resultado) {
     while ($linha = $resultado->fetch_assoc()) {
         $linha['id'] = (int) $linha['id'];
         $linha['idade'] = isset($linha['idade']) ? (int) $linha['idade'] : null;
-        $linha['ativo'] = 1; // Por enquanto, todos os clientes são considerados ativos
+        $linha['ativo'] = isset($linha['ativo']) ? (int) $linha['ativo'] : 1;
         $clientes[] = $linha;
     }
     $resultado->free();
@@ -635,7 +639,13 @@ function renderizarClienteCard(array $c): void {
                         <label class="form-label">Imagem (até 3 MB)</label>
                         <input type="file" name="imagem" class="form-control" accept="image/*" data-bs-toggle="tooltip" title="PNG, JPG ou WEBP até 3 MB">
                     </div>
-                    <div class="col-12 d-flex justify-content-end">
+                    <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="1" id="novoClienteAtivo" name="ativo" checked>
+                            <label class="form-check-label" for="novoClienteAtivo">
+                                Cliente ativo
+                            </label>
+                        </div>
                         <button type="submit" class="botao-salvar">Cadastrar cliente</button>
                     </div>
                 </div>
@@ -655,11 +665,47 @@ function renderizarClienteCard(array $c): void {
                 <span class="texto-suave"><?= count($clientes); ?> cliente(s) no sistema</span>
             </div>
 
+            <?php 
+            $clientesAtivos = [];
+            $clientesInativos = [];
+            foreach ($clientes as $cl) {
+                if ((int) ($cl['ativo'] ?? 1) === 1) {
+                    $clientesAtivos[] = $cl;
+                } else {
+                    $clientesInativos[] = $cl;
+                }
+            }
+            ?>
+
             <?php if (empty($clientes)): ?>
                 <div class="alert alert-info">Nenhum cliente cadastrado até o momento.</div>
             <?php else: ?>
-                <div class="servicos-grid">
-                    <?php foreach ($clientes as $c) { renderizarClienteCard($c); } ?>
+                <div class="servico-subsecao">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Clientes ativos</h3>
+                        <span class="texto-suave"><?= count($clientesAtivos); ?> ativo(s)</span>
+                    </div>
+                    <?php if (empty($clientesAtivos)): ?>
+                        <div class="alert alert-info">Nenhum cliente ativo cadastrado.</div>
+                    <?php else: ?>
+                        <div class="servicos-grid">
+                            <?php foreach ($clientesAtivos as $c) { renderizarClienteCard($c); } ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="servico-subsecao mt-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <h3 class="servico-subtitulo">Clientes inativos</h3>
+                        <span class="texto-suave"><?= count($clientesInativos); ?> inativo(s)</span>
+                    </div>
+                    <?php if (empty($clientesInativos)): ?>
+                        <div class="alert alert-info">Nenhum cliente marcado como inativo.</div>
+                    <?php else: ?>
+                        <div class="servicos-grid">
+                            <?php foreach ($clientesInativos as $c) { renderizarClienteCard($c); } ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>
@@ -726,6 +772,14 @@ function renderizarClienteCard(array $c): void {
                                     <input type="file" name="imagem" class="form-control" id="editarClienteImagem" accept="image/*">
                                     <input type="hidden" name="imagem_atual" id="editarClienteImagemAtual">
                                     <small class="form-text text-muted" id="editarClienteImagemInfo"></small>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="1" id="editarClienteAtivo" name="ativo">
+                                        <label class="form-check-label" for="editarClienteAtivo">
+                                            Cliente ativo
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -924,6 +978,7 @@ function renderizarClienteCard(array $c): void {
                 document.getElementById('editarClienteCidade').value = cliente.cidade || '';
                 document.getElementById('editarClienteEstado').value = cliente.estado || '';
                 document.getElementById('editarClienteIndicacao').value = cliente.indicacao || '';
+                document.getElementById('editarClienteAtivo').checked = String(cliente.ativo) === '1';
 
                 const inputArquivo = document.getElementById('editarClienteImagem');
                 if (inputArquivo) { inputArquivo.value = ''; }
