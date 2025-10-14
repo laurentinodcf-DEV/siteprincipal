@@ -269,32 +269,6 @@ if ($resultado) {
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
-
-                                <div class="card-depoimento">
-                                    <div class="avaliacao">★★★★★</div>
-                                    <h3 class="titulo-depoimento">Estou admirada!</h3>
-                                    <p class="texto-depoimento">
-                                    A experi�ncia foi incr�vel, definitivamente voltarei e recomendarei a todos!
-                                    </p>
-                                    <div class="autor">
-                                    <img src="img/clientes/carla.jpg" alt="Carla M." class="foto-autor">
-                                    <p class="nome-autor">Carla M.</p>
-                                    </div>
-                                </div>
-                                
-                                <!-- Depoimento 3 -->
-                                <div class="card-depoimento">
-                                    <div class="avaliacao">★★★★★</div>
-                                    <h3 class="titulo-depoimento">Impressionada!</h3>
-                                    <p class="texto-depoimento">
-                                    Impressionada com meu novo brilho e liso, voltarei e recomendarei a todos!
-                                    </p>
-                                    <div class="autor">
-                                    <img src="img/clientes/renata.jpg" alt="Renata L." class="foto-autor">
-                                    <p class="nome-autor">Renata L.</p>
-                                    </div>
-                                </div>
-                            </div>
                             
                             <!-- Bot�o Pr�ximo -->
                             <button class="depoimentos-btn next" aria-label="Pr�ximo depoimento">&#10095;</button>
