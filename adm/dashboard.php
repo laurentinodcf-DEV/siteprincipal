@@ -52,6 +52,11 @@ $modules = [
         'description' => 'Defina manualmente a ordem de exibição dos serviços ativos no site.',
         'src' => '../pages/servicos_ordem.php',
     ],
+    'ordenar_depoimentos' => [
+        'label' => 'Ordenar depoimentos',
+        'description' => 'Defina manualmente a ordem de exibição dos depoimentos ativos no site.',
+        'src' => '../pages/depoimentos_ordem.php',
+    ],
     'horarios' => [
         'label' => 'Horário de funcionamento',
         'description' => 'Configure meses, dias e períodos de atendimento.',
@@ -70,7 +75,7 @@ $navigation = [
     ],
     [
         'title' => 'Operação',
-        'items' => ['horarios', 'ordenar_servicos'],
+        'items' => ['horarios', 'ordenar_servicos', 'ordenar_depoimentos'],
     ],
 ];
 
