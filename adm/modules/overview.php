@@ -121,6 +121,21 @@ $usuario = $_SESSION['usuario_nome'] ?? 'Administrador';
             <p>Atualizar períodos de atendimento e Horários especiais.</p>
             <a href="../dashboard.php?module=horarios" target="_top">Configurar Horários</a>
         </article>
+        <article class="module-card">
+            <h3>Produtos</h3>
+            <p>Gerenciar catálogo de produtos e materiais disponibilizados.</p>
+            <a href="../dashboard.php?module=produtos" target="_top">Ver Produtos</a>
+        </article>
+        <article class="module-card">
+            <h3>Clientes</h3>
+            <p>Cadastrar e gerenciar informações dos clientes do salão.</p>
+            <a href="../dashboard.php?module=clientes" target="_top">Ver Clientes</a>
+        </article>
+        <article class="module-card">
+            <h3>Depoimentos clientes</h3>
+            <p>Administrar depoimentos dos clientes para exibição no site.</p>
+            <a href="../dashboard.php?module=depoimentos" target="_top">Ver Depoimentos</a>
+        </article>
     </section>
 </body>
 </html>
