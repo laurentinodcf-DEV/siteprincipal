@@ -19,6 +19,104 @@ function respostaJson(bool $success, string $message, array $extra = []): void
     exit;
 }
 
+// Tratamento de atualizacao e exclusao (modais de edicao/exclusao)
+$acao = isset($_POST['action']) ? strtolower(trim((string) $_POST['action'])) : '';
+if ($acao === 'update' || $acao === 'delete') {
+    $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+    if ($id <= 0) {
+        respostaJson(false, 'Identificador do video invalido.');
+    }
+
+    if ($acao === 'delete') {
+        // Buscar caminho para excluir arquivo local, se existir
+        $stmtBusca = $conn->prepare('SELECT caminho FROM salao_videos WHERE id = ?');
+        if ($stmtBusca) {
+            $stmtBusca->bind_param('i', $id);
+            if ($stmtBusca->execute()) {
+                $resultado = $stmtBusca->get_result();
+                if ($resultado && $resultado->num_rows > 0) {
+                    $row = $resultado->fetch_assoc();
+                    $caminho = isset($row['caminho']) ? (string) $row['caminho'] : '';
+                    if ($caminho !== '' && !preg_match('~^https?://~i', $caminho)) {
+                        $fisico = __DIR__ . '/' . ltrim($caminho, '/');
+                        if (is_file($fisico)) {
+                            @unlink($fisico);
+                        }
+                    }
+                }
+            }
+            $stmtBusca->close();
+        }
+
+        $stmt = $conn->prepare('DELETE FROM salao_videos WHERE id = ?');
+        if (!$stmt) {
+            respostaJson(false, 'Nao foi possivel preparar a exclusao.');
+        }
+        $stmt->bind_param('i', $id);
+        if ($stmt->execute()) {
+            $stmt->close();
+            respostaJson(true, 'Video excluido com sucesso.');
+        }
+        $erro = $stmt->error;
+        $stmt->close();
+        respostaJson(false, 'Erro ao excluir o video: ' . $erro);
+    }
+
+    // UPDATE
+    $titulo = trim((string) ($_POST['titulo'] ?? ''));
+    if ($titulo === '') {
+        respostaJson(false, 'Informe um titulo.');
+    }
+    $descricao = trim((string) ($_POST['descricao'] ?? ''));
+    // Em editar, o select usa name="id_categoria"
+    $categoriaIdEditar = isset($_POST['id_categoria']) && $_POST['id_categoria'] !== ''
+        ? (int) $_POST['id_categoria']
+        : null;
+    $ativo = isset($_POST['ativo']) ? 1 : 0;
+
+    if ($categoriaIdEditar !== null) {
+        // Valida categoria ativa
+        $stmtCategoria = $conn->prepare('SELECT 1 FROM categoria_videos WHERE id = ? AND ativo = 1');
+        if (!$stmtCategoria) {
+            respostaJson(false, 'Erro ao validar a categoria informada.');
+        }
+        $stmtCategoria->bind_param('i', $categoriaIdEditar);
+        if (!$stmtCategoria->execute()) {
+            $stmtCategoria->close();
+            respostaJson(false, 'Erro ao validar a categoria informada.');
+        }
+        $stmtCategoria->store_result();
+        if ($stmtCategoria->num_rows === 0) {
+            $stmtCategoria->close();
+            respostaJson(false, 'Categoria selecionada nao esta disponivel.');
+        }
+        $stmtCategoria->close();
+    }
+
+    if ($categoriaIdEditar === null) {
+        $stmt = $conn->prepare('UPDATE salao_videos SET titulo = ?, descricao = ?, id_categoria = NULL, ativo = ? WHERE id = ?');
+        if (!$stmt) {
+            respostaJson(false, 'Nao foi possivel preparar a atualizacao.');
+        }
+        $stmt->bind_param('ssii', $titulo, $descricao, $ativo, $id);
+    } else {
+        $stmt = $conn->prepare('UPDATE salao_videos SET titulo = ?, descricao = ?, id_categoria = ?, ativo = ? WHERE id = ?');
+        if (!$stmt) {
+            respostaJson(false, 'Nao foi possivel preparar a atualizacao.');
+        }
+        $stmt->bind_param('ssiii', $titulo, $descricao, $categoriaIdEditar, $ativo, $id);
+    }
+
+    if ($stmt->execute()) {
+        $stmt->close();
+        respostaJson(true, 'Video atualizado com sucesso.');
+    }
+    $erro = $stmt->error;
+    $stmt->close();
+    respostaJson(false, 'Nao foi possivel atualizar o video: ' . $erro);
+}
+
+// Fluxo de criacao (inserir por link/upload)
 $titulo = trim((string) ($_POST['titulo'] ?? ''));
 if ($titulo === '') {
     respostaJson(false, 'Informe um titulo.');
