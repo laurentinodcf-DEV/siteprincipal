@@ -554,6 +554,26 @@ function renderizarClienteCard(array $c): void {
             border-color: #dc3545;
             box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
         }
+        
+        /* Corrigir modais transparentes */
+        .modal {
+            z-index: 1055 !important;
+        }
+        .modal-backdrop {
+            z-index: 1050 !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+        .modal-content {
+            background-color: white !important;
+            border: 1px solid #dee2e6 !important;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        .modal-header {
+            border-bottom: 1px solid #dee2e6 !important;
+        }
+        .modal-footer {
+            border-top: 1px solid #dee2e6 !important;
+        }
     </style>
 </head>
 <body>

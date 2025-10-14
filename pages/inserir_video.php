@@ -216,6 +216,11 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                                         <dd class="servico-descricao-texto"><?= $descricaoFormatada; ?></dd>
                                     </div>
                                 </dl>
+
+                                <div class="servico-card-acoes">
+                                    <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarVideo">Editar</button>
+                                    <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirVideo">Excluir</button>
+                                </div>
                             </div>
 
                             <figure class="servico-card-imagem" style="display: flex; align-items: center; justify-content: center;">
@@ -369,6 +374,79 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
     </section>
 </div>
 
+<!-- Modal Edição de Vídeo -->
+<div class="modal fade" id="modalEditarVideo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar vídeo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="id" id="editarVideoId">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Título*</label>
+                            <input type="text" name="titulo" id="editarVideoTitulo" class="form-control" required maxlength="200">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descrição</label>
+                            <textarea name="descricao" id="editarVideoDescricao" class="form-control" rows="3" maxlength="1000"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Categoria</label>
+                            <select name="id_categoria" id="editarVideoCategoria" class="form-control">
+                                <option value="">Selecione uma categoria</option>
+                                <?php foreach ($categorias as $cat): ?>
+                                    <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="editarVideoAtivo" name="ativo">
+                                <label class="form-check-label" for="editarVideoAtivo">
+                                    Vídeo ativo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Exclusão de Vídeo -->
+<div class="modal fade" id="modalExcluirVideo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Excluir vídeo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" id="excluirVideoId">
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir o vídeo <strong id="excluirVideoTitulo"></strong>?</p>
+                    <p class="text-muted">Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 const MAX_UPLOAD_SIZE = 15 * 1024 * 1024; // 15 MB
 
@@ -466,7 +544,69 @@ document.getElementById('formUpload').addEventListener('submit', function (event
         icon.textContent = newState ? '-' : '+';
       });
     });
+
+    // Preencher modal de edição
+    document.querySelectorAll('.acao-editar').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const item = this.closest('.servico-accordion-item');
+            const titulo = item.querySelector('.servico-accordion-title strong').textContent;
+            const descricao = item.querySelector('.servico-descricao-texto').textContent;
+            const categoria = item.querySelector('.servico-categoria-pill')?.textContent || '';
+            const ativo = item.querySelector('.servico-status-pill').textContent === 'Ativo';
+            
+            // Encontrar o ID do vídeo (você pode precisar ajustar isso baseado na estrutura)
+            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
+            
+            document.getElementById('editarVideoId').value = videoId;
+            document.getElementById('editarVideoTitulo').value = titulo;
+            document.getElementById('editarVideoDescricao').value = descricao;
+            document.getElementById('editarVideoAtivo').checked = ativo;
+            
+            // Selecionar categoria
+            const categoriaSelect = document.getElementById('editarVideoCategoria');
+            for (let option of categoriaSelect.options) {
+                if (option.textContent === categoria) {
+                    option.selected = true;
+                    break;
+                }
+            }
+        });
+    });
+
+    // Preencher modal de exclusão
+    document.querySelectorAll('.acao-excluir').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const item = this.closest('.servico-accordion-item');
+            const titulo = item.querySelector('.servico-accordion-title strong').textContent;
+            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
+            
+            document.getElementById('excluirVideoId').value = videoId;
+            document.getElementById('excluirVideoTitulo').textContent = titulo;
+        });
+    });
   });
 </script>
+
+<style>
+/* Corrigir modais transparentes */
+.modal {
+    z-index: 1055 !important;
+}
+.modal-backdrop {
+    z-index: 1050 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+.modal-content {
+    background-color: white !important;
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+.modal-header {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+.modal-footer {
+    border-top: 1px solid #dee2e6 !important;
+}
+</style>
 </body>
 </html>
