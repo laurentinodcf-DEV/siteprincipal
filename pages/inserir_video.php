@@ -218,8 +218,8 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                                 </dl>
 
                                 <div class="servico-card-acoes">
-                                    <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarVideo">Editar</button>
-                                    <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirVideo">Excluir</button>
+                                    <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarVideo" data-video-id="<?= $video['id']; ?>">Editar</button>
+                                    <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirVideo" data-video-id="<?= $video['id']; ?>">Excluir</button>
                                 </div>
                             </div>
 
@@ -399,7 +399,7 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                             <label class="form-label">Categoria</label>
                             <select name="id_categoria" id="editarVideoCategoria" class="form-control">
                                 <option value="">Selecione uma categoria</option>
-                                <?php foreach ($categorias as $cat): ?>
+                                <?php foreach ($categoriasVideo as $cat): ?>
                                     <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -554,8 +554,8 @@ document.getElementById('formUpload').addEventListener('submit', function (event
             const categoria = item.querySelector('.servico-categoria-pill')?.textContent || '';
             const ativo = item.querySelector('.servico-status-pill').textContent === 'Ativo';
             
-            // Encontrar o ID do vídeo (você pode precisar ajustar isso baseado na estrutura)
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
+            // Obter o ID do vídeo do atributo data-video-id
+            const videoId = this.getAttribute('data-video-id');
             
             document.getElementById('editarVideoId').value = videoId;
             document.getElementById('editarVideoTitulo').value = titulo;
@@ -578,12 +578,56 @@ document.getElementById('formUpload').addEventListener('submit', function (event
         btn.addEventListener('click', function() {
             const item = this.closest('.servico-accordion-item');
             const titulo = item.querySelector('.servico-accordion-title strong').textContent;
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
+            const videoId = this.getAttribute('data-video-id');
             
             document.getElementById('excluirVideoId').value = videoId;
             document.getElementById('excluirVideoTitulo').textContent = titulo;
         });
     });
+
+    // Processar formulário de edição
+    const formEditar = document.querySelector('#modalEditarVideo form');
+    if (formEditar) {
+        formEditar.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            formData.append('action', 'update');
+
+            fetch('../video_action.php', { method: 'POST', body: formData })
+                .then((res) => res.json())
+                .then((data) => {
+                    alert(data.message || 'Operação concluída.');
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(() => {
+                    alert('Não foi possível enviar os dados. Tente novamente.');
+                });
+        });
+    }
+
+    // Processar formulário de exclusão
+    const formExcluir = document.querySelector('#modalExcluirVideo form');
+    if (formExcluir) {
+        formExcluir.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            formData.append('action', 'delete');
+
+            fetch('../video_action.php', { method: 'POST', body: formData })
+                .then((res) => res.json())
+                .then((data) => {
+                    alert(data.message || 'Operação concluída.');
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(() => {
+                    alert('Não foi possível enviar os dados. Tente novamente.');
+                });
+        });
+    }
   });
 </script>
 
