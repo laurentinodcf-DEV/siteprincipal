@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -205,6 +205,15 @@ if ($resultado) {
             background: #1d4ed8;
         }
         
+        /* Corrigir sobreposição: garantir modal acima do backdrop */
+        .modal {
+            z-index: 1055 !important;
+        }
+        .modal-backdrop {
+            z-index: 1050 !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+
         /* Estilo personalizado para modais de categorias de produtos */
         .modal-content {
             border-radius: 12px !important;
