@@ -170,6 +170,18 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
     <div class="servicos-grid">
         <?php foreach ($lista as $video): ?>
             <?php
+            $videoPayload = [
+                'id' => (int) ($video['id'] ?? 0),
+                'titulo' => (string) ($video['titulo'] ?? ''),
+                'descricao' => isset($video['descricao']) ? (string) $video['descricao'] : null,
+                'id_categoria' => isset($video['id_categoria']) ? (int) $video['id_categoria'] : null,
+                'ativo' => (int) ($video['ativo'] ?? 0),
+            ];
+            $videoJson = htmlspecialchars(
+                json_encode($videoPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP),
+                ENT_QUOTES,
+                'UTF-8'
+            );
             $fonte = resolverFonteVideo($video);
             $descricaoFormatada = formatarDescricaoVideo($video['descricao'] ?? null);
             $categoriaNome = '';
@@ -190,7 +202,7 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                     </button>
                 </header>
                 <div class="servico-accordion-content" aria-hidden="true">
-                    <div class="servico-card">
+                    <div class="servico-card" data-video='<?= $videoJson; ?>'>
                         <div class="servico-card-inner">
                             <div class="servico-card-info">
                                 <header class="servico-card-top">
@@ -399,7 +411,7 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                             <label class="form-label">Categoria</label>
                             <select name="id_categoria" id="editarVideoCategoria" class="form-control">
                                 <option value="">Selecione uma categoria</option>
-                                <?php foreach ($categorias as $cat): ?>
+                                <?php foreach ($categoriasVideo as $cat): ?>
                                     <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -545,45 +557,99 @@ document.getElementById('formUpload').addEventListener('submit', function (event
       });
     });
 
-    // Preencher modal de edição
-    document.querySelectorAll('.acao-editar').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.servico-accordion-item');
-            const titulo = item.querySelector('.servico-accordion-title strong').textContent;
-            const descricao = item.querySelector('.servico-descricao-texto').textContent;
-            const categoria = item.querySelector('.servico-categoria-pill')?.textContent || '';
-            const ativo = item.querySelector('.servico-status-pill').textContent === 'Ativo';
-            
-            // Encontrar o ID do vídeo (você pode precisar ajustar isso baseado na estrutura)
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
-            
-            document.getElementById('editarVideoId').value = videoId;
-            document.getElementById('editarVideoTitulo').value = titulo;
-            document.getElementById('editarVideoDescricao').value = descricao;
-            document.getElementById('editarVideoAtivo').checked = ativo;
-            
-            // Selecionar categoria
-            const categoriaSelect = document.getElementById('editarVideoCategoria');
-            for (let option of categoriaSelect.options) {
-                if (option.textContent === categoria) {
-                    option.selected = true;
-                    break;
-                }
-            }
-        });
+    const getVideoDataFromItem = (item) => {
+      if (!item) return null;
+      const card = item.querySelector('.servico-card');
+      const dataStr = card ? card.getAttribute('data-video') : null;
+      if (!dataStr) return null;
+      try { return JSON.parse(dataStr); } catch { return null; }
+    };
+
+    // Preencher modal de edição a partir do dataset
+    document.querySelectorAll('.acao-editar').forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const item = this.closest('.servico-accordion-item');
+        const dados = getVideoDataFromItem(item);
+        if (!dados) { return; }
+
+        const idInput = document.getElementById('editarVideoId');
+        const tituloInput = document.getElementById('editarVideoTitulo');
+        const descricaoInput = document.getElementById('editarVideoDescricao');
+        const ativoInput = document.getElementById('editarVideoAtivo');
+        const categoriaSelect = document.getElementById('editarVideoCategoria');
+
+        if (idInput) { idInput.value = String(dados.id || ''); }
+        if (tituloInput) { tituloInput.value = dados.titulo || ''; }
+        if (descricaoInput) { descricaoInput.value = dados.descricao || ''; }
+        if (ativoInput) { ativoInput.checked = String(dados.ativo) === '1' || dados.ativo === 1; }
+        if (categoriaSelect) {
+          const alvo = dados.id_categoria != null ? String(dados.id_categoria) : '';
+          categoriaSelect.value = alvo;
+        }
+      });
     });
 
-    // Preencher modal de exclusão
-    document.querySelectorAll('.acao-excluir').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.servico-accordion-item');
-            const titulo = item.querySelector('.servico-accordion-title strong').textContent;
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
-            
-            document.getElementById('excluirVideoId').value = videoId;
-            document.getElementById('excluirVideoTitulo').textContent = titulo;
-        });
+    // Preencher modal de exclusão a partir do dataset
+    document.querySelectorAll('.acao-excluir').forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const item = this.closest('.servico-accordion-item');
+        const dados = getVideoDataFromItem(item);
+        if (!dados) { return; }
+
+        const idInput = document.getElementById('excluirVideoId');
+        const tituloSpan = document.getElementById('excluirVideoTitulo');
+        if (idInput) { idInput.value = String(dados.id || ''); }
+        if (tituloSpan) { tituloSpan.textContent = dados.titulo || ''; }
+      });
     });
+
+    // Submit da edição via AJAX
+    const formEditar = document.querySelector('#modalEditarVideo form');
+    if (formEditar) {
+      formEditar.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        formData.set('action', 'update');
+        const ativoMarcado = document.getElementById('editarVideoAtivo');
+        formData.set('ativo', ativoMarcado && ativoMarcado.checked ? '1' : '0');
+
+        fetch('../video_action.php', { method: 'POST', body: formData })
+          .then((r) => r.json())
+          .then((data) => {
+            alert(data.message || 'Operacao concluida.');
+            if (data.success) {
+              const modalEl = document.getElementById('modalEditarVideo');
+              const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl) : null;
+              if (modal) { modal.hide(); }
+              location.reload();
+            }
+          })
+          .catch(() => alert('Nao foi possivel salvar as alteracoes.'));
+      });
+    }
+
+    // Submit da exclusao via AJAX
+    const formExcluir = document.querySelector('#modalExcluirVideo form');
+    if (formExcluir) {
+      formExcluir.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        formData.set('action', 'delete');
+
+        fetch('../video_action.php', { method: 'POST', body: formData })
+          .then((r) => r.json())
+          .then((data) => {
+            alert(data.message || 'Operacao concluida.');
+            if (data.success) {
+              const modalEl = document.getElementById('modalExcluirVideo');
+              const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl) : null;
+              if (modal) { modal.hide(); }
+              location.reload();
+            }
+          })
+          .catch(() => alert('Nao foi possivel excluir o video.'));
+      });
+    }
   });
 </script>
 

@@ -19,16 +19,148 @@ function respostaJson(bool $success, string $message, array $extra = []): void
     exit;
 }
 
-$titulo = trim((string) ($_POST['titulo'] ?? ''));
-if ($titulo === '') {
-    respostaJson(false, 'Informe um titulo.');
+function obterProximaOrdemVideo(mysqli $conn): int
+{
+    $resultado = $conn->query('SELECT COALESCE(MAX(ordem), 0) + 1 AS proxima FROM salao_videos WHERE ativo = 1');
+    if ($resultado) {
+        $linha = $resultado->fetch_assoc();
+        $resultado->free();
+        return (int) ($linha['proxima'] ?? 1);
+    }
+    return 1;
 }
 
-$descricao = trim((string) ($_POST['descricao'] ?? ''));
+// Rotas por acao (update/delete) usadas pelos modais
+$acao = strtolower(trim((string)($_POST['action'] ?? '')));
+if ($acao === 'delete') {
+    $id = (int) ($_POST['id'] ?? 0);
+    if ($id <= 0) {
+        respostaJson(false, 'Video invalido.');
+    }
+
+    // Buscar caminho para possivel remocao do arquivo
+    $caminho = null;
+    $stmtBusca = $conn->prepare('SELECT caminho FROM salao_videos WHERE id = ?');
+    if ($stmtBusca) {
+        $stmtBusca->bind_param('i', $id);
+        if ($stmtBusca->execute()) {
+            $stmtBusca->bind_result($caminho);
+            $stmtBusca->fetch();
+        }
+        $stmtBusca->close();
+    }
+
+    $stmt = $conn->prepare('DELETE FROM salao_videos WHERE id = ?');
+    if ($stmt === false) {
+        respostaJson(false, 'Erro ao preparar exclusao.');
+    }
+    $stmt->bind_param('i', $id);
+    if ($stmt->execute()) {
+        // Remover arquivo fisico se for um upload local em videos/vdcadastro
+        if ($caminho) {
+            $p = str_replace('\\', '/', (string)$caminho);
+            if (strpos($p, 'videos/vdcadastro/') === 0) {
+                $caminhoFisico = __DIR__ . '/' . $p;
+                if (is_file($caminhoFisico)) {
+                    @unlink($caminhoFisico);
+                }
+            }
+        }
+        respostaJson(true, 'Video removido.');
+    }
+    respostaJson(false, 'Nao foi possivel excluir o video.');
+}
+
+if ($acao === 'update') {
+    $id = (int) ($_POST['id'] ?? 0);
+    $titulo = trim((string) ($_POST['titulo'] ?? ''));
+    $descricao = trim((string) ($_POST['descricao'] ?? ''));
+    // Aceita tanto id_categoria (editar) quanto categoria (criar antigo)
+    $categoriaId = null;
+    if (isset($_POST['id_categoria']) && $_POST['id_categoria'] !== '') {
+        $categoriaId = (int) $_POST['id_categoria'];
+    } elseif (isset($_POST['categoria']) && $_POST['categoria'] !== '') {
+        $categoriaId = (int) $_POST['categoria'];
+    }
+    $ativo = isset($_POST['ativo']) ? (int) $_POST['ativo'] : 0;
+
+    if ($id <= 0 || $titulo === '') {
+        respostaJson(false, 'Informe os dados obrigatorios.');
+    }
+
+    if ($categoriaId !== null) {
+        $stmtCategoria = $conn->prepare('SELECT 1 FROM categoria_videos WHERE id = ? AND ativo = 1');
+        if ($stmtCategoria === false) {
+            respostaJson(false, 'Erro ao validar a categoria informada.');
+        }
+        $stmtCategoria->bind_param('i', $categoriaId);
+        if (!$stmtCategoria->execute()) {
+            $stmtCategoria->close();
+            respostaJson(false, 'Erro ao validar a categoria informada.');
+        }
+        $stmtCategoria->store_result();
+        if ($stmtCategoria->num_rows === 0) {
+            $stmtCategoria->close();
+            respostaJson(false, 'Categoria selecionada nao esta disponivel.');
+        }
+        $stmtCategoria->close();
+    }
+
+    // Buscar antigo ativo/ordem
+    $ativoAnterior = 0;
+    $ordemAtual = null;
+    $stmtBusca = $conn->prepare('SELECT ativo, ordem FROM salao_videos WHERE id = ?');
+    if ($stmtBusca) {
+        $stmtBusca->bind_param('i', $id);
+        if ($stmtBusca->execute()) {
+            $stmtBusca->bind_result($ativoAnterior, $ordemAtual);
+            $stmtBusca->fetch();
+        }
+        $stmtBusca->close();
+    }
+
+    $ordemParam = null;
+    if ($ativo === 1) {
+        if ((int)$ativoAnterior === 1 && $ordemAtual !== null) {
+            $ordemParam = (int) $ordemAtual;
+        } else {
+            $ordemParam = obterProximaOrdemVideo($conn);
+        }
+    }
+
+    $stmt = $conn->prepare(
+        'UPDATE salao_videos
+         SET titulo = ?, descricao = ?, id_categoria = ?, ativo = ?, ordem = ?
+         WHERE id = ?'
+    );
+    if ($stmt === false) {
+        respostaJson(false, 'Erro ao preparar atualizacao.');
+    }
+    $descricaoParam = $descricao !== '' ? $descricao : null;
+    $categoriaParam = $categoriaId;
+    $ordemBind = $ordemParam;
+    $stmt->bind_param('ssiiii', $titulo, $descricaoParam, $categoriaParam, $ativo, $ordemBind, $id);
+    if ($stmt->execute()) {
+        respostaJson(true, 'Video atualizado com sucesso.');
+    }
+    respostaJson(false, 'Nao foi possivel atualizar o video.');
+}
+
+// Fluxo de criacao (inserir) por tipo: link|upload
 $tipo = strtolower(trim((string) ($_POST['tipo'] ?? '')));
+$titulo = trim((string) ($_POST['titulo'] ?? ''));
+$descricao = trim((string) ($_POST['descricao'] ?? ''));
 $categoriaId = isset($_POST['categoria']) && $_POST['categoria'] !== ''
     ? (int) $_POST['categoria']
     : null;
+
+if ($tipo === '') {
+    respostaJson(false, 'Tipo de operacao invalido.');
+}
+
+if ($titulo === '') {
+    respostaJson(false, 'Informe um titulo.');
+}
 
 if ($categoriaId !== null) {
     $stmtCategoria = $conn->prepare(
