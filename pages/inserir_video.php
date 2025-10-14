@@ -265,80 +265,69 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
     <button id="btnUpload" class="btn btn-success">Upload de arquivo</button>
 </div>
 
-<div id="modalLink" class="modal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="formLink" method="POST" novalidate>
-        <div class="modal-header">
-          <h5 class="modal-title">Inserir link de video</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+<!-- Sessao de cadastro (alterna entre link e upload) -->
+<section id="cadastroWrapper" class="mb-4">
+    <div id="cadastroLink" class="card d-none">
+        <div class="card-header">
+            <h5 class="mb-0">Inserir link de video</h5>
         </div>
-        <div class="modal-body">
-            <label class="form-label">Titulo:</label>
-            <input type="text" name="titulo" class="form-control mb-3" required>
-            <label class="form-label">Descricao:</label>
-            <textarea name="descricao" class="form-control mb-3" rows="4"></textarea>
-            <label class="form-label">Categoria:</label>
-            <select name="categoria" class="form-select mb-3">
-                <option value="">Sem categoria</option>
-                <?php foreach ($categoriasVideo as $categoria): ?>
-                    <option value="<?= $categoria['id']; ?>"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <?php if (empty($categoriasVideo)): ?>
-                <p class="text-muted small mb-3">Nenhuma categoria ativa cadastrada.</p>
-            <?php endif; ?>
-            <label class="form-label">Link do video:</label>
-            <input type="url" name="link" class="form-control" required placeholder="https://">
+        <div class="card-body">
+            <form id="formLink" method="POST" novalidate>
+                <label class="form-label">Titulo:</label>
+                <input type="text" name="titulo" class="form-control mb-3" required>
+                <label class="form-label">Descricao:</label>
+                <textarea name="descricao" class="form-control mb-3" rows="4"></textarea>
+                <label class="form-label">Categoria:</label>
+                <select name="categoria" class="form-select mb-3">
+                    <option value="">Sem categoria</option>
+                    <?php foreach ($categoriasVideo as $categoria): ?>
+                        <option value="<?= $categoria['id']; ?>"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if (empty($categoriasVideo)): ?>
+                    <p class="text-muted small mb-3">Nenhuma categoria ativa cadastrada.</p>
+                <?php endif; ?>
+                <label class="form-label">Link do video:</label>
+                <input type="url" name="link" class="form-control mb-3" required placeholder="https://">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" id="fecharLink" class="btn btn-outline-secondary">Fechar</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Salvar</button>
-        </div>
-      </form>
     </div>
-  </div>
-</div>
 
-<div id="modalUpload" class="modal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="formUpload" method="POST" enctype="multipart/form-data" novalidate>
-        <div class="modal-header">
-          <h5 class="modal-title">Upload de video</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+    <div id="cadastroUpload" class="card d-none">
+        <div class="card-header">
+            <h5 class="mb-0">Upload de video</h5>
         </div>
-        <div class="modal-body">
-            <label class="form-label">Titulo:</label>
-            <input type="text" name="titulo" class="form-control mb-3" required>
-            <label class="form-label">Descricao:</label>
-            <textarea name="descricao" class="form-control mb-3" rows="4"></textarea>
-            <label class="form-label">Categoria:</label>
-            <select name="categoria" class="form-select mb-3">
-                <option value="">Sem categoria</option>
-                <?php foreach ($categoriasVideo as $categoria): ?>
-                    <option value="<?= $categoria['id']; ?>"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <?php if (empty($categoriasVideo)): ?>
-                <p class="text-muted small mb-3">Nenhuma categoria ativa cadastrada.</p>
-            <?php endif; ?>
-            <label class="form-label">Arquivo de video:</label>
-            <input
-                type="file"
-                name="arquivo"
-                accept="video/*"
-                class="form-control"
-                required
-            >
-            <small class="form-text text-muted">Tamanho maximo permitido: 15 MB.</small>
+        <div class="card-body">
+            <form id="formUpload" method="POST" enctype="multipart/form-data" novalidate>
+                <label class="form-label">Titulo:</label>
+                <input type="text" name="titulo" class="form-control mb-3" required>
+                <label class="form-label">Descricao:</label>
+                <textarea name="descricao" class="form-control mb-3" rows="4"></textarea>
+                <label class="form-label">Categoria:</label>
+                <select name="categoria" class="form-select mb-3">
+                    <option value="">Sem categoria</option>
+                    <?php foreach ($categoriasVideo as $categoria): ?>
+                        <option value="<?= $categoria['id']; ?>"><?= htmlspecialchars($categoria['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if (empty($categoriasVideo)): ?>
+                    <p class="text-muted small mb-3">Nenhuma categoria ativa cadastrada.</p>
+                <?php endif; ?>
+                <label class="form-label">Arquivo de video:</label>
+                <input type="file" name="arquivo" accept="video/*" class="form-control mb-2" required>
+                <small class="form-text text-muted d-block mb-3">Tamanho maximo permitido: 15 MB.</small>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <button type="button" id="fecharUpload" class="btn btn-outline-secondary">Fechar</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Salvar</button>
-        </div>
-      </form>
     </div>
-  </div>
-</div>
+</section>
 
 <?php
 // Secao de listagem abaixo dos formularios
@@ -383,11 +372,32 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
 <script>
 const MAX_UPLOAD_SIZE = 15 * 1024 * 1024; // 15 MB
 
-const modalLink = new bootstrap.Modal(document.getElementById('modalLink'));
-const modalUpload = new bootstrap.Modal(document.getElementById('modalUpload'));
+const cadastroLink = document.getElementById('cadastroLink');
+const cadastroUpload = document.getElementById('cadastroUpload');
+const btnLink = document.getElementById('btnLink');
+const btnUpload = document.getElementById('btnUpload');
+const fecharLink = document.getElementById('fecharLink');
+const fecharUpload = document.getElementById('fecharUpload');
 
-document.getElementById('btnLink').addEventListener('click', () => modalLink.show());
-document.getElementById('btnUpload').addEventListener('click', () => modalUpload.show());
+const mostrarSecao = (qual) => {
+    if (qual === 'link') {
+        cadastroLink.classList.remove('d-none');
+        cadastroUpload.classList.add('d-none');
+    } else if (qual === 'upload') {
+        cadastroUpload.classList.remove('d-none');
+        cadastroLink.classList.add('d-none');
+    }
+    // rola a tela ate o inicio da sessao de cadastro
+    const wrapper = document.getElementById('cadastroWrapper');
+    if (wrapper) {
+        wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};
+
+btnLink.addEventListener('click', () => mostrarSecao('link'));
+btnUpload.addEventListener('click', () => mostrarSecao('upload'));
+if (fecharLink) { fecharLink.addEventListener('click', () => cadastroLink.classList.add('d-none')); }
+if (fecharUpload) { fecharUpload.addEventListener('click', () => cadastroUpload.classList.add('d-none')); }
 
 document.getElementById('formLink').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -399,8 +409,8 @@ document.getElementById('formLink').addEventListener('submit', function (event) 
         .then((data) => {
             alert(data.message || 'Operacao concluida.');
             if (data.success) {
-                modalLink.hide();
                 this.reset();
+                cadastroLink.classList.add('d-none');
                 location.reload();
             }
         })
@@ -428,8 +438,8 @@ document.getElementById('formUpload').addEventListener('submit', function (event
         .then((data) => {
             alert(data.message || 'Operacao concluida.');
             if (data.success) {
-                modalUpload.hide();
                 this.reset();
+                cadastroUpload.classList.add('d-none');
                 location.reload();
             }
         })
