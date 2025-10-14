@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -164,6 +164,19 @@ if ($resultado) {
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../css/estilo.css">
     <style>
+        /* Corrigir sobreposição: garantir modal acima do backdrop */
+        .modal {
+            z-index: 1055 !important;
+        }
+        .modal-backdrop {
+            z-index: 1050 !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+        .modal-content {
+            background-color: #ffffff !important;
+            border: 1px solid #dee2e6 !important;
+        }
+        
         body {
             margin: 0;
             padding: 32px;
