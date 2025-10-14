@@ -19,6 +19,90 @@ function respostaJson(bool $success, string $message, array $extra = []): void
     exit;
 }
 
+// Nova abordagem: primeiro tratamos acoes administrativas diretas (update/delete),
+// e se nao houver acao, tratamos as operacoes de criacao (link/upload).
+$action = strtolower(trim((string) ($_POST['action'] ?? '')));
+
+if ($action === 'update') {
+    $id = (int) ($_POST['id'] ?? 0);
+    if ($id <= 0) {
+        respostaJson(false, 'ID invalido para edicao.');
+    }
+
+    $titulo = trim((string) ($_POST['titulo'] ?? ''));
+    if ($titulo === '') {
+        respostaJson(false, 'Informe um titulo.');
+    }
+
+    $descricao = trim((string) ($_POST['descricao'] ?? ''));
+    $categoriaId = isset($_POST['id_categoria']) && $_POST['id_categoria'] !== ''
+        ? (int) $_POST['id_categoria']
+        : null;
+    // checked -> '1', unchecked -> '0' (ou ausente)
+    $ativo = (isset($_POST['ativo']) && (string) $_POST['ativo'] === '1') ? 1 : 0;
+
+    if ($categoriaId !== null) {
+        $stmt = $conn->prepare(
+            'UPDATE salao_videos SET titulo = ?, descricao = ?, id_categoria = ?, ativo = ? WHERE id = ?'
+        );
+        if (!$stmt) {
+            respostaJson(false, 'Erro ao preparar a operacao.');
+        }
+        $stmt->bind_param('ssiii', $titulo, $descricao, $categoriaId, $ativo, $id);
+    } else {
+        $stmt = $conn->prepare(
+            'UPDATE salao_videos SET titulo = ?, descricao = ?, id_categoria = NULL, ativo = ? WHERE id = ?'
+        );
+        if (!$stmt) {
+            respostaJson(false, 'Erro ao preparar a operacao.');
+        }
+        $stmt->bind_param('ssii', $titulo, $descricao, $ativo, $id);
+    }
+
+    if ($stmt->execute()) {
+        respostaJson(true, 'Video atualizado com sucesso.');
+    }
+
+    respostaJson(false, 'Nao foi possivel atualizar o video.');
+}
+
+if ($action === 'delete') {
+    $id = (int) ($_POST['id'] ?? 0);
+    if ($id <= 0) {
+        respostaJson(false, 'ID invalido para exclusao.');
+    }
+
+    // Tentar obter o caminho para remover arquivo fisico, se aplicavel
+    $caminho = null;
+    if ($stmtSel = $conn->prepare('SELECT caminho FROM salao_videos WHERE id = ?')) {
+        $stmtSel->bind_param('i', $id);
+        if ($stmtSel->execute()) {
+            $stmtSel->bind_result($caminho);
+            $stmtSel->fetch();
+        }
+        $stmtSel->close();
+    }
+
+    $stmt = $conn->prepare('DELETE FROM salao_videos WHERE id = ?');
+    if (!$stmt) {
+        respostaJson(false, 'Erro ao preparar a exclusao.');
+    }
+    $stmt->bind_param('i', $id);
+    if ($stmt->execute()) {
+        // Remover arquivo salvo em videos/vdcadastro, se existir
+        if ($caminho && strpos($caminho, 'videos/vdcadastro/') === 0) {
+            $arquivoFisico = __DIR__ . '/' . $caminho;
+            if (is_file($arquivoFisico)) {
+                @unlink($arquivoFisico);
+            }
+        }
+        respostaJson(true, 'Video excluido com sucesso.');
+    }
+
+    respostaJson(false, 'Nao foi possivel excluir o video.');
+}
+
+// Fluxo de criacao (mantem compatibilidade com tipo=link|upload)
 $titulo = trim((string) ($_POST['titulo'] ?? ''));
 if ($titulo === '') {
     respostaJson(false, 'Informe um titulo.');
@@ -30,7 +114,7 @@ $categoriaId = isset($_POST['categoria']) && $_POST['categoria'] !== ''
     ? (int) $_POST['categoria']
     : null;
 
-if ($categoriaId !== null) {
+    if ($categoriaId !== null) {
     $stmtCategoria = $conn->prepare(
         'SELECT 1 FROM categoria_videos WHERE id = ? AND ativo = 1'
     );

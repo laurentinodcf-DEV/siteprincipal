@@ -218,8 +218,20 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                                 </dl>
 
                                 <div class="servico-card-acoes">
-                                    <button type="button" class="botao-primario acao-editar" data-bs-toggle="modal" data-bs-target="#modalEditarVideo">Editar</button>
-                                    <button type="button" class="botao-perigo acao-excluir" data-bs-toggle="modal" data-bs-target="#modalExcluirVideo">Excluir</button>
+                                    <button
+                                        type="button"
+                                        class="botao-primario acao-editar"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarVideo"
+                                        data-video-id="<?= (int) $video['id']; ?>"
+                                    >Editar</button>
+                                    <button
+                                        type="button"
+                                        class="botao-perigo acao-excluir"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalExcluirVideo"
+                                        data-video-id="<?= (int) $video['id']; ?>"
+                                    >Excluir</button>
                                 </div>
                             </div>
 
@@ -399,7 +411,7 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
                             <label class="form-label">Categoria</label>
                             <select name="id_categoria" id="editarVideoCategoria" class="form-control">
                                 <option value="">Selecione uma categoria</option>
-                                <?php foreach ($categorias as $cat): ?>
+                                <?php foreach ($categoriasVideo as $cat): ?>
                                     <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -552,11 +564,11 @@ document.getElementById('formUpload').addEventListener('submit', function (event
             const titulo = item.querySelector('.servico-accordion-title strong').textContent;
             const descricao = item.querySelector('.servico-descricao-texto').textContent;
             const categoria = item.querySelector('.servico-categoria-pill')?.textContent || '';
-            const ativo = item.querySelector('.servico-status-pill').textContent === 'Ativo';
-            
-            // Encontrar o ID do vídeo (você pode precisar ajustar isso baseado na estrutura)
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
-            
+            const ativo = (item.querySelector('.servico-status-pill')?.textContent || '').trim() === 'Ativo';
+
+            // ID correto do vídeo via atributo data-video-id do botão
+            const videoId = this.getAttribute('data-video-id') || '';
+
             document.getElementById('editarVideoId').value = videoId;
             document.getElementById('editarVideoTitulo').value = titulo;
             document.getElementById('editarVideoDescricao').value = descricao;
@@ -578,12 +590,54 @@ document.getElementById('formUpload').addEventListener('submit', function (event
         btn.addEventListener('click', function() {
             const item = this.closest('.servico-accordion-item');
             const titulo = item.querySelector('.servico-accordion-title strong').textContent;
-            const videoId = this.getAttribute('data-video-id') || '1'; // Placeholder
-            
+            const videoId = this.getAttribute('data-video-id') || '';
+
             document.getElementById('excluirVideoId').value = videoId;
             document.getElementById('excluirVideoTitulo').textContent = titulo;
         });
     });
+
+    // Submeter edição via AJAX
+    const formEditar = document.querySelector('#modalEditarVideo form');
+    if (formEditar) {
+        formEditar.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('../video_action.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message || 'Operacao concluida.');
+                    if (data.success) {
+                        const modalEl = document.getElementById('modalEditarVideo');
+                        const modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getInstance(modalEl) : null;
+                        if (modal) { modal.hide(); }
+                        location.reload();
+                    }
+                })
+                .catch(() => alert('Nao foi possivel salvar as alteracoes.'));
+        });
+    }
+
+    // Submeter exclusao via AJAX
+    const formExcluir = document.querySelector('#modalExcluirVideo form');
+    if (formExcluir) {
+        formExcluir.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('../video_action.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message || 'Operacao concluida.');
+                    if (data.success) {
+                        const modalEl = document.getElementById('modalExcluirVideo');
+                        const modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getInstance(modalEl) : null;
+                        if (modal) { modal.hide(); }
+                        location.reload();
+                    }
+                })
+                .catch(() => alert('Nao foi possivel excluir o video.'));
+        });
+    }
   });
 </script>
 
