@@ -61,8 +61,6 @@ if ($resultado) {
                 <li class="li-menu-principal"><span class="menu-principal">Resultados</span>
                     <ul class="submenu">
                         <li class="submenu-item"><a href="pages/videos.php">Vídeos</a></li>
-                        <li class="submenu-item">Imagens</li>
-                        <li class="submenu-item">Depoimentos</li>
                     </ul>
                 </li>
                 <li class="li-menu-principal"><span class="menu-principal">Sobre</span>
