@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 $adminLogado = isset($_SESSION['usuario_id']);
 
