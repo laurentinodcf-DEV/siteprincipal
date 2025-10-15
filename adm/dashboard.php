@@ -18,8 +18,8 @@ $modules = [
         'src' => '../pages/inserir_video.php',
     ],
     'categorias_videos' => [
-        'label' => 'Categorias de v�deos',
-        'description' => 'Gerencie as categorias utilizadas para organizar os v�deos.',
+        'label' => 'Categorias de vídeos',
+        'description' => 'Gerencie as categorias utilizadas para organizar os vídeos.',
         'src' => 'modules/categorias_videos.php',
     ],
     'servicos' => [
