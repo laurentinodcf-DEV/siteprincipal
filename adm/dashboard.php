@@ -47,6 +47,11 @@ $modules = [
         'description' => 'Gerencie os depoimentos dos clientes para exibição no site.',
         'src' => 'modules/depoimentos.php',
     ],
+    'profissionais' => [
+        'label' => 'Profissionais',
+        'description' => 'Gerencie o cadastro dos profissionais do salão.',
+        'src' => 'modules/profissionais.php',
+    ],
     'ordenar_servicos' => [
         'label' => 'Ordenar serviços',
         'description' => 'Defina manualmente a ordem de exibição dos serviços ativos no site.',
@@ -71,7 +76,7 @@ $navigation = [
     ],
     [
         'title' => 'Inserir',
-        'items' => ['videos', 'categorias_videos', 'servicos', 'produtos', 'categorias_produtos', 'clientes', 'depoimentos'],
+        'items' => ['videos', 'categorias_videos', 'servicos', 'produtos', 'categorias_produtos', 'profissionais', 'clientes', 'depoimentos'],
     ],
     [
         'title' => 'Operação',
