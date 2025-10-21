@@ -67,6 +67,11 @@ $modules = [
         'description' => 'Configure meses, dias e períodos de atendimento.',
         'src' => '../pages/horarios_funcionamento.php',
     ],
+    'sistema_agenda' => [
+        'label' => 'Sistema de Agenda',
+        'description' => 'Gerencie agendamentos e controle de horários.',
+        'src' => 'agenda.php',
+    ],
 ];
 
 $navigation = [
@@ -80,7 +85,7 @@ $navigation = [
     ],
     [
         'title' => 'Operação',
-        'items' => ['horarios', 'ordenar_servicos', 'ordenar_depoimentos'],
+        'items' => ['horarios', 'ordenar_servicos', 'ordenar_depoimentos', 'sistema_agenda'],
     ],
 ];
 
