@@ -229,10 +229,20 @@ $titulos_modulos = [
                 transition: transform 0.25s ease;
                 width: 280px;
                 z-index: 1000;
+                overflow-y: auto; /* permitir scroll no menu mobile */
             }
             
             .sidebar.show {
                 transform: translateX(0);
+            }
+            
+            .logo-section {
+                width: 280px;
+                position: relative; /* em mobile não fica fixo para permitir scroll */
+            }
+            
+            .nav-container {
+                padding-top: 0; /* remover padding em mobile já que logo não é fixa */
             }
             
             .main-content {
