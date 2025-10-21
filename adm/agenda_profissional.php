@@ -49,29 +49,34 @@ $titulos_modulos = [
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+        }
+
         body {
             background: linear-gradient(135deg, #1a472a 0%, #2d7a3d 50%, #28a745 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .page-layout {
+            display: flex;
+            min-height: 100vh;
         }
         
         .sidebar {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(15px);
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
             width: 320px;
-            z-index: 1000;
+            flex-shrink: 0;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             border-right: 3px solid rgba(40, 167, 69, 0.2);
         }
         
         .main-content {
-            margin-left: 320px;
+            flex: 1;
             padding: 25px;
-            min-height: 100vh;
         }
         
         .logo-section {
@@ -210,19 +215,30 @@ $titulos_modulos = [
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-                width: 280px;
+        @media (max-width: 992px) {
+            .page-layout {
+                flex-direction: column;
             }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                width: 280px;
+                z-index: 1000;
+            }
+            
             .sidebar.show {
                 transform: translateX(0);
             }
+            
             .main-content {
-                margin-left: 0;
                 padding: 80px 15px 25px 15px;
             }
+            
             .btn-toggle-sidebar {
                 display: block;
             }
@@ -251,8 +267,9 @@ $titulos_modulos = [
         <i class="bi bi-list fs-5"></i>
     </button>
 
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
+    <div class="page-layout">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
         <div class="logo-section">
             <div class="d-flex align-items-center justify-content-center mb-2">
                 <i class="bi bi-calendar-heart fs-1 me-3"></i>
@@ -370,6 +387,7 @@ $titulos_modulos = [
             }
             ?>
         </div>
+    </div>
     </div>
     
     <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
