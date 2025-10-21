@@ -112,7 +112,62 @@ function removerImagemProfissional(?string $webPath, string $destinoDir, string 
     }
 }
 
-// Buscar serviços disponíveis para o dropdown
+// Função para gerenciar serviços do profissional
+function gerenciarServicosProfissional($conn, int $profissionalId, array $servicosIds): bool
+{
+    // Primeiro, remover todos os serviços existentes
+    $stmtDelete = $conn->prepare('DELETE FROM salao_profissional_servicos WHERE profissional_id = ?');
+    if (!$stmtDelete) {
+        return false;
+    }
+    
+    $stmtDelete->bind_param('i', $profissionalId);
+    if (!$stmtDelete->execute()) {
+        $stmtDelete->close();
+        return false;
+    }
+    $stmtDelete->close();
+    
+    // Inserir os novos serviços
+    if (!empty($servicosIds)) {
+        $stmtInsert = $conn->prepare('INSERT INTO salao_profissional_servicos (profissional_id, servico_id) VALUES (?, ?)');
+        if (!$stmtInsert) {
+            return false;
+        }
+        
+        foreach ($servicosIds as $servicoId) {
+            $servicoId = (int) $servicoId;
+            $stmtInsert->bind_param('ii', $profissionalId, $servicoId);
+            if (!$stmtInsert->execute()) {
+                $stmtInsert->close();
+                return false;
+            }
+        }
+        $stmtInsert->close();
+    }
+    
+    return true;
+}
+
+// Função para buscar serviços do profissional
+function buscarServicosProfissional($conn, int $profissionalId): array
+{
+    $servicos = [];
+    $stmt = $conn->prepare('SELECT servico_id FROM salao_profissional_servicos WHERE profissional_id = ?');
+    if ($stmt) {
+        $stmt->bind_param('i', $profissionalId);
+        if ($stmt->execute()) {
+            $resultado = $stmt->get_result();
+            while ($linha = $resultado->fetch_assoc()) {
+                $servicos[] = (int) $linha['servico_id'];
+            }
+        }
+        $stmt->close();
+    }
+    return $servicos;
+}
+
+// Buscar serviços disponíveis para os checkboxes
 $servicos = [];
 $resultadoServicos = $conn->query('SELECT id, nome FROM salao_servicos WHERE ativo = 1 ORDER BY nome ASC');
 if ($resultadoServicos) {
@@ -127,26 +182,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'create') {
         $nome = trim((string) ($_POST['nome'] ?? ''));
-        $servico_id = trim((string) ($_POST['servico_id'] ?? ''));
+        $servicosIds = $_POST['servicos'] ?? [];
         $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($nome === '') {
             $mensagemErro = 'Informe o nome do profissional.';
         } else {
-            $servico_id_param = ($servico_id !== '') ? (int) $servico_id : null;
-
-            // Validar se o serviço existe caso seja informado
-            if ($servico_id_param !== null) {
-                $stmtValidaServico = $conn->prepare('SELECT id FROM salao_servicos WHERE id = ? AND ativo = 1');
-                if ($stmtValidaServico) {
-                    $stmtValidaServico->bind_param('i', $servico_id_param);
-                    $stmtValidaServico->execute();
-                    $stmtValidaServico->store_result();
-                    if ($stmtValidaServico->num_rows === 0) {
-                        $mensagemErro = 'Serviço selecionado não é válido.';
+            // Validar serviços selecionados
+            if (!empty($servicosIds)) {
+                $servicosIdsValidos = [];
+                foreach ($servicosIds as $servicoId) {
+                    $servicoId = (int) $servicoId;
+                    if ($servicoId > 0) {
+                        $servicosIdsValidos[] = $servicoId;
                     }
-                    $stmtValidaServico->close();
                 }
+                
+                if (!empty($servicosIdsValidos)) {
+                    $placeholders = str_repeat('?,', count($servicosIdsValidos) - 1) . '?';
+                    $stmtValidaServicos = $conn->prepare("SELECT COUNT(*) as total FROM salao_servicos WHERE id IN ($placeholders) AND ativo = 1");
+                    if ($stmtValidaServicos) {
+                        $types = str_repeat('i', count($servicosIdsValidos));
+                        $stmtValidaServicos->bind_param($types, ...$servicosIdsValidos);
+                        $stmtValidaServicos->execute();
+                        $resultado = $stmtValidaServicos->get_result();
+                        $linha = $resultado->fetch_assoc();
+                        if ((int) $linha['total'] !== count($servicosIdsValidos)) {
+                            $mensagemErro = 'Um ou mais serviços selecionados não são válidos.';
+                        }
+                        $stmtValidaServicos->close();
+                    }
+                }
+                $servicosIds = $servicosIdsValidos;
             }
 
             if ($mensagemErro === '') {
@@ -178,38 +245,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $fotoFisicaNova = $infoUpload['fisico'] ?? null;
                     }
 
-                    $stmt = $conn->prepare(
-                        'INSERT INTO salao_profissionais (nome, servico_id, foto, ativo, ordem)
-                         VALUES (?, ?, ?, ?, ?)'
-                    );
+                    // Iniciar transação
+                    $conn->begin_transaction();
+                    
+                    try {
+                        $stmt = $conn->prepare(
+                            'INSERT INTO salao_profissionais (nome, foto, ativo, ordem)
+                             VALUES (?, ?, ?, ?)'
+                        );
 
-                    if ($stmt === false) {
-                        $mensagemErro = 'Erro ao preparar inserção.';
-                        if ($fotoFisicaNova) {
-                            @unlink($fotoFisicaNova);
+                        if ($stmt === false) {
+                            throw new Exception('Erro ao preparar inserção do profissional.');
                         }
-                    } else {
+
                         $fotoParam = $fotoWebPath !== null && $fotoWebPath !== '' ? $fotoWebPath : null;
 
                         $stmt->bind_param(
-                            'sisii',
+                            'ssii',
                             $nome,
-                            $servico_id_param,
                             $fotoParam,
                             $ativo,
                             $proximaOrdem
                         );
 
-                        if ($stmt->execute()) {
-                            $mensagemSucesso = 'Profissional cadastrado com sucesso.';
-                        } else {
-                            $mensagemErro = 'Erro ao inserir profissional: ' . $stmt->error;
-                            if ($fotoFisicaNova) {
-                                @unlink($fotoFisicaNova);
+                        if (!$stmt->execute()) {
+                            throw new Exception('Erro ao inserir profissional: ' . $stmt->error);
+                        }
+                        
+                        $profissionalId = $conn->insert_id;
+                        $stmt->close();
+                        
+                        // Associar serviços ao profissional
+                        if (!empty($servicosIds)) {
+                            if (!gerenciarServicosProfissional($conn, $profissionalId, $servicosIds)) {
+                                throw new Exception('Erro ao associar serviços ao profissional.');
                             }
                         }
-
-                        $stmt->close();
+                        
+                        $conn->commit();
+                        $mensagemSucesso = 'Profissional cadastrado com sucesso.';
+                        
+                    } catch (Exception $e) {
+                        $conn->rollback();
+                        $mensagemErro = $e->getMessage();
+                        if ($fotoFisicaNova) {
+                            @unlink($fotoFisicaNova);
+                        }
                     }
                 }
             }
@@ -217,26 +298,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($acao === 'update') {
         $id = (int) ($_POST['id'] ?? 0);
         $nome = trim((string) ($_POST['nome'] ?? ''));
-        $servico_id = trim((string) ($_POST['servico_id'] ?? ''));
+        $servicosIds = $_POST['servicos'] ?? [];
         $ativo = isset($_POST['ativo']) ? 1 : 0;
 
         if ($id <= 0 || $nome === '') {
             $mensagemErro = 'Profissional inválido ou dados obrigatórios faltando.';
         } else {
-            $servico_id_param = ($servico_id !== '') ? (int) $servico_id : null;
-
-            // Validar se o serviço existe caso seja informado
-            if ($servico_id_param !== null) {
-                $stmtValidaServico = $conn->prepare('SELECT id FROM salao_servicos WHERE id = ? AND ativo = 1');
-                if ($stmtValidaServico) {
-                    $stmtValidaServico->bind_param('i', $servico_id_param);
-                    $stmtValidaServico->execute();
-                    $stmtValidaServico->store_result();
-                    if ($stmtValidaServico->num_rows === 0) {
-                        $mensagemErro = 'Serviço selecionado não é válido.';
+            // Validar serviços selecionados
+            if (!empty($servicosIds)) {
+                $servicosIdsValidos = [];
+                foreach ($servicosIds as $servicoId) {
+                    $servicoId = (int) $servicoId;
+                    if ($servicoId > 0) {
+                        $servicosIdsValidos[] = $servicoId;
                     }
-                    $stmtValidaServico->close();
                 }
+                
+                if (!empty($servicosIdsValidos)) {
+                    $placeholders = str_repeat('?,', count($servicosIdsValidos) - 1) . '?';
+                    $stmtValidaServicos = $conn->prepare("SELECT COUNT(*) as total FROM salao_servicos WHERE id IN ($placeholders) AND ativo = 1");
+                    if ($stmtValidaServicos) {
+                        $types = str_repeat('i', count($servicosIdsValidos));
+                        $stmtValidaServicos->bind_param($types, ...$servicosIdsValidos);
+                        $stmtValidaServicos->execute();
+                        $resultado = $stmtValidaServicos->get_result();
+                        $linha = $resultado->fetch_assoc();
+                        if ((int) $linha['total'] !== count($servicosIdsValidos)) {
+                            $mensagemErro = 'Um ou mais serviços selecionados não são válidos.';
+                        }
+                        $stmtValidaServicos->close();
+                    }
+                }
+                $servicosIds = $servicosIdsValidos;
             }
 
             if ($mensagemErro === '') {
@@ -279,42 +372,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $fotoFisicaNova = $infoUpload['fisico'] ?? null;
                         }
 
-                        $stmt = $conn->prepare(
-                            'UPDATE salao_profissionais
-                             SET nome = ?, servico_id = ?, foto = ?, ativo = ?
-                             WHERE id = ?'
-                        );
+                        // Iniciar transação
+                        $conn->begin_transaction();
+                        
+                        try {
+                            $stmt = $conn->prepare(
+                                'UPDATE salao_profissionais
+                                 SET nome = ?, foto = ?, ativo = ?
+                                 WHERE id = ?'
+                            );
 
-                        if ($stmt === false) {
-                            $mensagemErro = 'Erro ao preparar atualização.';
-                            if ($fotoFisicaNova) {
-                                @unlink($fotoFisicaNova);
+                            if ($stmt === false) {
+                                throw new Exception('Erro ao preparar atualização do profissional.');
                             }
-                        } else {
+
                             $fotoParam = $fotoWebPath !== null && $fotoWebPath !== '' ? $fotoWebPath : null;
 
                             $stmt->bind_param(
-                                'sisii',
+                                'ssii',
                                 $nome,
-                                $servico_id_param,
                                 $fotoParam,
                                 $ativo,
                                 $id
                             );
 
-                            if ($stmt->execute()) {
-                                $mensagemSucesso = 'Profissional atualizado.';
-                                if ($infoUpload !== null) {
-                                    removerImagemProfissional($fotoAtual, $diretorioImagensProfissionais, $webBaseImagensProfissionais);
-                                }
-                            } else {
-                                $mensagemErro = 'Erro ao atualizar profissional: ' . $stmt->error;
-                                if ($fotoFisicaNova) {
-                                    @unlink($fotoFisicaNova);
-                                }
+                            if (!$stmt->execute()) {
+                                throw new Exception('Erro ao atualizar profissional: ' . $stmt->error);
                             }
-
+                            
                             $stmt->close();
+                            
+                            // Atualizar serviços do profissional
+                            if (!gerenciarServicosProfissional($conn, $id, $servicosIds)) {
+                                throw new Exception('Erro ao atualizar serviços do profissional.');
+                            }
+                            
+                            $conn->commit();
+                            $mensagemSucesso = 'Profissional atualizado.';
+                            
+                            if ($infoUpload !== null) {
+                                removerImagemProfissional($fotoAtual, $diretorioImagensProfissionais, $webBaseImagensProfissionais);
+                            }
+                            
+                        } catch (Exception $e) {
+                            $conn->rollback();
+                            $mensagemErro = $e->getMessage();
+                            if ($fotoFisicaNova) {
+                                @unlink($fotoFisicaNova);
+                            }
                         }
                     }
                 }
@@ -343,6 +448,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($mensagemErro === '') {
+                // A exclusão em cascata vai remover automaticamente os registros de salao_profissional_servicos
+                // devido ao CONSTRAINT FOREIGN KEY com ON DELETE CASCADE
                 $stmt = $conn->prepare('DELETE FROM salao_profissionais WHERE id = ?');
                 if ($stmt === false) {
                     $mensagemErro = 'Erro ao preparar exclusão.';
@@ -363,17 +470,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $profissionais = [];
 $resultado = $conn->query(
-    'SELECT p.id, p.nome, p.servico_id, p.foto, p.ativo, p.ordem, p.criado_em, p.atualizado_em, s.nome as servico_nome
+    'SELECT p.id, p.nome, p.foto, p.ativo, p.ordem, p.criado_em, p.atualizado_em
      FROM salao_profissionais p
-     LEFT JOIN salao_servicos s ON p.servico_id = s.id
      ORDER BY p.ordem ASC, p.nome ASC'
 );
 if ($resultado) {
     while ($linha = $resultado->fetch_assoc()) {
         $linha['id'] = (int) $linha['id'];
-        $linha['servico_id'] = $linha['servico_id'] ? (int) $linha['servico_id'] : null;
         $linha['ativo'] = isset($linha['ativo']) ? (int) $linha['ativo'] : 1;
         $linha['ordem'] = (int) $linha['ordem'];
+        
+        // Buscar serviços do profissional
+        $profissionalId = $linha['id'];
+        $resultadoServicos = $conn->query(
+            "SELECT s.id, s.nome 
+             FROM salao_servicos s 
+             INNER JOIN salao_profissional_servicos ps ON s.id = ps.servico_id 
+             WHERE ps.profissional_id = $profissionalId AND s.ativo = 1
+             ORDER BY s.nome ASC"
+        );
+        
+        $servicosProfissional = [];
+        if ($resultadoServicos) {
+            while ($servicoLinha = $resultadoServicos->fetch_assoc()) {
+                $servicosProfissional[] = [
+                    'id' => (int) $servicoLinha['id'],
+                    'nome' => $servicoLinha['nome']
+                ];
+            }
+            $resultadoServicos->free();
+        }
+        
+        $linha['servicos'] = $servicosProfissional;
         $profissionais[] = $linha;
     }
     $resultado->free();
@@ -392,6 +520,15 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
             }
         }
     }
+    
+    // Preparar lista de serviços
+    $servicosNomes = [];
+    if (!empty($p['servicos'])) {
+        foreach ($p['servicos'] as $servico) {
+            $servicosNomes[] = $servico['nome'];
+        }
+    }
+    $servicosTexto = !empty($servicosNomes) ? implode(', ', $servicosNomes) : 'Sem serviços vinculados';
     ?>
     <article class="servico-accordion-item">
         <header class="servico-accordion-header">
@@ -412,15 +549,25 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                         <header class="servico-card-top">
                             <div>
                                 <h3 class="servico-nome"><?= htmlspecialchars($p['nome'] ?? 'Sem nome', ENT_QUOTES, 'UTF-8'); ?></h3>
-                                <?php if (!empty($p['servico_nome'])): ?>
-                                    <span class="servico-categoria-pill">Serviço: <?= htmlspecialchars($p['servico_nome'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                <?php else: ?>
-                                    <span class="servico-categoria-pill">Sem serviço vinculado</span>
-                                <?php endif; ?>
+                                <span class="servico-categoria-pill"><?= htmlspecialchars($servicosTexto, ENT_QUOTES, 'UTF-8'); ?></span>
                             </div>
                         </header>
 
                         <dl class="servico-propriedades">
+                            <div>
+                                <dt>Serviços:</dt>
+                                <dd>
+                                    <?php if (!empty($p['servicos'])): ?>
+                                        <ul style="margin: 0; padding-left: 20px;">
+                                            <?php foreach ($p['servicos'] as $servico): ?>
+                                                <li><?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php else: ?>
+                                        <em>Nenhum serviço vinculado</em>
+                                    <?php endif; ?>
+                                </dd>
+                            </div>
                             <div>
                                 <dt>Ordem de exibição:</dt>
                                 <dd><?= htmlspecialchars((string) ($p['ordem'] ?? '—'), ENT_QUOTES, 'UTF-8'); ?></dd>
@@ -611,6 +758,44 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
             font-size: 0.8rem !important;
             color: #6b7280 !important;
         }
+        
+        .servicos-checkboxes {
+            background-color: #f9fafb !important;
+        }
+        
+        .servicos-checkboxes .form-check {
+            margin-bottom: 8px !important;
+            padding-left: 0 !important;
+        }
+        
+        .servicos-checkboxes .form-check-input {
+            margin-right: 8px !important;
+            margin-top: 2px !important;
+        }
+        
+        .servicos-checkboxes .form-check-label {
+            font-size: 0.875rem !important;
+            color: #374151 !important;
+            cursor: pointer !important;
+        }
+        
+        .servicos-checkboxes::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .servicos-checkboxes::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        
+        .servicos-checkboxes::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .servicos-checkboxes::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -625,17 +810,25 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                         <input type="text" name="nome" class="form-control" required maxlength="255" autocomplete="off" value="<?= htmlspecialchars($_POST['nome'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Serviço vinculado</label>
-                        <select name="servico_id" class="form-select">
-                            <option value="">-- Sem serviço --</option>
-                            <?php foreach ($servicos as $servico): ?>
-                                <option value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>" 
-                                        <?= ($_POST['servico_id'] ?? '') == $servico['id'] ? 'selected' : ''; ?>>
-                                    <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <div class="text-muted">Opcional: vincule o profissional a um serviço específico</div>
+                        <label class="form-label">Serviços vinculados</label>
+                        <div class="servicos-checkboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px;">
+                            <?php if (empty($servicos)): ?>
+                                <div class="text-muted">Nenhum serviço ativo disponível</div>
+                            <?php else: ?>
+                                <?php foreach ($servicos as $servico): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="servicos[]" 
+                                               value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>" 
+                                               id="servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>"
+                                               <?= in_array($servico['id'], $_POST['servicos'] ?? []) ? 'checked' : ''; ?>>
+                                        <label class="form-check-label" for="servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        <div class="text-muted mt-1">Opcional: selecione um ou mais serviços para vincular ao profissional</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Foto do profissional (até 3 MB)</label>
@@ -731,16 +924,24 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                                     <input type="text" name="nome" class="form-control" id="editarProfissionalNome" required maxlength="255">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Serviço vinculado</label>
-                                    <select name="servico_id" class="form-select" id="editarProfissionalServico">
-                                        <option value="">-- Sem serviço --</option>
-                                        <?php foreach ($servicos as $servico): ?>
-                                            <option value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
-                                                <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="text-muted">Opcional: vincule o profissional a um serviço específico</div>
+                                    <label class="form-label">Serviços vinculados</label>
+                                    <div class="servicos-checkboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px;">
+                                        <?php if (empty($servicos)): ?>
+                                            <div class="text-muted">Nenhum serviço ativo disponível</div>
+                                        <?php else: ?>
+                                            <?php foreach ($servicos as $servico): ?>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="servicos[]" 
+                                                           value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>" 
+                                                           id="editar_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                    <label class="form-check-label" for="editar_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                        <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    </label>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="text-muted mt-1">Opcional: selecione um ou mais serviços para vincular ao profissional</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Foto do profissional (até 3 MB)</label>
@@ -821,8 +1022,23 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
             const preencherModalEdicao = (profissional) => {
                 document.getElementById('editarProfissionalId').value = profissional.id;
                 document.getElementById('editarProfissionalNome').value = profissional.nome || '';
-                document.getElementById('editarProfissionalServico').value = profissional.servico_id || '';
                 document.getElementById('editarProfissionalAtivo').checked = String(profissional.ativo) === '1';
+
+                // Limpar todos os checkboxes primeiro
+                const checkboxes = document.querySelectorAll('#modalEditarProfissional input[name="servicos[]"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+
+                // Marcar os serviços do profissional
+                if (profissional.servicos && Array.isArray(profissional.servicos)) {
+                    profissional.servicos.forEach(servico => {
+                        const checkbox = document.getElementById('editar_servico_' + servico.id);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                        }
+                    });
+                }
 
                 const inputArquivo = document.getElementById('editarProfissionalFoto');
                 if (inputArquivo) { inputArquivo.value = ''; }
