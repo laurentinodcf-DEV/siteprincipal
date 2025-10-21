@@ -759,6 +759,41 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
             color: #6b7280 !important;
         }
         
+        /* Estilo para serviços selecionados */
+        .servicos-selecionados-container {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            background: #f8f9fa;
+        }
+        
+        .servico-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+        
+        .servico-tag .btn-remove {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 4px;
+        }
+        
+        .servico-tag .btn-remove:hover {
+            opacity: 0.7;
+        }
+        
         .servicos-checkboxes {
             background-color: #f9fafb !important;
         }
@@ -811,22 +846,13 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Serviços vinculados</label>
-                        <div class="servicos-checkboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px;">
-                            <?php if (empty($servicos)): ?>
-                                <div class="text-muted">Nenhum serviço ativo disponível</div>
-                            <?php else: ?>
-                                <?php foreach ($servicos as $servico): ?>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="servicos[]" 
-                                               value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>" 
-                                               id="servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>"
-                                               <?= in_array($servico['id'], $_POST['servicos'] ?? []) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
-                                            <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                                        </label>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                        <div class="servicos-selecionados-container">
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalServicos">
+                                <i class="bi bi-plus-circle"></i> Adicionar serviços
+                            </button>
+                            <div id="servicosSelecionados" class="mt-2">
+                                <div class="text-muted fst-italic">Nenhum serviço selecionado</div>
+                            </div>
                         </div>
                         <div class="text-muted mt-1">Opcional: selecione um ou mais serviços para vincular ao profissional</div>
                     </div>
@@ -925,21 +951,13 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Serviços vinculados</label>
-                                    <div class="servicos-checkboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px;">
-                                        <?php if (empty($servicos)): ?>
-                                            <div class="text-muted">Nenhum serviço ativo disponível</div>
-                                        <?php else: ?>
-                                            <?php foreach ($servicos as $servico): ?>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="servicos[]" 
-                                                           value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>" 
-                                                           id="editar_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
-                                                    <label class="form-check-label" for="editar_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
-                                                        <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                                                    </label>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
+                                    <div class="servicos-selecionados-container">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalServicosEditar">
+                                            <i class="bi bi-plus-circle"></i> Adicionar serviços
+                                        </button>
+                                        <div id="editarServicosSelecionados" class="mt-2">
+                                            <div class="text-muted fst-italic">Nenhum serviço selecionado</div>
+                                        </div>
                                     </div>
                                     <div class="text-muted mt-1">Opcional: selecione um ou mais serviços para vincular ao profissional</div>
                                 </div>
@@ -964,6 +982,84 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                             <button type="submit" class="btn btn-primary">Salvar alterações</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Seleção de Serviços - Cadastro -->
+        <div class="modal fade" id="modalServicos" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Selecionar Serviços</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <?php if (empty($servicos)): ?>
+                                <div class="col-12">
+                                    <div class="alert alert-info">Nenhum serviço ativo disponível para seleção.</div>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($servicos as $servico): ?>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input servico-checkbox" type="checkbox" 
+                                                   value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>" 
+                                                   id="modal_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                   data-nome="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="form-check-label" for="modal_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                                            </label>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarServicos">Confirmar Seleção</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Seleção de Serviços - Edição -->
+        <div class="modal fade" id="modalServicosEditar" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Selecionar Serviços</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <?php if (empty($servicos)): ?>
+                                <div class="col-12">
+                                    <div class="alert alert-info">Nenhum serviço ativo disponível para seleção.</div>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($servicos as $servico): ?>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input servico-checkbox-editar" type="checkbox" 
+                                                   value="<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>" 
+                                                   id="modal_editar_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                   data-nome="<?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="form-check-label" for="modal_editar_servico_<?= htmlspecialchars($servico['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?= htmlspecialchars($servico['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                                            </label>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarServicosEditar">Confirmar Seleção</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -999,6 +1095,90 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.forEach(function (tooltipTriggerEl) { new bootstrap.Tooltip(tooltipTriggerEl); });
 
+            // Gerenciamento de serviços selecionados
+            let servicosSelecionados = new Set();
+            let servicosEditarSelecionados = new Set();
+
+            // Função para atualizar a exibição dos serviços selecionados
+            function atualizarServicosExibicao(container, servicosSet, isEditar = false) {
+                const containerEl = document.getElementById(container);
+                if (!containerEl) return;
+
+                if (servicosSet.size === 0) {
+                    containerEl.innerHTML = '<div class="text-muted fst-italic">Nenhum serviço selecionado</div>';
+                    return;
+                }
+
+                let html = '';
+                servicosSet.forEach(servicoId => {
+                    const checkbox = document.getElementById((isEditar ? 'modal_editar_servico_' : 'modal_servico_') + servicoId);
+                    const nomeServico = checkbox ? checkbox.dataset.nome : 'Serviço desconhecido';
+                    
+                    html += `
+                        <span class="servico-tag">
+                            ${nomeServico}
+                            <button type="button" class="btn-remove" onclick="removerServico('${servicoId}', ${isEditar})">&times;</button>
+                            <input type="hidden" name="servicos[]" value="${servicoId}">
+                        </span>
+                    `;
+                });
+                
+                containerEl.innerHTML = html;
+            }
+
+            // Função global para remover serviço
+            window.removerServico = function(servicoId, isEditar = false) {
+                if (isEditar) {
+                    servicosEditarSelecionados.delete(servicoId);
+                    const checkbox = document.getElementById('modal_editar_servico_' + servicoId);
+                    if (checkbox) checkbox.checked = false;
+                    atualizarServicosExibicao('editarServicosSelecionados', servicosEditarSelecionados, true);
+                } else {
+                    servicosSelecionados.delete(servicoId);
+                    const checkbox = document.getElementById('modal_servico_' + servicoId);
+                    if (checkbox) checkbox.checked = false;
+                    atualizarServicosExibicao('servicosSelecionados', servicosSelecionados);
+                }
+            };
+
+            // Event listeners para os checkboxes da modal de cadastro
+            document.querySelectorAll('.servico-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const servicoId = this.value;
+                    if (this.checked) {
+                        servicosSelecionados.add(servicoId);
+                    } else {
+                        servicosSelecionados.delete(servicoId);
+                    }
+                });
+            });
+
+            // Event listeners para os checkboxes da modal de edição
+            document.querySelectorAll('.servico-checkbox-editar').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const servicoId = this.value;
+                    if (this.checked) {
+                        servicosEditarSelecionados.add(servicoId);
+                    } else {
+                        servicosEditarSelecionados.delete(servicoId);
+                    }
+                });
+            });
+
+            // Confirmar seleção de serviços - Cadastro
+            document.getElementById('confirmarServicos')?.addEventListener('click', function() {
+                atualizarServicosExibicao('servicosSelecionados', servicosSelecionados);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalServicos'));
+                modal.hide();
+            });
+
+            // Confirmar seleção de serviços - Edição
+            document.getElementById('confirmarServicosEditar')?.addEventListener('click', function() {
+                atualizarServicosExibicao('editarServicosSelecionados', servicosEditarSelecionados, true);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalServicosEditar'));
+                modal.hide();
+            });
+
             // Acordeon
             document.querySelectorAll('.servico-accordion-toggle').forEach((toggle) => {
                 const item = toggle.closest('.servico-accordion-item');
@@ -1024,21 +1204,24 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                 document.getElementById('editarProfissionalNome').value = profissional.nome || '';
                 document.getElementById('editarProfissionalAtivo').checked = String(profissional.ativo) === '1';
 
-                // Limpar todos os checkboxes primeiro
-                const checkboxes = document.querySelectorAll('#modalEditarProfissional input[name="servicos[]"]');
-                checkboxes.forEach(checkbox => {
+                // Limpar seleções anteriores
+                servicosEditarSelecionados.clear();
+                document.querySelectorAll('.servico-checkbox-editar').forEach(checkbox => {
                     checkbox.checked = false;
                 });
 
-                // Marcar os serviços do profissional
-                if (profissional.servicos && Array.isArray(profissional.servicos)) {
-                    profissional.servicos.forEach(servico => {
-                        const checkbox = document.getElementById('editar_servico_' + servico.id);
+                // Marcar serviços do profissional
+                if (profissional.servicos_ids && Array.isArray(profissional.servicos_ids)) {
+                    profissional.servicos_ids.forEach(servicoId => {
+                        servicosEditarSelecionados.add(String(servicoId));
+                        const checkbox = document.getElementById('modal_editar_servico_' + servicoId);
                         if (checkbox) {
                             checkbox.checked = true;
                         }
                     });
                 }
+
+                atualizarServicosExibicao('editarServicosSelecionados', servicosEditarSelecionados, true);
 
                 const inputArquivo = document.getElementById('editarProfissionalFoto');
                 if (inputArquivo) { inputArquivo.value = ''; }
@@ -1077,6 +1260,8 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
                     if (form) { form.reset(); }
                     const fotoInfo = document.getElementById('editarProfissionalFotoInfo');
                     if (fotoInfo) { fotoInfo.textContent = ''; }
+                    servicosEditarSelecionados.clear();
+                    atualizarServicosExibicao('editarServicosSelecionados', servicosEditarSelecionados, true);
                 });
             }
 
