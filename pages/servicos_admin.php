@@ -618,6 +618,11 @@ function renderizarServicosGrid(array $servicosLista): void
                         <input type="text" name="nome" class="form-control" required maxlength="100" autocomplete="off">
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label">Duração horas/minutos*</label>
+                        <input type="text" name="duracao_hhmm" id="duracaoHhMm" class="form-control" placeholder="01:30" maxlength="5" pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" required>
+                        <small class="form-text text-muted">Formato: HH:MM</small>
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Duracao (min)*</label>
                         <input type="number" name="duracao" class="form-control" min="1" required>
                     </div>
@@ -705,6 +710,11 @@ function renderizarServicosGrid(array $servicosLista): void
                                 <input type="text" name="nome" class="form-control" id="editarServicoNome" required maxlength="100">
                             </div>
                             <div class="col-md-3">
+                                <label class="form-label">Duração horas/minutos*</label>
+                                <input type="text" name="duracao_hhmm" id="editarDuracaoHhMm" class="form-control" placeholder="01:30" maxlength="5" pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" required>
+                                <small class="form-text text-muted">Formato: HH:MM</small>
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label">Duracao (min)*</label>
                                 <input type="number" name="duracao" class="form-control" id="editarServicoDuracao" min="1" required>
                             </div>
@@ -770,7 +780,114 @@ function renderizarServicosGrid(array $servicosLista): void
 
     <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Função para formatação do campo HH:MM
+        function formatarHHMM(input) {
+            let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+            
+            if (valor.length === 0) {
+                input.value = '';
+                return;
+            }
+            
+            // Não formatar durante a digitação, apenas quando terminar
+            if (valor.length < 4) {
+                return; // Deixa o usuário terminar de digitar
+            }
+            
+            // Limita a 4 dígitos (HHMM)
+            if (valor.length > 4) {
+                valor = valor.substring(0, 4);
+            }
+            
+            // Extrai horas e minutos
+            let horas = parseInt(valor.substring(0, 2));
+            let minutos = parseInt(valor.substring(2, 4));
+            
+            // Validações
+            if (horas > 23) horas = 23;
+            if (minutos > 59) minutos = 59;
+            
+            // Formata como HH:MM
+            const resultado = horas.toString().padStart(2, '0') + ':' + minutos.toString().padStart(2, '0');
+            input.value = resultado;
+        }
+        
+        // Função para formatação ao sair do campo (blur)
+        function formatarHHMMCompleto(input) {
+            let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+            
+            if (valor.length === 0) {
+                input.value = '';
+                return;
+            }
+            
+            // Completa com zeros se necessário
+            if (valor.length === 1) {
+                valor = '0' + valor + '00'; // 1 -> 0100
+            } else if (valor.length === 2) {
+                valor = valor + '00'; // 01 -> 0100
+            } else if (valor.length === 3) {
+                valor = '0' + valor; // 130 -> 0130
+            } else if (valor.length > 4) {
+                valor = valor.substring(0, 4);
+            }
+            
+            // Extrai horas e minutos
+            let horas = parseInt(valor.substring(0, 2));
+            let minutos = parseInt(valor.substring(2, 4));
+            
+            // Validações
+            if (horas > 23) horas = 23;
+            if (minutos > 59) minutos = 59;
+            
+            // Formata como HH:MM
+            const resultado = horas.toString().padStart(2, '0') + ':' + minutos.toString().padStart(2, '0');
+            input.value = resultado;
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
+            // Configurar campo de duração HH:MM no formulário de criação
+            const campoHhMmCriar = document.getElementById('duracaoHhMm');
+            if (campoHhMmCriar) {
+                campoHhMmCriar.addEventListener('input', function() {
+                    // Permite apenas números
+                    let valor = this.value.replace(/\D/g, '');
+                    if (valor.length <= 4) {
+                        this.value = valor;
+                    }
+                    
+                    // Formata automaticamente quando digita 4 números
+                    if (valor.length === 4) {
+                        formatarHHMM(this);
+                    }
+                });
+                
+                campoHhMmCriar.addEventListener('blur', function() {
+                    formatarHHMMCompleto(this);
+                });
+            }
+            
+            // Configurar campo de duração HH:MM no modal de edição
+            const campoHhMmEditar = document.getElementById('editarDuracaoHhMm');
+            if (campoHhMmEditar) {
+                campoHhMmEditar.addEventListener('input', function() {
+                    // Permite apenas números
+                    let valor = this.value.replace(/\D/g, '');
+                    if (valor.length <= 4) {
+                        this.value = valor;
+                    }
+                    
+                    // Formata automaticamente quando digita 4 números
+                    if (valor.length === 4) {
+                        formatarHHMM(this);
+                    }
+                });
+                
+                campoHhMmEditar.addEventListener('blur', function() {
+                    formatarHHMMCompleto(this);
+                });
+            }
+            
             const editarModal = document.getElementById('modalEditarServico');
             const excluirModal = document.getElementById('modalExcluirServico');
 
