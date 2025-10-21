@@ -794,7 +794,46 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
             opacity: 0.7;
         }
         
-        .servicos-checkboxes {
+        /* Ajuste da posição das modais de serviços */
+        
+        #modalServicos .modal-dialog,
+        #modalServicosEditar .modal-dialog {
+            margin: 2rem auto !important;
+        }
+        .modal-content{/* Estilo para o conteúdo do modal */
+            width: 90%;
+            max-width: 91%;
+        }
+        #modalServicos .modal-content,
+        #modalServicosEditar .modal-content {/* Estilo para o conteúdo do modal */
+            border-radius: 15px !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid red;
+        }
+        
+        #modalServicos .modal-header,
+        #modalServicosEditar .modal-header {/* Estilo para o cabeçalho do modal */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: none !important;
+            padding: 1.5rem !important;
+        }
+        
+        #modalServicos .modal-title,
+        #modalServicosEditar .modal-title {/* Estilo para o título do modal */
+            font-weight: 600 !important;
+            font-size: 1.25rem !important;
+        }
+        
+        #modalServicos .modal-body,
+        #modalServicosEditar .modal-body {/* Estilo para a lista interna de checkboxes de serviços */
+            padding: 2rem !important;
+            max-height: 90% !important;
+            overflow-y: auto !important;
+        }
+        
+        .servicos-checkboxes {/* Estilo para a lista interna de checkboxes de serviços */
             background-color: #f9fafb !important;
         }
         
@@ -988,7 +1027,7 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
 
         <!-- Modal Seleção de Serviços - Cadastro -->
         <div class="modal fade" id="modalServicos" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Selecionar Serviços</h5>
@@ -1027,7 +1066,7 @@ function renderizarProfissionalCard(array $p, array $servicos): void {
 
         <!-- Modal Seleção de Serviços - Edição -->
         <div class="modal fade" id="modalServicosEditar" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Selecionar Serviços</h5>
