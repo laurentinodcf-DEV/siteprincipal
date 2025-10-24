@@ -67,6 +67,12 @@ $modules = [
         'description' => 'Configure meses, dias e períodos de atendimento.',
         'src' => '../pages/horarios_funcionamento.php',
     ],
+    // Placeholder: Sistema de Agenda (sem destino por enquanto)
+    'sistema_agenda' => [
+        'label' => 'Sistema de Agenda',
+        'description' => 'Gerencie agendamentos por profissional, com visual de calendário.',
+        'src' => '../pages/agenda_admin.php',
+    ],
 ];
 
 $navigation = [
@@ -80,7 +86,8 @@ $navigation = [
     ],
     [
         'title' => 'Operação',
-        'items' => ['horarios', 'ordenar_servicos', 'ordenar_depoimentos'],
+        // Inclui o item de menu "Sistema de Agenda" (placeholder)
+        'items' => ['sistema_agenda', 'horarios', 'ordenar_servicos', 'ordenar_depoimentos'],
     ],
 ];
 
