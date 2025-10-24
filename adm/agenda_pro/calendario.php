@@ -210,8 +210,25 @@ function badgeByStatus(?string $s): string {
                 $dias = [];
                 $d = new DateTime($rangeStart);
                 for ($i=0;$i<7;$i++){ $dias[] = clone $d; $d->modify('+1 day'); }
+
+                // Base: horas cheias
                 $horas = [];
-                for ($h=8;$h<=19;$h++){ $horas[] = sprintf('%02d:00:00', $h); }
+                for ($h=8;$h<=19;$h++){ $horas[] = sprintf('%02d:00', $h); }
+                // Extras: minutos exatos existentes na semana (ex.: 14:30)
+                $extras = [];
+                foreach ($dias as $diaObj) {
+                    $key = $diaObj->format('Y-m-d');
+                    if (!empty($porDia[$key])) {
+                        foreach ($porDia[$key] as $ev) {
+                            $hm = substr($ev['hora_inicio'], 0, 5);
+                            if (substr($hm,3,2) !== '00') { $extras[$hm] = true; }
+                        }
+                    }
+                }
+                if (!empty($extras)) {
+                    $horas = array_values(array_unique(array_merge($horas, array_keys($extras))));
+                    sort($horas);
+                }
             ?>
             <div class="table-responsive">
                 <table class="table table-bordered mb-0 align-middle">
@@ -226,18 +243,13 @@ function badgeByStatus(?string $s): string {
                     <tbody>
                         <?php foreach ($horas as $h): ?>
                             <tr>
-                                <td class="text-end pe-2"><small><?php echo substr($h,0,5); ?></small></td>
+                                <td class="text-end pe-2"><small><?php echo $h; ?></small></td>
                                 <?php foreach ($dias as $d): ?>
                                     <?php $key = $d->format('Y-m-d'); ?>
                                     <td style="min-height:48px;">
                                         <?php if (!empty($porDia[$key])): ?>
                                             <?php foreach ($porDia[$key] as $ev): ?>
-                                                <?php
-                                                    // Mostrar eventos cujo horário pertence a esta hora (inclui minutos)
-                                                    $evHora = substr($ev['hora_inicio'], 0, 2);
-                                                    $rowHora = substr($h, 0, 2);
-                                                ?>
-                                                <?php if ($evHora === $rowHora): ?>
+                                                <?php if (substr($ev['hora_inicio'],0,5) === $h): ?>
                                                     <div class="mb-1 p-1 rounded border">
                                                         <span class="badge bg-<?php echo badgeByStatus($ev['status']); ?> me-1"><?php echo substr($ev['hora_inicio'],0,5); ?></span>
                                                         <small><?php echo htmlspecialchars($ev['servico_nome'] . ' • ' . ($ev['profissional_nome'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></small>
@@ -254,8 +266,21 @@ function badgeByStatus(?string $s): string {
             </div>
         <?php else: ?>
             <?php
+                // Base horas cheias para o dia
                 $horas = [];
-                for ($h=8;$h<=20;$h++){ $horas[] = sprintf('%02d:00:00', $h); }
+                for ($h=8;$h<=20;$h++){ $horas[] = sprintf('%02d:00', $h); }
+                // Extras: minutos exatos existentes nesse dia
+                if (!empty($porDia[$data])) {
+                    $extras = [];
+                    foreach ($porDia[$data] as $ev) {
+                        $hm = substr($ev['hora_inicio'], 0, 5);
+                        if (substr($hm,3,2) !== '00') { $extras[$hm] = true; }
+                    }
+                    if (!empty($extras)) {
+                        $horas = array_values(array_unique(array_merge($horas, array_keys($extras))));
+                        sort($horas);
+                    }
+                }
             ?>
             <div class="table-responsive">
                 <table class="table table-bordered mb-0 align-middle">
@@ -267,15 +292,11 @@ function badgeByStatus(?string $s): string {
                     <tbody>
                         <?php foreach ($horas as $h): ?>
                             <tr>
-                                <td style="width: 80px;" class="text-end pe-2"><small><?php echo substr($h,0,5); ?></small></td>
+                                <td style="width: 80px;" class="text-end pe-2"><small><?php echo $h; ?></small></td>
                                 <td>
                                     <?php if (!empty($porDia[$data])): ?>
                                         <?php foreach ($porDia[$data] as $ev): ?>
-                                            <?php
-                                                $evHora = substr($ev['hora_inicio'], 0, 2);
-                                                $rowHora = substr($h, 0, 2);
-                                            ?>
-                                            <?php if ($evHora === $rowHora): ?>
+                                            <?php if (substr($ev['hora_inicio'],0,5) === $h): ?>
                                                 <div class="mb-1 p-1 rounded border">
                                                     <span class="badge bg-<?php echo badgeByStatus($ev['status']); ?> me-1"><?php echo substr($ev['hora_inicio'],0,5); ?></span>
                                                     <small><?php echo htmlspecialchars($ev['servico_nome'] . ' • ' . ($ev['profissional_nome'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></small>
