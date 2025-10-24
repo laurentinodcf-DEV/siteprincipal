@@ -633,7 +633,7 @@ function renderizarServicosGrid(array $servicosLista): void
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Duracao (min)*</label>
-                        <input type="number" name="duracao" id="duracaoMinutos" class="form-control duracao-readonly" min="1" required>
+                        <input type="number" name="duracao" id="duracaoMinutos" class="form-control duracao-readonly" min="1" required readonly>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Preco*</label>
@@ -725,7 +725,7 @@ function renderizarServicosGrid(array $servicosLista): void
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Duracao (min)*</label>
-                                <input type="number" name="duracao" class="form-control duracao-readonly" id="editarServicoDuracao" min="1" required>
+                                <input type="number" name="duracao" class="form-control duracao-readonly" id="editarServicoDuracao" min="1" required readonly>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Preco*</label>
