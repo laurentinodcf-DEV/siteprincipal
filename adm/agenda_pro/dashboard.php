@@ -112,7 +112,7 @@ if (isset($conn) && $conn instanceof mysqli) {
     // Métricas do mês
     $iniMes = date('Y-m-01');
     $fimMes = date('Y-m-t');
-    $fatMes = 0.0; $qtdAgMes = 0; $avgSatisf = null; $temAvaliacao = false;
+    $fatMes = 0.0; $qtdAgMes = 0; $avgSatisf = null;
     if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento BETWEEN ? AND ? AND a.status = "concluido"')) {
         $st->bind_param('ss', $iniMes, $fimMes);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $fatMes=(float)($row['total']??0);} $st->close();
@@ -121,14 +121,20 @@ if (isset($conn) && $conn instanceof mysqli) {
         $st->bind_param('ss', $iniMes, $fimMes);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qtdAgMes=(int)($row['t']??0);} $st->close();
     }
-    // Detectar coluna de avaliação (1..5) e calcular média
-    if ($res = $conn->query("SHOW COLUMNS FROM salao_agendamentos LIKE 'avaliacao'")) {
-        $temAvaliacao = $res->num_rows > 0; $res->free();
+    // Satisfação do mês (média de estrelas de salao_depoimentos)
+    $temDataCriacao = false;
+    if ($res = $conn->query("SHOW COLUMNS FROM salao_depoimentos LIKE 'data_criacao'")) {
+        $temDataCriacao = $res->num_rows > 0; $res->free();
     }
-    if ($temAvaliacao) {
-        if ($st = $conn->prepare('SELECT AVG(avaliacao) AS m FROM salao_agendamentos WHERE data_agendamento BETWEEN ? AND ? AND avaliacao IS NOT NULL')) {
+    if ($temDataCriacao) {
+        if ($st = $conn->prepare('SELECT AVG(estrelas) AS m FROM salao_depoimentos WHERE ativo = 1 AND data_criacao BETWEEN ? AND ?')) {
             $st->bind_param('ss', $iniMes, $fimMes);
-            if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $avgSatisf=(float)($row['m']??0);} $st->close();
+            if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $avgSatisf = $row && $row['m'] !== null ? (float)$row['m'] : null; }
+            $st->close();
+        }
+    } else {
+        if ($r = $conn->query('SELECT AVG(estrelas) AS m FROM salao_depoimentos WHERE ativo = 1')) {
+            $row = $r->fetch_assoc(); $avgSatisf = $row && $row['m'] !== null ? (float)$row['m'] : null; $r->free();
         }
     }
 
@@ -424,29 +430,37 @@ if (isset($conn) && $conn instanceof mysqli) {
                 </h6>
             </div>
             <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-4 mb-3">
-                        <div class="text-muted">Faturamento</div>
-                        <div class="fs-4 fw-bold text-success"><?php echo brl($fatMes ?? 0); ?></div>
+                <!-- Linha: Faturamento -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Faturamento</span>
+                        <span class="fw-semibold text-success"><?php echo brl($fatMes ?? 0); ?></span>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="text-muted">Agendamentos</div>
-                        <div class="fs-4 fw-bold text-primary"><?php echo (int)($qtdAgMes ?? 0); ?></div>
+                </div>
+
+                <!-- Linha: Agendamentos -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Agendamentos</span>
+                        <span class="fw-semibold text-primary"><?php echo (int)($qtdAgMes ?? 0); ?></span>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="text-muted">Satisfação</div>
-                        <div class="fs-5">
+                </div>
+
+                <!-- Linha: Satisfação -->
+                <div class="mb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Satisfação do Cliente</span>
+                        <span>
                             <?php if ($avgSatisf !== null): ?>
-                                <?php 
-                                $stars = round($avgSatisf); 
-                                for ($i=1;$i<=5;$i++) { echo $i <= $stars ? '<i class="bi bi-star-fill text-warning"></i>' : '<i class="bi bi-star text-warning"></i>'; }
-                                ?>
+                                <?php $stars = (int)round($avgSatisf); ?>
+                                <?php for ($i=1;$i<=5;$i++): ?>
+                                    <?php if ($i <= $stars): ?><i class="bi bi-star-fill text-warning"></i><?php else: ?><i class="bi bi-star text-warning"></i><?php endif; ?>
+                                <?php endfor; ?>
                                 <span class="ms-1 small"><?php echo number_format((float)$avgSatisf, 1, ',', '.'); ?>/5</span>
                             <?php else: ?>
-                                <span class="text-muted">—</span>
-                                <span class="small text-muted">Sem avaliações</span>
+                                <span class="text-muted small">Sem avaliações</span>
                             <?php endif; ?>
-                        </div>
+                        </span>
                     </div>
                 </div>
             </div>
