@@ -874,6 +874,13 @@ function renderizarServicosGrid(array $servicosLista): void
                 this.value = live;
                 // Limpa mensagem customizada ao digitar
                 this.setCustomValidity('');
+                
+                // Se campo vazio, limpa o campo de minutos
+                if (dig.length === 0) {
+                    inpMin.value = '';
+                    return;
+                }
+                
                 // Atualiza minutos quando já temos HH:MM completo (5 caracteres)
                 if (this.value.length === 5) {
                     const mins = hhMmParaMinutos(this.value);
