@@ -118,7 +118,7 @@ if (isset($conn) && $conn instanceof mysqli) {
     // Métricas do mês
     $iniMes = date('Y-m-01');
     $fimMes = date('Y-m-t');
-    $fatMes = 0.0; $qtdAgMes = 0; $avgSatisf = null;
+    $fatMes = 0.0; $qtdAgMes = 0; $avgSatisf = null; $qtdConclMes = 0; $qtdCancMes = 0;
     if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento BETWEEN ? AND ? AND a.status = "concluido"')) {
         $st->bind_param('ss', $iniMes, $fimMes);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $fatMes=(float)($row['total']??0);} $st->close();
@@ -126,6 +126,16 @@ if (isset($conn) && $conn instanceof mysqli) {
     if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento BETWEEN ? AND ? AND status <> "cancelado"')) {
         $st->bind_param('ss', $iniMes, $fimMes);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qtdAgMes=(int)($row['t']??0);} $st->close();
+    }
+    // Concluídos do mês
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento BETWEEN ? AND ? AND status = "concluido"')) {
+        $st->bind_param('ss', $iniMes, $fimMes);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qtdConclMes=(int)($row['t']??0);} $st->close();
+    }
+    // Cancelados do mês
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento BETWEEN ? AND ? AND status = "cancelado"')) {
+        $st->bind_param('ss', $iniMes, $fimMes);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qtdCancMes=(int)($row['t']??0);} $st->close();
     }
     // Satisfação do mês (média de estrelas de salao_depoimentos)
     $temDataCriacao = false;
@@ -444,6 +454,22 @@ if (isset($conn) && $conn instanceof mysqli) {
                     <div class="d-flex justify-content-between">
                         <span>Agendamentos</span>
                         <span class="fw-semibold text-primary"><?php echo (int)($qtdAgMes ?? 0); ?></span>
+                    </div>
+                </div>
+
+                <!-- Linha: Concluídos -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Concluídos</span>
+                        <span class="fw-semibold text-success"><?php echo (int)($qtdConclMes ?? 0); ?></span>
+                    </div>
+                </div>
+
+                <!-- Linha: Cancelados -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Cancelados</span>
+                        <span class="fw-semibold text-danger"><?php echo (int)($qtdCancMes ?? 0); ?></span>
                     </div>
                 </div>
 
