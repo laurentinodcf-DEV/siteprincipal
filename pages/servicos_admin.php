@@ -628,8 +628,8 @@ function renderizarServicosGrid(array $servicosLista): void
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Duração horas/minutos*</label>
-                        <input type="text" id="duracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="00:30" maxlength="5" autocomplete="off">
-                        <small class="form-text text-muted">Digite HH:MM ou somente números (ex: 0130 → 01:30)</small>
+                        <input type="text" id="duracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="hh:mm" maxlength="5" autocomplete="off">
+                        <small class="form-text text-muted">Digite somente números (ex: 0130 → 01:30)</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Duracao (min)*</label>
