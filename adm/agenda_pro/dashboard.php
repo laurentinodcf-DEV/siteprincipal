@@ -6,6 +6,12 @@ if (!isset($conn)) {
     if (file_exists($connFile)) { require_once $connFile; }
 }
 
+// Garantir timezone local consistente
+$tz = ini_get('date.timezone');
+if (!$tz || !@date_default_timezone_set($tz)) {
+    date_default_timezone_set('America/Sao_Paulo');
+}
+
 // Helpers
 function brl($v){ return 'R$ ' . number_format((float)$v, 2, ',', '.'); }
 function dt($format, $ts=null){ return date($format, $ts ?? time()); }
@@ -160,7 +166,8 @@ if (isset($conn) && $conn instanceof mysqli) {
                         <small class="opacity-75"><?php echo ($dif>=0?'+':'') . (int)$dif; ?> desde ontem</small>
                     </div>
                     <div class="align-self-center">
-                        <i class="bi bi-calendar-day fs-1 opacity-75"></i>
+                        <!-- Ícone sem texto em inglês dentro -->
+                        <i class="bi bi-calendar-check fs-1 opacity-75"></i>
                     </div>
                 </div>
             </div>

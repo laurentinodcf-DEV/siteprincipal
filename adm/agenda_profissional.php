@@ -2,6 +2,12 @@
 session_start();
 require_once '../conexao.php';
 
+// Garantir que a hora siga o fuso do sistema/servidor (fallback Brasil)
+$tz = ini_get('date.timezone');
+if (!$tz || !@date_default_timezone_set($tz)) {
+    date_default_timezone_set('America/Sao_Paulo');
+}
+
 // Verificar se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
@@ -379,7 +385,7 @@ $titulos_modulos = [
                 </div>
                 <div class="text-muted">
                     <i class="bi bi-clock me-1"></i>
-                    <?php echo date('d/m/Y H:i'); ?>
+                    <span id="clockLocal" aria-label="Relógio local">--/--/---- --:--</span>
                 </div>
             </div>
         </div>
@@ -437,6 +443,26 @@ $titulos_modulos = [
                     }, 100);
                 }, index * 100);
             });
+
+            // Relógio local do sistema (cliente)
+            const clockEl = document.getElementById('clockLocal');
+            function updateClock() {
+                try {
+                    const now = new Date();
+                    const fmt = new Intl.DateTimeFormat('pt-BR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    clockEl.textContent = fmt.format(now);
+                } catch (e) {
+                    // Fallback
+                    const pad = n => String(n).padStart(2, '0');
+                    const d = new Date();
+                    clockEl.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                }
+            }
+            updateClock();
+            setInterval(updateClock, 30000); // atualiza a cada 30s
         });
     </script>
 </body>
