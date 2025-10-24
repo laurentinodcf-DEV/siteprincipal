@@ -108,6 +108,7 @@ function badgeByStatus(?string $s): string {
 }
 ?>
 
+<div class="agenda-cal">
 <div class="card mb-3">
     <div class="card-body d-flex flex-wrap gap-2 align-items-center">
         <form method="get" class="d-flex align-items-center gap-2">
@@ -316,13 +317,15 @@ function badgeByStatus(?string $s): string {
                 </table>
             </div>
         <?php endif; ?>
-    </div>
+        </div>
     <div class="card-footer d-flex justify-content-end gap-2">
         <a class="btn btn-success" href="?modulo=agendamento_inteligente&data=<?php echo urlencode($data); ?><?php echo $profissionalId?('&profissional_id='.$profissionalId):''; ?>">
             <i class="bi bi-plus-lg me-1"></i> Novo Agendamento
         </a>
     </div>
 </div>
+
+    </div> <!-- /.agenda-cal -->
 
 <style>
 /* Ajustes visuais usando a paleta do sistema (verde) */
@@ -332,6 +335,14 @@ function badgeByStatus(?string $s): string {
 .badge.bg-success { background-color: #28a745 !important; }
 .badge.bg-warning { background-color: #ffc107 !important; }
 .badge.bg-secondary { background-color: #6c757d !important; }
+
+/* Hover com gradiente para os botões deste módulo */
+.agenda-cal .btn:not(:disabled):hover,
+.agenda-cal .btn:not(:disabled):focus {
+    background: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 0%, rgba(237, 221, 83, 1) 100%); !important;
+    color: #fff !important;
+    border-color: transparent !important;
+}
 </style>
 
 <script>
