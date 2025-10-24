@@ -504,10 +504,12 @@ function renderizarServicosGrid(array $servicosLista): void
             z-index: 1050 !important;
             background-color: rgba(0, 0, 0, 0.5) !important;
         }
-        .modal-content {
+        .modal-content {/* Estilos personalizados para o conteudo do modal */
             background-color: white !important;
             border: 1px solid #dee2e6 !important;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            width: 100%;
+            margin: 0;
         }
         .modal-header {
             border-bottom: 1px solid #dee2e6 !important;
@@ -515,13 +517,23 @@ function renderizarServicosGrid(array $servicosLista): void
         .modal-footer {
             border-top: 1px solid #dee2e6 !important;
         }
+
         
-        /* Estilo personalizado para modais de serviços */
-        .modal-content {
-            border-radius: 12px !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
-            width: 100%;
+        /* Remover qualquer espaçamento superior e encostar no topo */
+        #modalEditarServico .modal-dialog {
+            margin-top: 10px;      /* sem margem no topo/baixo */
+            margin-left: 10px;
+            max-width: 95%;       /* mantém o modal mais largo */
+            width: 95%;
         }
+
+        /* Cancela o centramento vertical para colar no topo */
+        #modalEditarServico .modal-dialog.modal-dialog-centered {
+            align-items: flex-start !important;
+            min-height: unset !important;
+            padding: 0 !important;
+        }
+
         
         .modal-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
