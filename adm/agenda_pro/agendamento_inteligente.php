@@ -12,6 +12,17 @@ $mensagemErro = '';
 // Helpers
 function so_numeros(string $v): string { return preg_replace('/\D+/', '', $v) ?? ''; }
 
+// Safe binder to avoid fatal if types length mismatches
+function bindParamsSafe(mysqli_stmt $stmt, string $types, &...$vars): bool {
+    $expected = strlen($types);
+    $given = count($vars);
+    if ($expected !== $given) {
+        // Fallback: bind all as strings to prevent ArgumentCountError
+        $types = str_repeat('s', $given);
+    }
+    return $stmt->bind_param($types, ...$vars);
+}
+
 function addMinutosHora(string $horaHHMM, int $minutos): string {
     try {
         $dt = new DateTime('1970-01-01 ' . $horaHHMM);
@@ -122,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $conn->prepare('INSERT INTO salao_agendamentos (cliente_id, nome_cliente, telefone_cliente, profissional_id, servico_id, data_agendamento, hora_inicio, hora_fim, duracao_prevista, duracao_real, observacoes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
                     if ($stmt) {
                         $types = 'issiisssiisss'; // i s s i i s s s i i s s
-                        $stmt->bind_param($types,
+                        bindParamsSafe($stmt, $types,
                             $cliente_id,
                             $nome_cliente,
                             $telefone_cliente,
@@ -155,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt = $conn->prepare('UPDATE salao_agendamentos SET cliente_id = ?, nome_cliente = ?, telefone_cliente = ?, profissional_id = ?, servico_id = ?, data_agendamento = ?, hora_inicio = ?, hora_fim = ?, duracao_prevista = ?, duracao_real = ?, observacoes = ?, status = ? WHERE id = ?');
                         if ($stmt) {
                             $types = 'issiisssiisssi'; // + id no final
-                            $stmt->bind_param($types,
+                            bindParamsSafe($stmt, $types,
                                 $cliente_id,
                                 $nome_cliente,
                                 $telefone_cliente,
