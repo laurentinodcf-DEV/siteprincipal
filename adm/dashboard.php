@@ -67,6 +67,12 @@ $modules = [
         'description' => 'Configure meses, dias e períodos de atendimento.',
         'src' => '../pages/horarios_funcionamento.php',
     ],
+    'sistema_agenda' => [
+        'label' => 'Sistema de Agenda',
+        'description' => 'Gerencie agendamentos e controle de horários.',
+        'src' => 'agenda_profissional.php',
+        'target' => '_blank'
+    ],
 ];
 
 $navigation = [
@@ -80,7 +86,7 @@ $navigation = [
     ],
     [
         'title' => 'Operação',
-        'items' => ['horarios', 'ordenar_servicos', 'ordenar_depoimentos'],
+        'items' => ['horarios', 'ordenar_servicos', 'ordenar_depoimentos', 'sistema_agenda'],
     ],
 ];
 
@@ -122,8 +128,10 @@ $usuario = $_SESSION['usuario_nome'] ?? 'Administrador';
                 <?php foreach ($section['items'] as $itemKey):
                     $item = $modules[$itemKey];
                     $isActive = $itemKey === $module;
+                    $target = isset($item['target']) ? ' target="' . $item['target'] . '"' : '';
+                    $href = isset($item['target']) && $item['target'] === '_blank' ? $item['src'] : "?module=" . urlencode($itemKey);
                 ?>
-                    <a class="nav-link<?php echo $isActive ? ' active' : ''; ?>" href="?module=<?php echo urlencode($itemKey); ?>">
+                    <a class="nav-link<?php echo $isActive ? ' active' : ''; ?>" href="<?php echo $href; ?>"<?php echo $target; ?>>
                         <span><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></span>
                     </a>
                 <?php endforeach; ?>

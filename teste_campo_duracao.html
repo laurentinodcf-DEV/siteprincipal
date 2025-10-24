@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Campo Duração HH:MM</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container { max-width: 600px; margin: 50px auto; }
+        .teste-resultado { 
+            background-color: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin-top: 20px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h4>🕒 Teste do Campo Duração HH:MM</h4>
+                <p class="mb-0 text-muted">Digite números para ver a formatação automática</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Duração horas/minutos*</label>
+                        <input type="text" id="duracaoHhMm" class="form-control" placeholder="01:30" maxlength="5" pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$">
+                        <small class="form-text text-muted">Formato: HH:MM</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Resultado:</label>
+                        <div id="resultado" class="form-control bg-light">Digite algo...</div>
+                    </div>
+                </div>
+                
+                <div class="teste-resultado">
+                    <h6>📝 Como funciona:</h6>
+                    <ul class="mb-0">
+                        <li><strong>Durante a digitação:</strong> Digite livremente números (ex: <code>01</code>, <code>0130</code>)</li>
+                        <li><strong>Ao digitar 4 números:</strong> <code>0130</code> → <strong>01:30</strong> (formatação automática)</li>
+                        <li><strong>Ao sair do campo:</strong> <code>1</code> → <strong>01:00</strong>, <code>130</code> → <strong>01:30</strong></li>
+                        <li><strong>Validação:</strong> Horas máx 23, minutos máx 59</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função para formatação do campo HH:MM
+        function formatarHHMM(input) {
+            let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+            
+            if (valor.length === 0) {
+                input.value = '';
+                document.getElementById('resultado').textContent = 'Digite algo...';
+                return;
+            }
+            
+            // Não formatar durante a digitação, apenas quando terminar
+            if (valor.length < 4) {
+                return; // Deixa o usuário terminar de digitar
+            }
+            
+            // Limita a 4 dígitos (HHMM)
+            if (valor.length > 4) {
+                valor = valor.substring(0, 4);
+            }
+            
+            // Extrai horas e minutos
+            let horas = parseInt(valor.substring(0, 2));
+            let minutos = parseInt(valor.substring(2, 4));
+            
+            // Validações
+            if (horas > 23) horas = 23;
+            if (minutos > 59) minutos = 59;
+            
+            // Formata como HH:MM
+            const resultado = horas.toString().padStart(2, '0') + ':' + minutos.toString().padStart(2, '0');
+            input.value = resultado;
+            
+            // Mostra o resultado
+            document.getElementById('resultado').textContent = resultado;
+        }
+        
+        // Função para formatação ao sair do campo (blur)
+        function formatarHHMMCompleto(input) {
+            let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+            
+            if (valor.length === 0) {
+                input.value = '';
+                document.getElementById('resultado').textContent = 'Digite algo...';
+                return;
+            }
+            
+            // Completa com zeros se necessário
+            if (valor.length === 1) {
+                valor = '0' + valor + '00'; // 1 -> 0100
+            } else if (valor.length === 2) {
+                valor = valor + '00'; // 01 -> 0100
+            } else if (valor.length === 3) {
+                valor = '0' + valor; // 130 -> 0130
+            } else if (valor.length > 4) {
+                valor = valor.substring(0, 4);
+            }
+            
+            // Extrai horas e minutos
+            let horas = parseInt(valor.substring(0, 2));
+            let minutos = parseInt(valor.substring(2, 4));
+            
+            // Validações
+            if (horas > 23) horas = 23;
+            if (minutos > 59) minutos = 59;
+            
+            // Formata como HH:MM
+            const resultado = horas.toString().padStart(2, '0') + ':' + minutos.toString().padStart(2, '0');
+            input.value = resultado;
+            
+            // Mostra o resultado
+            document.getElementById('resultado').textContent = resultado;
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const campo = document.getElementById('duracaoHhMm');
+            
+            campo.addEventListener('input', function() {
+                // Permite apenas números
+                let valor = this.value.replace(/\D/g, '');
+                if (valor.length <= 4) {
+                    this.value = valor;
+                }
+                
+                // Mostra o que está sendo digitado
+                document.getElementById('resultado').textContent = valor.length > 0 ? valor + ' (digitando...)' : 'Digite algo...';
+                
+                // Formata automaticamente quando digita 4 números
+                if (valor.length === 4) {
+                    formatarHHMM(this);
+                }
+            });
+            
+            campo.addEventListener('blur', function() {
+                formatarHHMMCompleto(this);
+            });
+        });
+    </script>
+</body>
+</html>
