@@ -628,7 +628,7 @@ function renderizarServicosGrid(array $servicosLista): void
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Duração horas/minutos*</label>
-                        <input type="text" id="duracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="hh:mm" maxlength="5" autocomplete="off">
+                        <input type="text" id="duracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="hh:mm" maxlength="5" autocomplete="off" required>
                         <small class="form-text text-muted">Digite somente números (ex: 0130 → 01:30)</small>
                     </div>
                     <div class="col-md-3">
@@ -720,7 +720,7 @@ function renderizarServicosGrid(array $servicosLista): void
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Duração horas/minutos*</label>
-                                <input type="text" id="editarDuracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="00:30" maxlength="5" autocomplete="off">
+                                <input type="text" id="editarDuracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="00:30" maxlength="5" autocomplete="off" required>
                                 <small class="form-text text-muted">Digite HH:MM ou somente números (ex: 1130 → 11:30)</small>
                             </div>
                             <div class="col-md-3">
@@ -872,6 +872,8 @@ function renderizarServicosGrid(array $servicosLista): void
                 const dig = apenasDigitos(this.value);
                 const live = formatarLiveHhMm(dig);
                 this.value = live;
+                // Limpa mensagem customizada ao digitar
+                this.setCustomValidity('');
                 // Atualiza minutos quando já temos HH:MM completo (5 caracteres)
                 if (this.value.length === 5) {
                     const mins = hhMmParaMinutos(this.value);
@@ -891,6 +893,13 @@ function renderizarServicosGrid(array $servicosLista): void
                     inpMin.setCustomValidity('Duração deve ser entre 00:01 e 24:00');
                 } else {
                     inpMin.setCustomValidity('');
+                }
+            });
+
+            // Mensagem de tooltip obrigatória
+            inpHhMm.addEventListener('invalid', function () {
+                if (!this.value || this.value.trim() === '') {
+                    this.setCustomValidity('Preencha esse campo');
                 }
             });
         }
