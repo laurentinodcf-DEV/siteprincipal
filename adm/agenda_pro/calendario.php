@@ -126,10 +126,15 @@ function badgeByStatus(?string $s): string {
                 <span class="badge bg-secondary">cancelado</span>
             </span>
 
+            <?php
+                $clsMensal  = ($view==='mensal')  ? 'btn-outline-success' : 'btn-success';
+                $clsSemanal = ($view==='semanal') ? 'btn-outline-success' : 'btn-success';
+                $clsDiaria  = ($view==='diaria')  ? 'btn-outline-success' : 'btn-success';
+            ?>
             <div class="ms-auto d-flex align-items-center gap-2">
-                <a class="btn btn-outline-success btn-sm <?php echo $view==='mensal'?'active':''; ?>" href="?modulo=calendario&view=mensal&data=<?php echo urlencode($data); ?><?php echo $profissionalId?('&profissional_id='.$profissionalId):''; ?>">Mensal</a>
-                <a class="btn btn-outline-success btn-sm <?php echo $view==='semanal'?'active':''; ?>" href="?modulo=calendario&view=semanal&data=<?php echo urlencode($data); ?><?php echo $profissionalId?('&profissional_id='.$profissionalId):''; ?>">Semanal</a>
-                <a class="btn btn-success btn-sm <?php echo $view==='diaria'?'active':''; ?>" href="?modulo=calendario&view=diaria&data=<?php echo urlencode($data); ?><?php echo $profissionalId?('&profissional_id='.$profissionalId):''; ?>">Diária</a>
+                <a class="btn <?php echo $clsMensal; ?> btn-sm" href="?modulo=calendario&view=mensal&data=<?php echo urlencode($data); ?><?php echo $profissionalId?('&profissional_id='.$profissionalId):''; ?>">Mensal</a>
+                <a class="btn <?php echo $clsSemanal; ?> btn-sm" href="?modulo=calendario&view=semanal&data=<?php echo urlencode($data); ?><?php echo $profissionalId?('&profissional_id='.$profissionalId):''; ?>">Semanal</a>
+                <a class="btn <?php echo $clsDiaria; ?> btn-sm" href="?modulo=calendario&view=diaria&data=<?php echo urlencode($data); ?><?php echo $profissionalId?('&profissional_id='.$profissionalId):''; ?>">Diária</a>
             </div>
         </form>
     </div>
