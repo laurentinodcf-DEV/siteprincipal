@@ -21,6 +21,7 @@ $modulo = isset($_GET['modulo']) ? $_GET['modulo'] : 'dashboard';
 $modulos_validos = [
     'dashboard',
     'agendamento_inteligente',
+    'calendario',
     'gestao_clientes',
     'controle_profissionais',
     'integracao_whatsapp',
@@ -38,6 +39,7 @@ if (!in_array($modulo, $modulos_validos)) {
 $titulos_modulos = [
     'dashboard' => 'Painel de Controle',
     'agendamento_inteligente' => 'Sistema de Agendamento Inteligente',
+    'calendario' => 'Calendário de Agendamentos',
     'gestao_clientes' => 'Gestão de Clientes',
     'controle_profissionais' => 'Controle de Profissionais',
     'integracao_whatsapp' => 'Integração WhatsApp',
@@ -310,6 +312,9 @@ $titulos_modulos = [
                 <div class="nav-section-title">Agendamentos</div>
                 <a class="nav-link <?php echo $modulo == 'agendamento_inteligente' ? 'active' : ''; ?>" href="?modulo=agendamento_inteligente">
                     <i class="bi bi-calendar-check me-3"></i> Sistema Inteligente
+                </a>
+                <a class="nav-link <?php echo $modulo == 'calendario' ? 'active' : ''; ?>" href="?modulo=calendario">
+                    <i class="bi bi-calendar3 me-3"></i> Calendário
                 </a>
             </div>
             
