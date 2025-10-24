@@ -283,7 +283,7 @@ if (isset($conn) && $conn instanceof mysqli) {
                     <a class="btn btn-success" href="?modulo=agendamento_inteligente">
                         <i class="bi bi-plus-lg me-1"></i> Novo Agendamento
                     </a>
-                    <a class="btn btn-outline-primary" href="?modulo=agendamento_inteligente">
+                    <a class="btn btn-outline-primary" href="?modulo=calendario">
                         <i class="bi bi-calendar3 me-1"></i> Ver Calendário
                     </a>
                 </div>
