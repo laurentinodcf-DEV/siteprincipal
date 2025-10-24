@@ -520,6 +520,7 @@ function renderizarServicosGrid(array $servicosLista): void
         .modal-content {
             border-radius: 12px !important;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+            width: 100%;
         }
         
         .modal-header {
