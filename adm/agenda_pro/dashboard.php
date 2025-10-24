@@ -11,6 +11,7 @@ function brl($v){ return 'R$ ' . number_format((float)$v, 2, ',', '.'); }
 function dt($format, $ts=null){ return date($format, $ts ?? time()); }
 
 $hoje = date('Y-m-d');
+$agora = date('H:i:s');
 $ontem = date('Y-m-d', strtotime('-1 day'));
 
 $agHoje = 0; $agOntem = 0; $dif = 0;
@@ -86,6 +87,56 @@ if (isset($conn) && $conn instanceof mysqli) {
     if ($st = $conn->prepare($sql)) {
         $st->bind_param('ss', $semIni, $semFim);
         if ($st->execute()) { $r = $st->get_result(); while ($row = $r->fetch_assoc()) { $profSemanal[] = $row; } }
+        $st->close();
+    }
+
+    // Alertas do dia
+    $qProximos1h = 0; $qAtrasados = 0; $qCanceladosHoje = 0; $qSemClienteHoje = 0;
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND status = "agendado" AND hora_inicio BETWEEN ? AND ADDTIME(?, "01:00:00")')) {
+        $st->bind_param('sss', $hoje, $agora, $agora);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qProximos1h=(int)($row['t']??0);} $st->close();
+    }
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND status = "agendado" AND hora_inicio < ?')) {
+        $st->bind_param('ss', $hoje, $agora);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qAtrasados=(int)($row['t']??0);} $st->close();
+    }
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND status = "cancelado"')) {
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qCanceladosHoje=(int)($row['t']??0);} $st->close();
+    }
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND (cliente_id IS NULL)')) {
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qSemClienteHoje=(int)($row['t']??0);} $st->close();
+    }
+
+    // Métricas do mês
+    $iniMes = date('Y-m-01');
+    $fimMes = date('Y-m-t');
+    $fatMes = 0.0; $qtdAgMes = 0; $avgSatisf = null; $temAvaliacao = false;
+    if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento BETWEEN ? AND ? AND a.status = "concluido"')) {
+        $st->bind_param('ss', $iniMes, $fimMes);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $fatMes=(float)($row['total']??0);} $st->close();
+    }
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento BETWEEN ? AND ? AND status <> "cancelado"')) {
+        $st->bind_param('ss', $iniMes, $fimMes);
+        if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qtdAgMes=(int)($row['t']??0);} $st->close();
+    }
+    // Detectar coluna de avaliação (1..5) e calcular média
+    if ($res = $conn->query("SHOW COLUMNS FROM salao_agendamentos LIKE 'avaliacao'")) {
+        $temAvaliacao = $res->num_rows > 0; $res->free();
+    }
+    if ($temAvaliacao) {
+        if ($st = $conn->prepare('SELECT AVG(avaliacao) AS m FROM salao_agendamentos WHERE data_agendamento BETWEEN ? AND ? AND avaliacao IS NOT NULL')) {
+            $st->bind_param('ss', $iniMes, $fimMes);
+            if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $avgSatisf=(float)($row['m']??0);} $st->close();
+        }
+    }
+
+    // Top serviços do mês (por agendamentos)
+    $topServicos = [];
+    if ($st = $conn->prepare('SELECT s.nome, COUNT(*) AS q FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento BETWEEN ? AND ? AND a.status <> "cancelado" GROUP BY s.id, s.nome ORDER BY q DESC, s.nome ASC LIMIT 5')) {
+        $st->bind_param('ss', $iniMes, $fimMes);
+        if ($st->execute()) { $r = $st->get_result(); while ($row = $r->fetch_assoc()) { $topServicos[] = $row; } }
         $st->close();
     }
 }
@@ -243,18 +294,36 @@ if (isset($conn) && $conn instanceof mysqli) {
                 </h6>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning alert-sm d-flex align-items-center mb-2">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    <small>3 horários vagos hoje após 17h</small>
-                </div>
-                <div class="alert alert-info alert-sm d-flex align-items-center mb-2">
-                    <i class="bi bi-person-check me-2"></i>
-                    <small>2 clientes VIP agendados amanhã</small>
-                </div>
-                <div class="alert alert-success alert-sm d-flex align-items-center mb-0">
-                    <i class="bi bi-graph-up me-2"></i>
-                    <small>Meta mensal 73% atingida</small>
-                </div>
+                <?php if (($qProximos1h ?? 0) > 0): ?>
+                    <div class="alert alert-info alert-sm d-flex align-items-center mb-2">
+                        <i class="bi bi-alarm me-2"></i>
+                        <small><?php echo (int)$qProximos1h; ?> agendamento(s) nas próximas 1h</small>
+                    </div>
+                <?php endif; ?>
+                <?php if (($qAtrasados ?? 0) > 0): ?>
+                    <div class="alert alert-warning alert-sm d-flex align-items-center mb-2">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <small><?php echo (int)$qAtrasados; ?> agendamento(s) atrasado(s)</small>
+                    </div>
+                <?php endif; ?>
+                <?php if (($qCanceladosHoje ?? 0) > 0): ?>
+                    <div class="alert alert-danger alert-sm d-flex align-items-center mb-2">
+                        <i class="bi bi-x-circle me-2"></i>
+                        <small><?php echo (int)$qCanceladosHoje; ?> cancelamento(s) hoje</small>
+                    </div>
+                <?php endif; ?>
+                <?php if (($qSemClienteHoje ?? 0) > 0): ?>
+                    <div class="alert alert-secondary alert-sm d-flex align-items-center mb-0">
+                        <i class="bi bi-person-dash me-2"></i>
+                        <small><?php echo (int)$qSemClienteHoje; ?> agendamento(s) sem cliente vinculado</small>
+                    </div>
+                <?php endif; ?>
+                <?php if (($qProximos1h ?? 0) === 0 && ($qAtrasados ?? 0) === 0 && ($qCanceladosHoje ?? 0) === 0 && ($qSemClienteHoje ?? 0) === 0): ?>
+                    <div class="alert alert-light alert-sm mb-0 d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <small>Sem alertas no momento.</small>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -268,18 +337,18 @@ if (isset($conn) && $conn instanceof mysqli) {
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <button class="btn btn-outline-primary btn-sm">
+                    <a class="btn btn-outline-primary btn-sm" href="?modulo=agendamento_inteligente">
                         <i class="bi bi-plus-circle me-2"></i> Novo Agendamento
-                    </button>
-                    <button class="btn btn-outline-success btn-sm">
-                        <i class="bi bi-whatsapp me-2"></i> Enviar Lembretes
-                    </button>
-                    <button class="btn btn-outline-info btn-sm">
-                        <i class="bi bi-people me-2"></i> Cadastrar Cliente
-                    </button>
-                    <button class="btn btn-outline-warning btn-sm">
-                        <i class="bi bi-clock me-2"></i> Bloquear Horário
-                    </button>
+                    </a>
+                    <a class="btn btn-outline-success btn-sm" href="?modulo=agendamento_inteligente">
+                        <i class="bi bi-calendar-check me-2"></i> Agendamentos de Hoje <span class="badge bg-success ms-1"><?php echo (int)($agHoje ?? 0); ?></span>
+                    </a>
+                    <a class="btn btn-outline-info btn-sm" href="?modulo=agendamento_inteligente&data=<?php echo date('Y-m-d', strtotime('+1 day')); ?>">
+                        <i class="bi bi-bell me-2"></i> Lembretes de Amanhã <span class="badge bg-info ms-1"></span>
+                    </a>
+                    <a class="btn btn-outline-warning btn-sm" href="?modulo=agendamento_inteligente">
+                        <i class="bi bi-alarm me-2"></i> Próximos 60 minutos <span class="badge bg-warning text-dark ms-1"><?php echo (int)($qProximos1h ?? 0); ?></span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -351,37 +420,33 @@ if (isset($conn) && $conn instanceof mysqli) {
             <div class="card-header">
                 <h6 class="mb-0">
                     <i class="bi bi-graph-up text-success me-2"></i>
-                    Performance do Mês
+                    Performance do Mês (<?php echo date('m/Y'); ?>)
                 </h6>
             </div>
             <div class="card-body">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Meta de Faturamento</span>
-                        <span>R$ 18.500 / R$ 25.000</span>
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-muted">Faturamento</div>
+                        <div class="fs-4 fw-bold text-success"><?php echo brl($fatMes ?? 0); ?></div>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-success" style="width: 74%">74%</div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-muted">Agendamentos</div>
+                        <div class="fs-4 fw-bold text-primary"><?php echo (int)($qtdAgMes ?? 0); ?></div>
                     </div>
-                </div>
-                
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Meta de Agendamentos</span>
-                        <span>185 / 250</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-primary" style="width: 74%">74%</div>
-                    </div>
-                </div>
-                
-                <div class="mb-0">
-                    <div class="d-flex justify-content-between">
-                        <span>Satisfação do Cliente</span>
-                        <span>4.8 / 5.0</span>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-warning" style="width: 96%">96%</div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-muted">Satisfação</div>
+                        <div class="fs-5">
+                            <?php if ($avgSatisf !== null): ?>
+                                <?php 
+                                $stars = round($avgSatisf); 
+                                for ($i=1;$i<=5;$i++) { echo $i <= $stars ? '<i class="bi bi-star-fill text-warning"></i>' : '<i class="bi bi-star text-warning"></i>'; }
+                                ?>
+                                <span class="ms-1 small"><?php echo number_format((float)$avgSatisf, 1, ',', '.'); ?>/5</span>
+                            <?php else: ?>
+                                <span class="text-muted">—</span>
+                                <span class="small text-muted">Sem avaliações</span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -393,40 +458,22 @@ if (isset($conn) && $conn instanceof mysqli) {
             <div class="card-header">
                 <h6 class="mb-0">
                     <i class="bi bi-star text-warning me-2"></i>
-                    Serviços Mais Solicitados
+                    Serviços Mais Solicitados (mês)
                 </h6>
             </div>
             <div class="card-body">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Corte de Cabelo</span>
-                        <span class="badge bg-primary">45</span>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Manicure</span>
-                        <span class="badge bg-success">38</span>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Escova</span>
-                        <span class="badge bg-info">32</span>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Pedicure</span>
-                        <span class="badge bg-warning">28</span>
-                    </div>
-                </div>
-                <div class="mb-0">
-                    <div class="d-flex justify-content-between">
-                        <span>Hidratação</span>
-                        <span class="badge bg-secondary">22</span>
-                    </div>
-                </div>
+                <?php if (empty($topServicos)): ?>
+                    <div class="alert alert-light mb-0">Sem dados para o mês atual.</div>
+                <?php else: ?>
+                    <?php foreach ($topServicos as $ts): ?>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span><?php echo htmlspecialchars($ts['nome'] ?? 'Serviço', ENT_QUOTES, 'UTF-8'); ?></span>
+                                <span class="badge bg-primary"><?php echo (int)($ts['q'] ?? 0); ?></span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
