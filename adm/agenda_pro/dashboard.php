@@ -1,5 +1,94 @@
 <?php
-// Dashboard Principal - Painel de Controle da Agenda Profissional
+// Dashboard Principal - Painel de Controle da Agenda Profissional (dinâmico)
+if (!isset($conn)) {
+    // Tenta obter conexão global do container agenda_profissional
+    $connFile = __DIR__ . '/../../conexao.php';
+    if (file_exists($connFile)) { require_once $connFile; }
+}
+
+// Helpers
+function brl($v){ return 'R$ ' . number_format((float)$v, 2, ',', '.'); }
+function dt($format, $ts=null){ return date($format, $ts ?? time()); }
+
+$hoje = date('Y-m-d');
+$ontem = date('Y-m-d', strtotime('-1 day'));
+
+$agHoje = 0; $agOntem = 0; $dif = 0;
+if (isset($conn) && $conn instanceof mysqli) {
+    // Agendamentos hoje
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ?')) {
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $agHoje = (int)($row['t'] ?? 0); }
+        $st->close();
+    }
+    if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ?')) {
+        $st->bind_param('s', $ontem);
+        if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $agOntem = (int)($row['t'] ?? 0); }
+        $st->close();
+    }
+    $dif = $agHoje - $agOntem;
+
+    // Faturamento: previsto (status != cancelado) e realizado (concluído)
+    $fatPrev = 0.0; $fatReal = 0.0;
+    if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento = ? AND a.status <> "cancelado"')) {
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $fatPrev = (float)($row['total'] ?? 0); }
+        $st->close();
+    }
+    if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento = ? AND a.status = "concluido"')) {
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $fatReal = (float)($row['total'] ?? 0); }
+        $st->close();
+    }
+
+    // Clientes novos hoje (primeira vez na agenda)
+    $clientesNovosHoje = 0;
+    // Vinculados (cliente_id)
+    if ($st = $conn->prepare('SELECT COUNT(DISTINCT a.cliente_id) AS q FROM salao_agendamentos a WHERE a.data_agendamento = ? AND a.cliente_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM salao_agendamentos ap WHERE ap.cliente_id = a.cliente_id AND ap.data_agendamento < ?)')) {
+        $st->bind_param('ss', $hoje, $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $clientesNovosHoje += (int)($row['q'] ?? 0); }
+        $st->close();
+    }
+    // Rápidos (sem cliente_id): considera par (nome, telefone)
+    if ($st = $conn->prepare('SELECT COUNT(DISTINCT CONCAT(COALESCE(a.nome_cliente, ""), "|", COALESCE(a.telefone_cliente, ""))) AS q FROM salao_agendamentos a WHERE a.data_agendamento = ? AND a.cliente_id IS NULL AND NOT EXISTS (SELECT 1 FROM salao_agendamentos ap WHERE ap.cliente_id IS NULL AND ap.data_agendamento < ? AND COALESCE(ap.nome_cliente, "") = COALESCE(a.nome_cliente, "") AND COALESCE(ap.telefone_cliente, "") = COALESCE(a.telefone_cliente, ""))')) {
+        $st->bind_param('ss', $hoje, $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $clientesNovosHoje += (int)($row['q'] ?? 0); }
+        $st->close();
+    }
+
+    // Ocupação: minutos agendados hoje / (profissionais ativos * 8h)
+    $minAgendadosHoje = 0; $profAtivos = 0; $taxaOcup = 0;
+    if ($st = $conn->prepare('SELECT SUM(COALESCE(a.duracao_real, a.duracao_prevista)) AS mins FROM salao_agendamentos a WHERE a.data_agendamento = ? AND a.status <> "cancelado"')) {
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $minAgendadosHoje = (int)($row['mins'] ?? 0); }
+        $st->close();
+    }
+    if ($r = $conn->query('SELECT COUNT(*) AS c FROM salao_profissionais WHERE ativo = 1')) {
+        $row = $r->fetch_assoc(); $profAtivos = (int)($row['c'] ?? 0); $r->free();
+    }
+    $capacidadeMinDia = $profAtivos * 8 * 60; // hipótese 8h por profissional
+    if ($capacidadeMinDia > 0) { $taxaOcup = max(0, min(100, round(($minAgendadosHoje / $capacidadeMinDia) * 100))); }
+
+    // Agenda de hoje (lista)
+    $listaHoje = [];
+    if ($st = $conn->prepare('SELECT a.*, p.nome AS profissional_nome, s.nome AS servico_nome, s.preco AS servico_preco, c.nome AS cliente_nome_cad FROM salao_agendamentos a INNER JOIN salao_profissionais p ON p.id = a.profissional_id INNER JOIN salao_servicos s ON s.id = a.servico_id LEFT JOIN salao_clientes c ON c.id = a.cliente_id WHERE a.data_agendamento = ? ORDER BY a.hora_inicio ASC')) {
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); while ($row = $r->fetch_assoc()) { $listaHoje[] = $row; } }
+        $st->close();
+    }
+
+    // Semana por profissional (top 3 por agendamentos)
+    $iniSemana = (new DateTime('today')); $wkDow = (int)$iniSemana->format('N'); $iniSemana->modify('-' . ($wkDow-1) . ' days');
+    $fimSemana = (clone $iniSemana); $fimSemana->modify('+6 days');
+    $semIni = $iniSemana->format('Y-m-d'); $semFim = $fimSemana->format('Y-m-d');
+    $profSemanal = [];
+    $sql = 'SELECT p.id, p.nome, COUNT(a.id) AS total_ag, COALESCE(SUM(COALESCE(a.duracao_real, a.duracao_prevista)),0) AS min_total, COALESCE(SUM(s.preco),0) AS faturamento FROM salao_profissionais p LEFT JOIN salao_agendamentos a ON a.profissional_id = p.id AND a.data_agendamento BETWEEN ? AND ? AND a.status <> "cancelado" LEFT JOIN salao_servicos s ON s.id = a.servico_id WHERE p.ativo = 1 GROUP BY p.id, p.nome ORDER BY total_ag DESC, p.nome ASC LIMIT 3';
+    if ($st = $conn->prepare($sql)) {
+        $st->bind_param('ss', $semIni, $semFim);
+        if ($st->execute()) { $r = $st->get_result(); while ($row = $r->fetch_assoc()) { $profSemanal[] = $row; } }
+        $st->close();
+    }
+}
 ?>
 
 <!-- Resumo Executivo -->
@@ -10,8 +99,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-title">Agendamentos Hoje</h6>
-                        <h2 class="mb-0">12</h2>
-                        <small class="opacity-75">+3 desde ontem</small>
+                        <h2 class="mb-0"><?php echo (int)($agHoje ?? 0); ?></h2>
+                        <small class="opacity-75"><?php echo ($dif>=0?'+':'') . (int)$dif; ?> desde ontem</small>
                     </div>
                     <div class="align-self-center">
                         <i class="bi bi-calendar-day fs-1 opacity-75"></i>
@@ -27,8 +116,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-title">Faturamento Hoje</h6>
-                        <h2 class="mb-0">R$ 890</h2>
-                        <small class="opacity-75">Meta: R$ 1.200</small>
+                        <h2 class="mb-0"><?php echo brl($fatReal ?? 0); ?></h2>
+                        <small class="opacity-75">Previsto: <?php echo brl($fatPrev ?? 0); ?></small>
                     </div>
                     <div class="align-self-center">
                         <i class="bi bi-currency-dollar fs-1 opacity-75"></i>
@@ -44,8 +133,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-title">Clientes Novos</h6>
-                        <h2 class="mb-0">3</h2>
-                        <small class="opacity-75">Este mês: 28</small>
+                        <h2 class="mb-0"><?php echo (int)($clientesNovosHoje ?? 0); ?></h2>
+                        <small class="opacity-75">Hoje</small>
                     </div>
                     <div class="align-self-center">
                         <i class="bi bi-person-plus fs-1 opacity-75"></i>
@@ -61,7 +150,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-title">Taxa Ocupação</h6>
-                        <h2 class="mb-0">85%</h2>
+                        <h2 class="mb-0"><?php echo isset($taxaOcup) ? (int)$taxaOcup : 0; ?>%</h2>
                         <small class="opacity-75">Horários preenchidos</small>
                     </div>
                     <div class="align-self-center">
@@ -94,105 +183,41 @@
             </div>
             <div class="card-body p-0">
                 <div class="timeline-container" style="max-height: 500px; overflow-y: auto;">
-                    <div class="timeline-item d-flex align-items-center p-3 border-bottom">
-                        <div class="time-label text-center me-3" style="min-width: 60px;">
-                            <strong class="text-primary">08:00</strong>
-                        </div>
-                        <div class="appointment-info flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">Maria da Silva</h6>
-                                    <small class="text-muted">Corte + Escova • Ana Paula</small>
+                    <?php if (empty($listaHoje)): ?>
+                        <div class="p-3 text-muted">Sem agendamentos para hoje.</div>
+                    <?php else: ?>
+                        <?php foreach ($listaHoje as $ag): ?>
+                            <?php
+                                $hora = htmlspecialchars(substr($ag['hora_inicio'],0,5), ENT_QUOTES, 'UTF-8');
+                                $cliente = $ag['nome_cliente'] ?: ($ag['cliente_nome_cad'] ?? '—');
+                                $serv = $ag['servico_nome'] ?? '';
+                                $prof = $ag['profissional_nome'] ?? '';
+                                $preco = isset($ag['servico_preco']) ? brl($ag['servico_preco']) : '—';
+                                $st = $ag['status'] ?? 'agendado';
+                                $map = ['agendado'=>'warning','em_andamento'=>'info','concluido'=>'success','cancelado'=>'secondary'];
+                                $badge = $map[$st] ?? 'secondary';
+                            ?>
+                            <div class="timeline-item d-flex align-items-center p-3 border-bottom">
+                                <div class="time-label text-center me-3" style="min-width: 60px;">
+                                    <strong class="text-primary"><?php echo $hora; ?></strong>
                                 </div>
-                                <div class="text-end">
-                                    <span class="badge bg-success">Confirmado</span>
-                                    <div class="mt-1">
-                                        <small class="text-success fw-bold">R$ 85,00</small>
+                                <div class="appointment-info flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1"><?php echo htmlspecialchars($cliente, ENT_QUOTES, 'UTF-8'); ?></h6>
+                                            <small class="text-muted"><?php echo htmlspecialchars($serv . ' • ' . $prof, ENT_QUOTES, 'UTF-8'); ?></small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-<?php echo $badge; ?>"><?php echo htmlspecialchars($st, ENT_QUOTES, 'UTF-8'); ?></span>
+                                            <div class="mt-1">
+                                                <small class="text-success fw-bold"><?php echo $preco; ?></small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item d-flex align-items-center p-3 border-bottom">
-                        <div class="time-label text-center me-3" style="min-width: 60px;">
-                            <strong class="text-warning">09:30</strong>
-                        </div>
-                        <div class="appointment-info flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">João Santos</h6>
-                                    <small class="text-muted">Corte Masculino • Maria José</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge bg-warning">Agendado</span>
-                                    <div class="mt-1">
-                                        <small class="text-success fw-bold">R$ 45,00</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item d-flex align-items-center p-3 border-bottom">
-                        <div class="time-label text-center me-3" style="min-width: 60px;">
-                            <strong class="text-info">11:00</strong>
-                        </div>
-                        <div class="appointment-info flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">Carla Oliveira</h6>
-                                    <small class="text-muted">Manicure + Pedicure • Ana Paula</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge bg-info">Em Andamento</span>
-                                    <div class="mt-1">
-                                        <small class="text-success fw-bold">R$ 60,00</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item d-flex align-items-center p-3 border-bottom">
-                        <div class="time-label text-center me-3" style="min-width: 60px;">
-                            <strong class="text-primary">14:30</strong>
-                        </div>
-                        <div class="appointment-info flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">Patricia Costa</h6>
-                                    <small class="text-muted">Química + Escova • Carla Silva</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge bg-success">Confirmado</span>
-                                    <div class="mt-1">
-                                        <small class="text-success fw-bold">R$ 150,00</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item d-flex align-items-center p-3">
-                        <div class="time-label text-center me-3" style="min-width: 60px;">
-                            <strong class="text-primary">16:00</strong>
-                        </div>
-                        <div class="appointment-info flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">Fernanda Lima</h6>
-                                    <small class="text-muted">Corte + Hidratação • Maria José</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge bg-success">Confirmado</span>
-                                    <div class="mt-1">
-                                        <small class="text-success fw-bold">R$ 95,00</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="card-footer">
@@ -273,80 +298,46 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-primary">
-                            <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0">Ana Paula</h6>
-                                <small>Cabeleireira</small>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-6">
-                                        <strong class="text-primary">15</strong>
-                                        <div class="small text-muted">Agendamentos</div>
-                                    </div>
-                                    <div class="col-6">
-                                        <strong class="text-success">R$ 1.280</strong>
-                                        <div class="small text-muted">Faturamento</div>
-                                    </div>
-                                </div>
-                                <div class="progress mt-2">
-                                    <div class="progress-bar bg-primary" style="width: 75%">75%</div>
-                                </div>
-                                <small class="text-muted">Ocupação da semana</small>
-                            </div>
+                    <?php if (empty($profSemanal)): ?>
+                        <div class="col-12">
+                            <div class="alert alert-light mb-0">Sem dados de semana para mostrar.</div>
                         </div>
-                    </div>
-                    
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-success">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0">Maria José</h6>
-                                <small>Cabeleireira</small>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-6">
-                                        <strong class="text-primary">12</strong>
-                                        <div class="small text-muted">Agendamentos</div>
+                    <?php else: ?>
+                        <?php foreach ($profSemanal as $i => $ps): ?>
+                            <?php
+                                $cor = ['primary','success','info'][$i % 3];
+                                $ag = (int)($ps['total_ag'] ?? 0);
+                                $fat = brl($ps['faturamento'] ?? 0);
+                                $min = (int)($ps['min_total'] ?? 0);
+                                // capacidade semanal estimada (8h x 7 dias)
+                                $capSem = 8*60*7; $pct = $capSem>0 ? max(0, min(100, round(($min/$capSem)*100))) : 0;
+                            ?>
+                            <div class="col-md-4 mb-3">
+                                <div class="card border-<?php echo $cor; ?>">
+                                    <div class="card-header bg-<?php echo $cor; ?> text-white">
+                                        <h6 class="mb-0"><?php echo htmlspecialchars($ps['nome'] ?? 'Profissional', ENT_QUOTES, 'UTF-8'); ?></h6>
+                                        <small>Profissional</small>
                                     </div>
-                                    <div class="col-6">
-                                        <strong class="text-success">R$ 950</strong>
-                                        <div class="small text-muted">Faturamento</div>
-                                    </div>
-                                </div>
-                                <div class="progress mt-2">
-                                    <div class="progress-bar bg-success" style="width: 60%">60%</div>
-                                </div>
-                                <small class="text-muted">Ocupação da semana</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-info">
-                            <div class="card-header bg-info text-white">
-                                <h6 class="mb-0">Carla Silva</h6>
-                                <small>Manicure</small>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-6">
-                                        <strong class="text-primary">18</strong>
-                                        <div class="small text-muted">Agendamentos</div>
-                                    </div>
-                                    <div class="col-6">
-                                        <strong class="text-success">R$ 720</strong>
-                                        <div class="small text-muted">Faturamento</div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-6">
+                                                <strong class="text-<?php echo $cor; ?>"><?php echo $ag; ?></strong>
+                                                <div class="small text-muted">Agendamentos</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <strong class="text-success"><?php echo $fat; ?></strong>
+                                                <div class="small text-muted">Faturamento</div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-<?php echo $cor; ?>" style="width: <?php echo $pct; ?>%"><?php echo $pct; ?>%</div>
+                                        </div>
+                                        <small class="text-muted">Ocupação da semana</small>
                                     </div>
                                 </div>
-                                <div class="progress mt-2">
-                                    <div class="progress-bar bg-info" style="width: 90%">90%</div>
-                                </div>
-                                <small class="text-muted">Ocupação da semana</small>
                             </div>
-                        </div>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
