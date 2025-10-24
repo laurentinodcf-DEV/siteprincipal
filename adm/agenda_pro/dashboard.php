@@ -20,20 +20,6 @@ $hoje = date('Y-m-d');
 $agora = date('H:i:s');
 $ontem = date('Y-m-d', strtotime('-1 day'));
 
-// Data selecionada via querystring para a "Agenda do Dia"
-$dataParam = isset($_GET['data']) ? trim($_GET['data']) : '';
-$dataSel = $hoje;
-if ($dataParam !== '') {
-    $d = DateTime::createFromFormat('Y-m-d', $dataParam);
-    if ($d && $d->format('Y-m-d') === $dataParam) {
-        $dataSel = $dataParam;
-    }
-}
-$isHojeSel = ($dataSel === $hoje);
-$dataSelBR = date('d/m/Y', strtotime($dataSel));
-$dataSelPrev = date('Y-m-d', strtotime($dataSel . ' -1 day'));
-$dataSelNext = date('Y-m-d', strtotime($dataSel . ' +1 day'));
-
 $agHoje = 0; $agOntem = 0; $dif = 0;
 if (isset($conn) && $conn instanceof mysqli) {
     // Agendamentos hoje
@@ -90,11 +76,11 @@ if (isset($conn) && $conn instanceof mysqli) {
     $capacidadeMinDia = $profAtivos * 8 * 60; // hipótese 8h por profissional
     if ($capacidadeMinDia > 0) { $taxaOcup = max(0, min(100, round(($minAgendadosHoje / $capacidadeMinDia) * 100))); }
 
-    // Agenda do dia selecionado (lista)
-    $listaDia = [];
+    // Agenda de hoje (lista)
+    $listaHoje = [];
     if ($st = $conn->prepare('SELECT a.*, p.nome AS profissional_nome, s.nome AS servico_nome, s.preco AS servico_preco, c.nome AS cliente_nome_cad FROM salao_agendamentos a INNER JOIN salao_profissionais p ON p.id = a.profissional_id INNER JOIN salao_servicos s ON s.id = a.servico_id LEFT JOIN salao_clientes c ON c.id = a.cliente_id WHERE a.data_agendamento = ? ORDER BY a.hora_inicio ASC')) {
-        $st->bind_param('s', $dataSel);
-        if ($st->execute()) { $r = $st->get_result(); while ($row = $r->fetch_assoc()) { $listaDia[] = $row; } }
+        $st->bind_param('s', $hoje);
+        if ($st->execute()) { $r = $st->get_result(); while ($row = $r->fetch_assoc()) { $listaHoje[] = $row; } }
         $st->close();
     }
 
@@ -110,22 +96,22 @@ if (isset($conn) && $conn instanceof mysqli) {
         $st->close();
     }
 
-    // Alertas do dia (seguem a data selecionada)
+    // Alertas do dia (hoje)
     $qProximos1h = 0; $qAtrasados = 0; $qCanceladosHoje = 0; $qSemClienteHoje = 0;
     if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND status = "agendado" AND hora_inicio BETWEEN ? AND ADDTIME(?, "01:00:00")')) {
-        $st->bind_param('sss', $dataSel, $agora, $agora);
+        $st->bind_param('sss', $hoje, $agora, $agora);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qProximos1h=(int)($row['t']??0);} $st->close();
     }
     if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND status = "agendado" AND hora_inicio < ?')) {
-        $st->bind_param('ss', $dataSel, $agora);
+        $st->bind_param('ss', $hoje, $agora);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qAtrasados=(int)($row['t']??0);} $st->close();
     }
     if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND status = "cancelado"')) {
-        $st->bind_param('s', $dataSel);
+        $st->bind_param('s', $hoje);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qCanceladosHoje=(int)($row['t']??0);} $st->close();
     }
     if ($st = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamentos WHERE data_agendamento = ? AND (cliente_id IS NULL)')) {
-        $st->bind_param('s', $dataSel);
+        $st->bind_param('s', $hoje);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $qSemClienteHoje=(int)($row['t']??0);} $st->close();
     }
 
@@ -247,24 +233,18 @@ if (isset($conn) && $conn instanceof mysqli) {
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="bi bi-calendar-check text-primary me-2"></i>
-                    <?php echo $isHojeSel ? 'Agenda de Hoje - ' . $dataSelBR : 'Agenda - ' . $dataSelBR; ?>
+                    Agenda de Hoje - <?php echo date('d/m/Y'); ?>
                 </h5>
                 <div class="btn-group btn-group-sm">
-                    <a class="btn btn-outline-primary" href="?modulo=dashboard&data=<?php echo urlencode($dataSelPrev); ?>" title="Dia anterior">
-                        <i class="bi bi-arrow-left"></i>
-                    </a>
-                    <a class="btn btn-primary" href="?modulo=dashboard" title="Hoje">Hoje</a>
-                    <a class="btn btn-outline-primary" href="?modulo=dashboard&data=<?php echo urlencode($dataSelNext); ?>" title="Próximo dia">
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
+                    <button class="btn btn-primary" disabled>Hoje</button>
                 </div>
             </div>
             <div class="card-body p-0">
                 <div class="timeline-container" style="max-height: 500px; overflow-y: auto;">
-                    <?php if (empty($listaDia)): ?>
+                    <?php if (empty($listaHoje)): ?>
                         <div class="p-3 text-muted">Sem agendamentos para hoje.</div>
                     <?php else: ?>
-                        <?php foreach ($listaDia as $ag): ?>
+                        <?php foreach ($listaHoje as $ag): ?>
                             <?php
                                 $hora = htmlspecialchars(substr($ag['hora_inicio'],0,5), ENT_QUOTES, 'UTF-8');
                                 $cliente = $ag['nome_cliente'] ?: ($ag['cliente_nome_cad'] ?? '—');
@@ -300,10 +280,10 @@ if (isset($conn) && $conn instanceof mysqli) {
             </div>
             <div class="card-footer">
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <a class="btn btn-success" href="?modulo=agendamento_inteligente&data=<?php echo urlencode($dataSel); ?>">
+                    <a class="btn btn-success" href="?modulo=agendamento_inteligente">
                         <i class="bi bi-plus-lg me-1"></i> Novo Agendamento
                     </a>
-                    <a class="btn btn-outline-primary" href="?modulo=agendamento_inteligente&data=<?php echo urlencode($dataSel); ?>">
+                    <a class="btn btn-outline-primary" href="?modulo=agendamento_inteligente">
                         <i class="bi bi-calendar3 me-1"></i> Ver Calendário
                     </a>
                 </div>
