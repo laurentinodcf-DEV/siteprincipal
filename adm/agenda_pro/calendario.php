@@ -232,7 +232,12 @@ function badgeByStatus(?string $s): string {
                                     <td style="min-height:48px;">
                                         <?php if (!empty($porDia[$key])): ?>
                                             <?php foreach ($porDia[$key] as $ev): ?>
-                                                <?php if (substr($ev['hora_inicio'],0,5) === substr($h,0,5)): ?>
+                                                <?php
+                                                    // Mostrar eventos cujo horário pertence a esta hora (inclui minutos)
+                                                    $evHora = substr($ev['hora_inicio'], 0, 2);
+                                                    $rowHora = substr($h, 0, 2);
+                                                ?>
+                                                <?php if ($evHora === $rowHora): ?>
                                                     <div class="mb-1 p-1 rounded border">
                                                         <span class="badge bg-<?php echo badgeByStatus($ev['status']); ?> me-1"><?php echo substr($ev['hora_inicio'],0,5); ?></span>
                                                         <small><?php echo htmlspecialchars($ev['servico_nome'] . ' • ' . ($ev['profissional_nome'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></small>
@@ -266,7 +271,11 @@ function badgeByStatus(?string $s): string {
                                 <td>
                                     <?php if (!empty($porDia[$data])): ?>
                                         <?php foreach ($porDia[$data] as $ev): ?>
-                                            <?php if (substr($ev['hora_inicio'],0,5) === substr($h,0,5)): ?>
+                                            <?php
+                                                $evHora = substr($ev['hora_inicio'], 0, 2);
+                                                $rowHora = substr($h, 0, 2);
+                                            ?>
+                                            <?php if ($evHora === $rowHora): ?>
                                                 <div class="mb-1 p-1 rounded border">
                                                     <span class="badge bg-<?php echo badgeByStatus($ev['status']); ?> me-1"><?php echo substr($ev['hora_inicio'],0,5); ?></span>
                                                     <small><?php echo htmlspecialchars($ev['servico_nome'] . ' • ' . ($ev['profissional_nome'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></small>
