@@ -591,6 +591,15 @@ function renderizarServicosGrid(array $servicosLista): void
             font-size: 0.8rem !important;
             color: #6b7280 !important;
         }
+
+        /* Estilos leves para os campos de duração */
+        .duracao-hhmm {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            letter-spacing: 0.5px;
+        }
+        .duracao-readonly[readonly] {
+            background-color: #f9fafb !important;
+        }
     </style>
 </head>
 <body class="pagina-admin">
@@ -618,8 +627,13 @@ function renderizarServicosGrid(array $servicosLista): void
                         <input type="text" name="nome" class="form-control" required maxlength="100" autocomplete="off">
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label">Duração horas/minutos*</label>
+                        <input type="text" id="duracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="00:30" maxlength="5" autocomplete="off">
+                        <small class="form-text text-muted">Digite HH:MM ou somente números (ex: 0130 → 01:30)</small>
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Duracao (min)*</label>
-                        <input type="number" name="duracao" class="form-control" min="1" required>
+                        <input type="number" name="duracao" id="duracaoMinutos" class="form-control duracao-readonly" min="1" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Preco*</label>
@@ -705,8 +719,13 @@ function renderizarServicosGrid(array $servicosLista): void
                                 <input type="text" name="nome" class="form-control" id="editarServicoNome" required maxlength="100">
                             </div>
                             <div class="col-md-3">
+                                <label class="form-label">Duração horas/minutos*</label>
+                                <input type="text" id="editarDuracaoHhMm" name="duracao_hhmm" class="form-control duracao-hhmm" placeholder="00:30" maxlength="5" autocomplete="off">
+                                <small class="form-text text-muted">Digite HH:MM ou somente números (ex: 1130 → 11:30)</small>
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label">Duracao (min)*</label>
-                                <input type="number" name="duracao" class="form-control" id="editarServicoDuracao" min="1" required>
+                                <input type="number" name="duracao" class="form-control duracao-readonly" id="editarServicoDuracao" min="1" required>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Preco*</label>
@@ -770,7 +789,117 @@ function renderizarServicosGrid(array $servicosLista): void
 
     <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Utilidades para duração HH:MM
+        function apenasDigitos(str) {
+            return (str || '').replace(/\D/g, '');
+        }
+
+        function formatarLiveHhMm(digitos) {
+            // digitos: string com até 4 números
+            const d = apenasDigitos(digitos).slice(0, 4);
+            if (d.length === 0) return '';
+            if (d.length === 1) return d;                 // H
+            if (d.length === 2) return d;                 // HH
+            if (d.length === 3) return d.slice(0, 2) + ':' + d.slice(2, 3); // HH:M
+            return d.slice(0, 2) + ':' + d.slice(2, 4);   // HH:MM
+        }
+
+        function normalizarHhMmCompleto(digitos) {
+            // Interpreta entrada parcial e aplica limites (00:01 a 24:00)
+            const d = apenasDigitos(digitos);
+            if (d.length === 0) return '';
+            let h = 0, m = 0;
+            if (d.length === 1) {
+                // H -> H:00
+                h = parseInt(d[0], 10);
+                m = 0;
+            } else if (d.length === 2) {
+                // HH -> HH:00
+                h = parseInt(d, 10);
+                m = 0;
+            } else if (d.length === 3) {
+                // HMM -> H:MM
+                h = parseInt(d[0], 10);
+                m = parseInt(d.slice(1, 3), 10);
+            } else {
+                // HHMM -> HH:MM
+                h = parseInt(d.slice(0, 2), 10);
+                m = parseInt(d.slice(2, 4), 10);
+            }
+
+            if (h > 24) h = 24;
+            if (m > 59) m = 59;
+            if (h === 24 && m > 0) {
+                // 24:xx não permitido, força 24:00
+                m = 0;
+            }
+            if (h === 0 && m === 0) {
+                // 00:00 inválido -> 00:01 mínimo
+                m = 1;
+            }
+            const HH = String(h).padStart(2, '0');
+            const MM = String(m).padStart(2, '0');
+            return `${HH}:${MM}`;
+        }
+
+        function hhMmParaMinutos(hhmm) {
+            if (!hhmm || hhmm.indexOf(':') === -1) return 0;
+            const [hStr, mStr] = hhmm.split(':');
+            const h = parseInt(hStr, 10) || 0;
+            const m = parseInt(mStr, 10) || 0;
+            const total = h * 60 + m;
+            // Limites: 1..1440
+            if (total < 1) return 1;
+            if (total > 1440) return 1440;
+            return total;
+        }
+
+        function minutosParaHhMm(total) {
+            let t = parseInt(total, 10) || 0;
+            if (t < 1) t = 1;
+            if (t > 1440) t = 1440;
+            const h = Math.floor(t / 60);
+            const m = t % 60;
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        }
+
+        function ligarCampoHhMm(idHhMm, idMinutos) {
+            const inpHhMm = document.getElementById(idHhMm);
+            const inpMin = document.getElementById(idMinutos);
+            if (!inpHhMm || !inpMin) return;
+
+            inpHhMm.addEventListener('input', function () {
+                const dig = apenasDigitos(this.value);
+                const live = formatarLiveHhMm(dig);
+                this.value = live;
+                // Atualiza minutos quando já temos HH:MM completo (5 caracteres)
+                if (this.value.length === 5) {
+                    const mins = hhMmParaMinutos(this.value);
+                    inpMin.value = String(mins);
+                    inpMin.setCustomValidity(mins < 1 || mins > 1440 ? 'Duração deve ser entre 00:01 e 24:00' : '');
+                }
+            });
+
+            inpHhMm.addEventListener('blur', function () {
+                if (!this.value) return;
+                const norm = normalizarHhMmCompleto(this.value);
+                this.value = norm;
+                const mins = hhMmParaMinutos(norm);
+                inpMin.value = String(mins);
+                // Validação final
+                if (mins < 1 || mins > 1440) {
+                    inpMin.setCustomValidity('Duração deve ser entre 00:01 e 24:00');
+                } else {
+                    inpMin.setCustomValidity('');
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Ligar campos HH:MM -> Minutos (criação e edição)
+            ligarCampoHhMm('duracaoHhMm', 'duracaoMinutos');
+            ligarCampoHhMm('editarDuracaoHhMm', 'editarServicoDuracao');
+
             const editarModal = document.getElementById('modalEditarServico');
             const excluirModal = document.getElementById('modalExcluirServico');
 
@@ -798,6 +927,10 @@ function renderizarServicosGrid(array $servicosLista): void
                 document.getElementById('editarServicoId').value = servico.id;
                 document.getElementById('editarServicoNome').value = servico.nome || '';
                 document.getElementById('editarServicoDuracao').value = servico.duracao || '';
+                // Preencher HH:MM correspondente
+                const hhmm = minutosParaHhMm(servico.duracao || 0);
+                const campoHh = document.getElementById('editarDuracaoHhMm');
+                if (campoHh) campoHh.value = hhmm;
                 document.getElementById('editarServicoPreco').value = parseFloat(servico.preco ?? 0).toFixed(2).replace('.', ',');
                 document.getElementById('editarServicoCategoria').value = servico.categoria || '';
                 document.getElementById('editarServicoDescricao').value = servico.descricao || '';
