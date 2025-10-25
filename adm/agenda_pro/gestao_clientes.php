@@ -8,6 +8,10 @@ if (!isset($conn)) {
 
 $mensagemSucesso = '';
 $mensagemErro = '';
+// Controla se a seção de novo cliente deve iniciar aberta (desktop e após POST)
+$formInitOpen = (
+    ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
+) || ($mensagemSucesso !== '') || ($mensagemErro !== '');
 
 $diretorioImagensClientes = __DIR__ . '/../../img/clientes/imgcadastro';
 if (!is_dir($diretorioImagensClientes)) {
@@ -504,11 +508,23 @@ function renderizarClienteCard_ag(array $c): void {
     .btn-primary { background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important; border: none !important; border-radius: 8px !important; padding: 0.75rem 1.5rem !important; font-weight: 500 !important; }
     .btn-primary:hover { background: linear-gradient(135deg, #218838 0%, #1da97e 100%) !important; transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(40,167,69,0.35) !important; }
     .btn-outline-secondary, .btn-danger { border-radius: 8px !important; padding: 0.75rem 1.5rem !important; font-weight: 500 !important; }
+
+    /* Toggle da seção Novo cliente (mobile-first) */
+    .novo-cliente-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .toggle-form-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: none; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; box-shadow: 0 6px 16px rgba(40,167,69,0.35); }
+    .toggle-form-btn:hover { filter: brightness(0.95); }
+    .novo-cliente-form-wrapper.collapsed { display: none; }
 </style>
 
 <div class="clientes-wrapper">
-    <section class="cliente-form-section">
-        <h2>Novo cliente</h2>
+    <section class="cliente-form-section" id="novoClienteSection" data-init-open="<?= $formInitOpen ? '1' : '0'; ?>">
+        <div class="novo-cliente-header">
+            <h2 class="mb-0">Novo cliente</h2>
+            <button type="button" class="toggle-form-btn" id="toggleNovoClienteBtn" aria-controls="novoClienteForm" aria-expanded="true" aria-label="Mostrar/ocultar formulário de novo cliente">
+                <span id="toggleNovoClienteIcon">-</span>
+            </button>
+        </div>
+        <div id="novoClienteForm" class="novo-cliente-form-wrapper">
         <form method="post" class="cliente-form card" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <div class="row g-3">
@@ -573,6 +589,7 @@ function renderizarClienteCard_ag(array $c): void {
                 </div>
             </div>
         </form>
+        </div>
     </section>
 
     <?php if ($mensagemSucesso): ?>
@@ -738,6 +755,34 @@ function renderizarClienteCard_ag(array $c): void {
 document.addEventListener('DOMContentLoaded', () => {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach(function (tooltipTriggerEl) { new bootstrap.Tooltip(tooltipTriggerEl); });
+
+    // Controle de colapso do formulário "Novo cliente" (mobile default)
+    const isMobile = window.matchMedia('(max-width: 576px)').matches;
+    const novoClienteSection = document.getElementById('novoClienteSection');
+    const novoClienteFormWrap = document.getElementById('novoClienteForm');
+    const toggleNovoBtn = document.getElementById('toggleNovoClienteBtn');
+    const toggleNovoIcon = document.getElementById('toggleNovoClienteIcon');
+    if (novoClienteSection && novoClienteFormWrap && toggleNovoBtn && toggleNovoIcon) {
+        const initOpenData = (novoClienteSection.dataset.initOpen === '1');
+        let open = (!isMobile) || initOpenData;
+        const applyState = () => {
+            toggleNovoBtn.setAttribute('aria-expanded', String(open));
+            if (open) {
+                novoClienteFormWrap.classList.remove('collapsed');
+                toggleNovoIcon.textContent = '-';
+            } else {
+                novoClienteFormWrap.classList.add('collapsed');
+                toggleNovoIcon.textContent = '+';
+            }
+        };
+        applyState();
+        toggleNovoBtn.addEventListener('click', () => { open = !open; applyState(); });
+        // Também reavalia em resize para manter desktop aberto
+        window.addEventListener('resize', () => {
+            const nowMobile = window.matchMedia('(max-width: 576px)').matches;
+            if (!nowMobile && !open) { open = true; applyState(); }
+        });
+    }
 
     const emailInput = document.getElementById('email');
     const telefoneInput = document.getElementById('telefone');
