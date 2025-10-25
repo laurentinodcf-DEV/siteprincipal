@@ -17,9 +17,21 @@ if($result->num_rows === 1){
     if(password_verify($senha, $user['password'])){
         $_SESSION['usuario_id'] = $user['id'];
         $_SESSION['usuario_nome'] = $user['username'];
+        // Permitir redirecionamento opcional e seguro
+        $redirect = $_POST['redirect'] ?? 'adm/dashboard.php';
+        // Sanitização simples: apenas caminhos relativos dentro de 'adm/' e sem esquema/host
+        $redirect = trim($redirect);
+        if (
+            strpos($redirect, '://') !== false ||
+            str_starts_with($redirect, '//') ||
+            !preg_match('#^adm\/[a-zA-Z0-9_\-/\.]+$#', $redirect)
+        ) {
+            $redirect = 'adm/dashboard.php';
+        }
+
         echo json_encode([
             'success'  => true,
-            'redirect' => 'adm/dashboard.php'
+            'redirect' => $redirect
         ]);
         exit;
     } else {

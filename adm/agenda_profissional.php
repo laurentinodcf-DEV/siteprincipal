@@ -10,7 +10,7 @@ if (!$tz || !@date_default_timezone_set($tz)) {
 
 // Verificar se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
+    header('Location: login_agenda.php');
     exit();
 }
 
