@@ -520,11 +520,11 @@ function renderizarClienteCard_ag(array $c): void {
     <section class="cliente-form-section" id="novoClienteSection" data-init-open="<?= $formInitOpen ? '1' : '0'; ?>">
         <div class="novo-cliente-header">
             <h2 class="mb-0">Novo cliente</h2>
-            <button type="button" class="toggle-form-btn" id="toggleNovoClienteBtn" aria-controls="novoClienteForm" aria-expanded="true" aria-label="Mostrar/ocultar formulário de novo cliente">
-                <span id="toggleNovoClienteIcon">-</span>
+            <button type="button" class="toggle-form-btn" id="toggleNovoClienteBtn" aria-controls="novoClienteForm" aria-expanded="<?= $formInitOpen ? 'true' : 'false'; ?>" aria-label="Mostrar/ocultar formulário de novo cliente">
+                <span id="toggleNovoClienteIcon"><?= $formInitOpen ? '-' : '+'; ?></span>
             </button>
         </div>
-        <div id="novoClienteForm" class="novo-cliente-form-wrapper">
+        <div id="novoClienteForm" class="novo-cliente-form-wrapper<?= $formInitOpen ? '' : ' collapsed'; ?>">
         <form method="post" class="cliente-form card" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <div class="row g-3">
@@ -756,15 +756,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach(function (tooltipTriggerEl) { new bootstrap.Tooltip(tooltipTriggerEl); });
 
-    // Controle de colapso do formulário "Novo cliente" (mobile default)
-    const isMobile = window.matchMedia('(max-width: 576px)').matches;
+    // Controle de colapso do formulário "Novo cliente" (padrão fechado, abre após POST)
     const novoClienteSection = document.getElementById('novoClienteSection');
     const novoClienteFormWrap = document.getElementById('novoClienteForm');
     const toggleNovoBtn = document.getElementById('toggleNovoClienteBtn');
     const toggleNovoIcon = document.getElementById('toggleNovoClienteIcon');
     if (novoClienteSection && novoClienteFormWrap && toggleNovoBtn && toggleNovoIcon) {
         const initOpenData = (novoClienteSection.dataset.initOpen === '1');
-        let open = (!isMobile) || initOpenData;
+        let open = initOpenData;
         const applyState = () => {
             toggleNovoBtn.setAttribute('aria-expanded', String(open));
             if (open) {
@@ -777,11 +776,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         applyState();
         toggleNovoBtn.addEventListener('click', () => { open = !open; applyState(); });
-        // Também reavalia em resize para manter desktop aberto
-        window.addEventListener('resize', () => {
-            const nowMobile = window.matchMedia('(max-width: 576px)').matches;
-            if (!nowMobile && !open) { open = true; applyState(); }
-        });
     }
 
     const emailInput = document.getElementById('email');
