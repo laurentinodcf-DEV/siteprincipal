@@ -53,6 +53,7 @@ $adminLogado = false;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login do Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         /* Fundo dourado profissional */
         html, body {
@@ -80,9 +81,63 @@ $adminLogado = false;
         .login-modal { z-index: 10; }
         /* Remove qualquer rolagem inesperada quando a modal abrir */
         .no-scroll { overflow: hidden; }
+
+        /* Faixa de marca (logo) da Agenda acima da modal */
+        .agenda-login-brand {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: #fff;
+            border-radius: 14px;
+            padding: 14px 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 10002; /* acima do overlay do modal (10000) e acima da modal-content */
+            border: 3px solid rgba(255,255,255,0.9);
+            cursor: pointer;
+        }
+        .agenda-login-brand .brand-icon {
+            font-size: 1.6rem;
+        }
+        .agenda-login-brand .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 0;
+        }
+        .agenda-login-brand .brand-text small {
+            display: block;
+            font-size: 0.78rem;
+            opacity: 0.95;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 576px) {
+            .agenda-login-brand {
+                padding: 10px 14px;
+                border-width: 2px;
+                gap: 10px;
+            }
+            .agenda-login-brand .brand-icon { font-size: 1.3rem; }
+            .agenda-login-brand .brand-text h1 { font-size: 0.98rem; }
+            .agenda-login-brand .brand-text small { font-size: 0.72rem; }
+        }
     </style>
 </head>
 <body>
+    <!-- Logo/Marca da Agenda acima da modal -->
+    <div class="agenda-login-brand" id="agendaLoginBrand" aria-label="Marca do sistema Agenda Pro" title="Abrir login da Agenda Pro">
+        <i class="bi bi-calendar-heart brand-icon" aria-hidden="true"></i>
+        <div class="brand-text">
+            <h1>Agenda Pro</h1>
+            <small>Sistema Profissional</small>
+        </div>
+    </div>
     <?php
         // Inclui a modal de login original do sistema
         // Ela já importa Bootstrap e o estilo principal e registra o script de controle
@@ -95,6 +150,7 @@ $adminLogado = false;
             var loginModal = document.getElementById('loginModal');
             var loginError = document.getElementById('loginError');
             var closeBtn = document.getElementById('closeLoginModal');
+            var brand = document.getElementById('agendaLoginBrand');
             if (loginModal) {
                 loginModal.style.display = 'flex';
                 // Evita rolagem de fundo quando a modal estiver aberta
@@ -109,6 +165,16 @@ $adminLogado = false;
                         document.body.classList.remove('no-scroll');
                     });
                 }
+            }
+
+            // Reabrir modal ao clicar na faixa "Agenda Pro"
+            if (brand) {
+                brand.addEventListener('click', function(){
+                    if (loginModal) {
+                        loginModal.style.display = 'flex';
+                        document.body.classList.add('no-scroll');
+                    }
+                });
             }
 
             // Caso o login tenha falhado via fallback (POST direto), mostra o erro na área da modal
