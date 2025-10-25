@@ -514,6 +514,17 @@ function renderizarClienteCard_ag(array $c): void {
     .toggle-form-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: none; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; box-shadow: 0 6px 16px rgba(40,167,69,0.35); }
     .toggle-form-btn:hover { filter: brightness(0.95); }
     .novo-cliente-form-wrapper.collapsed { display: none; }
+
+    /* Cabeçalho Clientes cadastrados com contador à direita */
+    .secao-titulo-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap; }
+    .count-pill { white-space: nowrap; color: #157347; background: rgba(40,167,69,0.08); border: 1px solid rgba(40,167,69,0.25); padding: 6px 12px; border-radius: 999px; font-weight: 600; }
+
+    /* Header com 3 colunas: título | contador (centro) | toggle (direita) */
+    .clientes-lista-header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+    .clientes-lista-header .secao-titulo { justify-self: start; }
+    .clientes-lista-header .count-pill { justify-self: center; }
+    .clientes-lista-header .toggle-form-btn { justify-self: end; }
+    .clientes-lista-wrapper.collapsed { display: none; }
 </style>
 
 <div class="clientes-wrapper">
@@ -600,10 +611,14 @@ function renderizarClienteCard_ag(array $c): void {
     <?php endif; ?>
 
     <section class="cliente-lista-section">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h2 class="secao-titulo">Clientes cadastrados</h2>
-            <span class="texto-suave"><?= count($clientes); ?> cliente(s) no sistema</span>
+        <div class="clientes-lista-header mb-3">
+            <h2 class="secao-titulo mb-0">Clientes cadastrados</h2>
+            <span class="count-pill"><?= count($clientes); ?> cliente(s) no sistema</span>
+            <button type="button" class="toggle-form-btn" id="toggleClientesBtn" aria-controls="clientesListaWrapper" aria-expanded="true" aria-label="Mostrar/ocultar lista de clientes">
+                <span id="toggleClientesIcon">-</span>
+            </button>
         </div>
+        <div id="clientesListaWrapper" class="clientes-lista-wrapper">
 
         <?php 
         $clientesAtivos = [];
@@ -644,6 +659,7 @@ function renderizarClienteCard_ag(array $c): void {
                 <?php endif; ?>
             </div>
         <?php endif; ?>
+        </div>
     </section>
 
     <!-- Modal Edição -->
@@ -776,6 +792,26 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         applyState();
         toggleNovoBtn.addEventListener('click', () => { open = !open; applyState(); });
+    }
+
+    // Toggle da lista de clientes (padrão aberto)
+    const clientesWrapper = document.getElementById('clientesListaWrapper');
+    const toggleClientesBtn = document.getElementById('toggleClientesBtn');
+    const toggleClientesIcon = document.getElementById('toggleClientesIcon');
+    if (clientesWrapper && toggleClientesBtn && toggleClientesIcon) {
+        let openClientes = true;
+        const applyStateClientes = () => {
+            toggleClientesBtn.setAttribute('aria-expanded', String(openClientes));
+            if (openClientes) {
+                clientesWrapper.classList.remove('collapsed');
+                toggleClientesIcon.textContent = '-';
+            } else {
+                clientesWrapper.classList.add('collapsed');
+                toggleClientesIcon.textContent = '+';
+            }
+        };
+        applyStateClientes();
+        toggleClientesBtn.addEventListener('click', () => { openClientes = !openClientes; applyStateClientes(); });
     }
 
     const emailInput = document.getElementById('email');
