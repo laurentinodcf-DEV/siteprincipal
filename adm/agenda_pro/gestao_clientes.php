@@ -614,11 +614,11 @@ function renderizarClienteCard_ag(array $c): void {
         <div class="clientes-lista-header mb-3">
             <h2 class="secao-titulo mb-0">Clientes cadastrados</h2>
             <span class="count-pill"><?= count($clientes); ?> cliente(s) no sistema</span>
-            <button type="button" class="toggle-form-btn" id="toggleClientesBtn" aria-controls="clientesListaWrapper" aria-expanded="true" aria-label="Mostrar/ocultar lista de clientes">
-                <span id="toggleClientesIcon">-</span>
+            <button type="button" class="toggle-form-btn" id="toggleClientesBtn" aria-controls="clientesListaWrapper" aria-expanded="false" aria-label="Mostrar/ocultar lista de clientes">
+                <span id="toggleClientesIcon">+</span>
             </button>
         </div>
-        <div id="clientesListaWrapper" class="clientes-lista-wrapper">
+        <div id="clientesListaWrapper" class="clientes-lista-wrapper collapsed">
 
         <?php 
         $clientesAtivos = [];
@@ -799,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleClientesBtn = document.getElementById('toggleClientesBtn');
     const toggleClientesIcon = document.getElementById('toggleClientesIcon');
     if (clientesWrapper && toggleClientesBtn && toggleClientesIcon) {
-        let openClientes = true;
+        let openClientes = false;
         const applyStateClientes = () => {
             toggleClientesBtn.setAttribute('aria-expanded', String(openClientes));
             if (openClientes) {
