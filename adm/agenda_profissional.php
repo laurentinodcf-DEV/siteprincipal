@@ -311,7 +311,7 @@ $titulos_modulos = [
             <div class="nav-section">
                 <div class="nav-section-title">Agendamentos</div>
                 <a class="nav-link <?php echo $modulo == 'agendamento_inteligente' ? 'active' : ''; ?>" href="?modulo=agendamento_inteligente">
-                    <i class="bi bi-calendar-check me-3"></i> Sistema Inteligente
+                    <i class="bi bi-calendar-check me-3"></i> Agendamento Inteligente
                 </a>
                 <a class="nav-link <?php echo $modulo == 'calendario' ? 'active' : ''; ?>" href="?modulo=calendario">
                     <i class="bi bi-calendar3 me-3"></i> Calendário
