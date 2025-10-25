@@ -519,12 +519,21 @@ function renderizarClienteCard_ag(array $c): void {
     .secao-titulo-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap; }
     .count-pill { white-space: nowrap; color: #157347; background: rgba(40,167,69,0.08); border: 1px solid rgba(40,167,69,0.25); padding: 6px 12px; border-radius: 999px; font-weight: 600; }
 
-    /* Header com 3 colunas: título | contador (centro) | toggle (direita) */
-    .clientes-lista-header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
-    .clientes-lista-header .secao-titulo { justify-self: start; }
-    .clientes-lista-header .count-pill { justify-self: center; }
-    .clientes-lista-header .toggle-form-btn { justify-self: end; }
+    /* Header com 3 colunas (desktop): título | contador (centro) | toggle (direita) */
+    .clientes-lista-header { display: grid; grid-template-columns: 1fr auto 1fr; grid-template-areas: 'title count toggle'; align-items: center; gap: 12px; }
+    .clientes-lista-header .secao-titulo { justify-self: start; grid-area: title; }
+    .clientes-lista-header .count-pill { justify-self: center; grid-area: count; }
+    .clientes-lista-header .toggle-form-btn { justify-self: end; grid-area: toggle; }
     .clientes-lista-wrapper.collapsed { display: none; }
+
+    /* Responsivo: até 960px, contador vai para baixo do título e largura alinhada ao bloco */
+    @media (max-width: 960px) {
+        .clientes-lista-header { grid-template-columns: 1fr auto; grid-template-rows: auto auto; grid-template-areas:
+            'title toggle'
+            'count count';
+        }
+        .clientes-lista-header .count-pill { justify-self: start; margin-top: 8px; white-space: normal; }
+    }
 </style>
 
 <div class="clientes-wrapper">
