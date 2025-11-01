@@ -367,12 +367,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Buscar agendamentos do dia selecionado
 $params = [$dataSelecionada];
 $types = 's';
-$sql = "SELECT a.*, c.nome AS cliente_nome_cad, p.nome AS profissional_nome, s.nome AS servico_nome
-        FROM salao_agendamentos a
-        LEFT JOIN salao_clientes c ON c.id = a.cliente_id
-        INNER JOIN salao_profissionais p ON p.id = a.profissional_id
-        INNER JOIN salao_servicos s ON s.id = a.servico_id
-        WHERE a.data_agendamento = ?";
+$sql = "SELECT a.*,
+           c.nome AS cliente_nome_cad,
+           p.nome AS profissional_nome,
+           s.nome AS servico_nome,
+           ap.parcelas_qtd,
+           ap.valor_parcela_medio,
+           ap.dia_vencimento
+    FROM salao_agendamentos a
+    LEFT JOIN salao_clientes c ON c.id = a.cliente_id
+    INNER JOIN salao_profissionais p ON p.id = a.profissional_id
+    INNER JOIN salao_servicos s ON s.id = a.servico_id
+    LEFT JOIN (
+        SELECT agendamento_id,
+           COUNT(*) AS parcelas_qtd,
+           AVG(valor_parcela) AS valor_parcela_medio,
+           DAY(MIN(data_vencimento)) AS dia_vencimento
+        FROM salao_agendamento_parcelas
+        GROUP BY agendamento_id
+    ) ap ON ap.agendamento_id = a.id
+    WHERE a.data_agendamento = ?";
 if ($profFiltro > 0) {
     $sql .= ' AND a.profissional_id = ?';
     $types .= 'i';
@@ -1055,8 +1069,25 @@ $next = clone $dtSel; $next->modify('+1 day');
             // Exibir campos de parcelado se aplicável e preencher quantidade
             toggleParcelado('edit_status_pagamento','edit_parcelado_fields');
             const np = document.getElementById('edit_numero_parcelas');
-            if (np) { np.value = (ag.quantidade_parcelas != null ? parseInt(ag.quantidade_parcelas,10) : '') || ''; }
-            // valor_parcela e dia_vencimento não são armazenados diretamente; manter em branco
+            if (np) {
+                const qtd1 = (ag.quantidade_parcelas != null ? parseInt(ag.quantidade_parcelas,10) : 0) || 0;
+                const qtd2 = (ag.parcelas_qtd != null ? parseInt(ag.parcelas_qtd,10) : 0) || 0;
+                np.value = String(qtd1 > 0 ? qtd1 : (qtd2 > 0 ? qtd2 : ''));
+            }
+            const vparc = document.getElementById('edit_valor_parcela');
+            if (vparc) {
+                if (ag.valor_parcela_medio != null) {
+                    const vv = parseFloat(ag.valor_parcela_medio);
+                    vparc.value = isNaN(vv) ? '' : vv.toString();
+                } else { vparc.value = ''; }
+            }
+            const diaV = document.getElementById('edit_dia_vencimento');
+            if (diaV) {
+                if (ag.dia_vencimento != null) {
+                    const dv = parseInt(ag.dia_vencimento,10);
+                    diaV.value = isNaN(dv) ? '' : String(dv);
+                } else { diaV.value=''; }
+            }
             document.getElementById('edit_cliente_id').value = ag.cliente_id || '';
             document.getElementById('edit_nome_cliente').value = ag.nome_cliente || '';
             document.getElementById('edit_telefone_cliente').value = ag.telefone_cliente || '';
