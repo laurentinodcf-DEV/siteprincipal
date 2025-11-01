@@ -37,12 +37,14 @@ if (isset($conn) && $conn instanceof mysqli) {
 
     // Faturamento: previsto (status != cancelado) e realizado (concluído)
     $fatPrev = 0.0; $fatReal = 0.0;
-    if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento = ? AND a.status <> "cancelado"')) {
+    // Previsto usa snapshot do agendamento (valor_servico)
+    if ($st = $conn->prepare('SELECT SUM(a.valor_servico) AS total FROM salao_agendamentos a WHERE a.data_agendamento = ? AND a.status <> "cancelado"')) {
         $st->bind_param('s', $hoje);
         if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $fatPrev = (float)($row['total'] ?? 0); }
         $st->close();
     }
-    if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento = ? AND a.status = "concluido"')) {
+    // Realizado usa o valor pago do agendamento
+    if ($st = $conn->prepare('SELECT SUM(a.valor_pago) AS total FROM salao_agendamentos a WHERE a.data_agendamento = ? AND a.status = "concluido"')) {
         $st->bind_param('s', $hoje);
         if ($st->execute()) { $r = $st->get_result(); $row = $r->fetch_assoc(); $fatReal = (float)($row['total'] ?? 0); }
         $st->close();
@@ -89,7 +91,7 @@ if (isset($conn) && $conn instanceof mysqli) {
     $fimSemana = (clone $iniSemana); $fimSemana->modify('+6 days');
     $semIni = $iniSemana->format('Y-m-d'); $semFim = $fimSemana->format('Y-m-d');
     $profSemanal = [];
-    $sql = 'SELECT p.id, p.nome, COUNT(a.id) AS total_ag, COALESCE(SUM(COALESCE(a.duracao_real, a.duracao_prevista)),0) AS min_total, COALESCE(SUM(s.preco),0) AS faturamento FROM salao_profissionais p LEFT JOIN salao_agendamentos a ON a.profissional_id = p.id AND a.data_agendamento BETWEEN ? AND ? AND a.status <> "cancelado" LEFT JOIN salao_servicos s ON s.id = a.servico_id WHERE p.ativo = 1 GROUP BY p.id, p.nome ORDER BY total_ag DESC, p.nome ASC LIMIT 3';
+    $sql = 'SELECT p.id, p.nome, COUNT(a.id) AS total_ag, COALESCE(SUM(COALESCE(a.duracao_real, a.duracao_prevista)),0) AS min_total, COALESCE(SUM(CASE WHEN a.status = "concluido" THEN a.valor_pago ELSE 0 END),0) AS faturamento FROM salao_profissionais p LEFT JOIN salao_agendamentos a ON a.profissional_id = p.id AND a.data_agendamento BETWEEN ? AND ? AND a.status <> "cancelado" WHERE p.ativo = 1 GROUP BY p.id, p.nome ORDER BY total_ag DESC, p.nome ASC LIMIT 3';
     if ($st = $conn->prepare($sql)) {
         $st->bind_param('ss', $semIni, $semFim);
         if ($st->execute()) { $r = $st->get_result(); while ($row = $r->fetch_assoc()) { $profSemanal[] = $row; } }
@@ -119,7 +121,7 @@ if (isset($conn) && $conn instanceof mysqli) {
     $iniMes = date('Y-m-01');
     $fimMes = date('Y-m-t');
     $fatMes = 0.0; $qtdAgMes = 0; $avgSatisf = null; $qtdConclMes = 0; $qtdCancMes = 0;
-    if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento BETWEEN ? AND ? AND a.status = "concluido"')) {
+    if ($st = $conn->prepare('SELECT SUM(a.valor_pago) AS total FROM salao_agendamentos a WHERE a.data_agendamento BETWEEN ? AND ? AND a.status = "concluido"')) {
         $st->bind_param('ss', $iniMes, $fimMes);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $fatMes=(float)($row['total']??0);} $st->close();
     }

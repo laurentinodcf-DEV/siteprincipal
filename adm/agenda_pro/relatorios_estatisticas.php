@@ -55,8 +55,8 @@ switch ($view) {
 // Consultas
 $fat = 0.0; $qtdAg = 0; $qtdConcl = 0; $qtdCanc = 0; $avgSatisf = null; $topServicos = [];
 if (isset($conn) && $conn instanceof mysqli) {
-    // Faturamento concluído no período
-    if ($st = $conn->prepare('SELECT SUM(s.preco) AS total FROM salao_agendamentos a INNER JOIN salao_servicos s ON s.id = a.servico_id WHERE a.data_agendamento BETWEEN ? AND ? AND a.status = "concluido"')) {
+  // Faturamento concluído no período (valor efetivamente pago)
+  if ($st = $conn->prepare('SELECT SUM(a.valor_pago) AS total FROM salao_agendamentos a WHERE a.data_agendamento BETWEEN ? AND ? AND a.status = "concluido"')) {
         $st->bind_param('ss', $rangeStart, $rangeEnd);
         if ($st->execute()) { $r = $st->get_result(); $row=$r->fetch_assoc(); $fat=(float)($row['total']??0); }
         $st->close();
