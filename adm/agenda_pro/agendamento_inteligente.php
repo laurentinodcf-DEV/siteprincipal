@@ -258,6 +258,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($id <= 0) {
                         $mensagemErro = 'Agendamento inválido para edição.';
                     } else {
+                        // Buscar status anterior e existência de parcelas para lógica de reset ao sair de concluído
+                        $statusAnterior = null; $temParcelasExistentes = 0;
+                        if ($stx = $conn->prepare('SELECT status FROM salao_agendamentos WHERE id = ?')) {
+                            $stx->bind_param('i', $id);
+                            if ($stx->execute()) { $rx = $stx->get_result(); $rowx = $rx->fetch_assoc(); $statusAnterior = $rowx['status'] ?? null; }
+                            $stx->close();
+                        }
+                        if ($rsx = $conn->prepare('SELECT COUNT(*) AS t FROM salao_agendamento_parcelas WHERE agendamento_id = ?')) {
+                            $rsx->bind_param('i', $id);
+                            if ($rsx->execute()) { $rr = $rsx->get_result(); $rrow = $rr->fetch_assoc(); $temParcelasExistentes = (int)($rrow['t'] ?? 0); }
+                            $rsx->close();
+                        }
+                        $resetPagamentoAoSairDeConcluido = ($statusAnterior === 'concluido' && $status !== 'concluido');
+                        if ($resetPagamentoAoSairDeConcluido) {
+                            // Resetar campos de pagamento para default
+                            $valor_pago = 0.0;
+                            $forma_pagamento = 'dinheiro';
+                            $status_pagamento = 'pendente';
+                            $parceladoFlagPost = 0;
+                            $quantidade_parcelas = 0;
+                            // sem data de pagamento
+                        }
                         $stmt = $conn->prepare('UPDATE salao_agendamentos SET cliente_id = ?, nome_cliente = ?, telefone_cliente = ?, profissional_id = ?, servico_id = ?, valor_servico = ?, valor_pago = ?, data_pagamento = ?, forma_pagamento = ?, status_pagamento = ?, parcelado = ?, quantidade_parcelas = ?, data_agendamento = ?, hora_inicio = ?, hora_fim = ?, duracao_prevista = ?, duracao_real = ?, observacoes = ?, status = ? WHERE id = ?');
                         if ($stmt) {
                             $types = 'issiiddsssiissssiiissi';
@@ -330,6 +352,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 $stmtParc->close();
                                             }
                                         }
+                                    }
+                                }
+                                // Se saiu de concluído para outro status: deletar parcelas existentes
+                                if ($resetPagamentoAoSairDeConcluido && $temParcelasExistentes > 0) {
+                                    if ($del = $conn->prepare('DELETE FROM salao_agendamento_parcelas WHERE agendamento_id = ?')) {
+                                        $del->bind_param('i', $id);
+                                        $del->execute();
+                                        $del->close();
                                     }
                                 }
                             } else {
@@ -656,6 +686,9 @@ $next = clone $dtSel; $next->modify('+1 day');
             <form method="post" id="formEditarAgendamento">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="id" id="edit_id">
+                <input type="hidden" name="original_status" id="edit_original_status" value="">
+                <input type="hidden" name="tem_parcelas" id="edit_tem_parcelas" value="0">
+                <input type="hidden" name="confirm_reset_pagamento" id="edit_confirm_reset_pagamento" value="0">
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Agendamento</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
@@ -1046,6 +1079,15 @@ $next = clone $dtSel; $next->modify('+1 day');
             if (editHH) editHH.value = hhmm;
             if (editMin) editMin.value = String(durReal);
             document.getElementById('edit_status').value = ag.status || 'agendado';
+            // Guardar status original e quantidade de parcelas para confirmação
+            const hOrig = document.getElementById('edit_original_status');
+            if (hOrig) hOrig.value = ag.status || '';
+            const hParc = document.getElementById('edit_tem_parcelas');
+            if (hParc) hParc.value = String(parseInt(ag.parcelas_qtd || 0, 10));
+            const hConf = document.getElementById('edit_confirm_reset_pagamento');
+            if (hConf) hConf.value = '0';
+            const formEd = document.getElementById('formEditarAgendamento');
+            if (formEd) delete formEd.dataset.confirmedReset;
             // Ajustar sessão de pagamento conforme status carregado
             togglePagamento('edit_status','edit_pagamento_section');
             // Trancar campos não pagamento se concluído
@@ -1170,6 +1212,32 @@ $next = clone $dtSel; $next->modify('+1 day');
     const formEdit = document.getElementById('formEditarAgendamento');
     if (formEdit){
         formEdit.addEventListener('submit', function(e){
+            // Confirmação: se status original era concluído e mudou para outro (avisar que pagamento será resetado e parcelas serão deletadas se existirem)
+            const orig = document.getElementById('edit_original_status')?.value || '';
+            const selStatus = document.getElementById('edit_status');
+            const statusAtual = selStatus ? selStatus.value : '';
+            if (orig === 'concluido' && statusAtual !== 'concluido' && formEdit.dataset.confirmedReset !== '1'){
+                e.preventDefault(); e.stopPropagation();
+                const modalEl = document.getElementById('confirmResetPagamentoModal');
+                if (modalEl){
+                    const yesBtn = modalEl.querySelector('[data-action="confirm-reset"]');
+                    const noBtn = modalEl.querySelector('[data-bs-dismiss]');
+                    // Limpa handlers anteriores
+                    yesBtn.replaceWith(yesBtn.cloneNode(true));
+                    const yesNew = modalEl.querySelector('[data-action="confirm-reset"]');
+                    yesNew.addEventListener('click', function(){
+                        formEdit.dataset.confirmedReset = '1';
+                        const conf = document.getElementById('edit_confirm_reset_pagamento');
+                        if (conf) conf.value = '1';
+                        const bsModal = bootstrap.Modal.getInstance(modalEl);
+                        if (bsModal) bsModal.hide();
+                        setTimeout(()=> formEdit.requestSubmit(), 50);
+                    });
+                    const bsModal = new bootstrap.Modal(modalEl);
+                    bsModal.show();
+                }
+                return;
+            }
             if (!validarPagamentoAntesSubmit(formEdit)){
                 e.preventDefault(); e.stopPropagation(); return;
             }
@@ -1196,3 +1264,23 @@ $next = clone $dtSel; $next->modify('+1 day');
     attachClearInvalid('input[name="valor_pago"], select[name="forma_pagamento"], select[name="status_pagamento"], input[name="numero_parcelas"], input[name="valor_parcela"], input[name="dia_vencimento"]');
 })();
 </script>
+
+<!-- Modal de confirmação para reset de pagamento/parcelas -->
+<div class="modal fade" id="confirmResetPagamentoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar alteração de status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Ao mudar o Status de <strong>Concluído</strong> para outro, os dados de pagamento serão resetados para o padrão e todos os registros de parcelamento vinculados a este agendamento serão <strong>deletados</strong>.</p>
+                <p class="mb-0">Deseja continuar?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" data-action="confirm-reset">Sim, continuar</button>
+            </div>
+        </div>
+    </div>
+    </div>
