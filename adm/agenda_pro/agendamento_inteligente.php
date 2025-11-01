@@ -351,7 +351,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Hora início*</label>
-                            <input type="time" name="hora_inicio" class="form-control" required>
+                            <input type="text" name="hora_inicio" id="novo_hora_inicio" class="form-control" placeholder="hh:mm" maxlength="5" autocomplete="off" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Profissional*</label>
@@ -373,9 +373,14 @@ $next = clone $dtSel; $next->modify('+1 day');
                             </select>
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label">Duração/Tempo (hh:mm)</label>
+                            <input type="text" name="duracao_hhmm" id="novo_duracao_hhmm" class="form-control" inputmode="numeric" maxlength="5" placeholder="hh:mm (00:00 a 24:00)" pattern="^(?:[01]?\d|2[0-3]):[0-5]\d$|^24:00$">
+                            <div class="form-text">Converte para minutos automaticamente</div>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Duração real (min)</label>
-                            <input type="number" name="duracao_real" id="novo_duracao_real" class="form-control" min="1" placeholder="opcional">
-                            <div class="form-text">Padrão: duração do serviço</div>
+                            <input type="number" name="duracao_real" id="novo_duracao_real" class="form-control" min="1" readonly>
+                            <div class="form-text">Calculado a partir do campo acima</div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Status</label>
@@ -438,7 +443,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Hora início*</label>
-                            <input type="time" name="hora_inicio" id="edit_hora_inicio" class="form-control" required>
+                            <input type="text" name="hora_inicio" id="edit_hora_inicio" class="form-control" placeholder="hh:mm" maxlength="5" autocomplete="off" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Profissional*</label>
@@ -458,8 +463,13 @@ $next = clone $dtSel; $next->modify('+1 day');
                             </select>
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label">Duração/Tempo (hh:mm)</label>
+                            <input type="text" name="duracao_hhmm" id="edit_duracao_hhmm" class="form-control" inputmode="numeric" maxlength="5" placeholder="hh:mm (00:00 a 24:00)" pattern="^(?:[01]?\d|2[0-3]):[0-5]\d$|^24:00$">
+                            <div class="form-text">Converte para minutos automaticamente</div>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Duração real (min)</label>
-                            <input type="number" name="duracao_real" id="edit_duracao_real" class="form-control" min="1" placeholder="opcional">
+                            <input type="number" name="duracao_real" id="edit_duracao_real" class="form-control" min="1" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Status</label>
@@ -511,19 +521,105 @@ $next = clone $dtSel; $next->modify('+1 day');
         mapDuracao["<?php echo (int)$s['id']; ?>"] = <?php echo (int)$s['duracao']; ?>;
     <?php endforeach; ?>
 
-    function conectarServicoDuracao(selectId, inputId){
-        const sel = document.getElementById(selectId);
-        const inp = document.getElementById(inputId);
-        if (!sel || !inp) return;
-        sel.addEventListener('change', function(){
-            const dur = mapDuracao[this.value] || '';
-            if (inp.value === '' && dur) {
-                inp.placeholder = dur + ' (padrão)';
-            }
-        });
+    // === Utilidades HH:MM replicadas do cadastro de serviços ===
+    function apenasDigitos(str){ return (str || '').replace(/\D/g, ''); }
+    function formatarLiveHhMm(digitos){
+        const d = apenasDigitos(digitos).slice(0,4);
+        if (d.length === 0) return '';
+        if (d.length <= 2) return d; // H, HH
+        if (d.length === 3) return d.slice(0,2) + ':' + d.slice(2,3);
+        return d.slice(0,2) + ':' + d.slice(2,4);
     }
-    conectarServicoDuracao('novo_servico_id','novo_duracao_real');
-    conectarServicoDuracao('edit_servico_id','edit_duracao_real');
+    function normalizarHhMmCompleto(digitos){
+        // Para duração: limites 00:01 a 24:00
+        const d = apenasDigitos(digitos);
+        if (d.length === 0) return '';
+        let h=0,m=0;
+        if (d.length === 1){ h=parseInt(d[0],10); m=0; }
+        else if (d.length === 2){ h=parseInt(d,10); m=0; }
+        else if (d.length === 3){ h=parseInt(d[0],10); m=parseInt(d.slice(1,3),10); }
+        else { h=parseInt(d.slice(0,2),10); m=parseInt(d.slice(2,4),10); }
+        if (h>24) h=24; if (m>59) m=59; if (h===24 && m>0) m=0; if (h===0 && m===0) m=1;
+        const HH=String(h).padStart(2,'0'); const MM=String(m).padStart(2,'0');
+        return `${HH}:${MM}`;
+    }
+    function hhMmParaMinutos(hhmm){
+        if (!hhmm || hhmm.indexOf(':')===-1) return 0;
+        const [hStr,mStr]=hhmm.split(':');
+        let h=parseInt(hStr,10)||0, m=parseInt(mStr,10)||0;
+        let total=h*60+m; if (total<1) total=1; if (total>1440) total=1440; return total;
+    }
+    function minutosParaHhMm(total){
+        let t=parseInt(total,10)||0; if (t<1) t=1; if (t>1440) t=1440;
+        const h=Math.floor(t/60), m=t%60;
+        return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    }
+
+    // Variante para HORA INÍCIO: 00:00..23:59 (24:00 não permitido) e 00:00 é válido
+    function normalizarHoraHhMm(digitos){
+        const d = apenasDigitos(digitos);
+        if (d.length === 0) return '';
+        let h=0,m=0;
+        if (d.length === 1){ h=parseInt(d[0],10); m=0; }
+        else if (d.length === 2){ h=parseInt(d,10); m=0; }
+        else if (d.length === 3){ h=parseInt(d[0],10); m=parseInt(d.slice(1,3),10); }
+        else { h=parseInt(d.slice(0,2),10); m=parseInt(d.slice(2,4),10); }
+        if (h>23) h=23; if (m>59) m=59; // 24:xx nunca
+        const HH=String(h).padStart(2,'0'); const MM=String(m).padStart(2,'0');
+        return `${HH}:${MM}`;
+    }
+    function validarHora(hhmm){
+        if (!hhmm || hhmm.length!==5 || hhmm.indexOf(':')!==2) return false;
+        const [hStr,mStr]=hhmm.split(':');
+        const h=parseInt(hStr,10), m=parseInt(mStr,10);
+        return !(isNaN(h)||isNaN(m)||h<0||h>23||m<0||m>59);
+    }
+
+    function ligarCampoHhMm(idHhMm, idMinutos){
+        const inpHhMm=document.getElementById(idHhMm);
+        const inpMin=document.getElementById(idMinutos);
+        if (!inpHhMm || !inpMin) return;
+        inpHhMm.addEventListener('input', function(){
+            const dig=apenasDigitos(this.value); const live=formatarLiveHhMm(dig); this.value=live; this.setCustomValidity('');
+            if (dig.length===0){ inpMin.value=''; return; }
+            if (this.value.length===5){ const mins=hhMmParaMinutos(this.value); inpMin.value=String(mins); inpMin.setCustomValidity(mins<1||mins>1440?'Duração deve ser entre 00:01 e 24:00':''); }
+        });
+        inpHhMm.addEventListener('blur', function(){
+            if (!this.value) return; const norm=normalizarHhMmCompleto(this.value); this.value=norm; const mins=hhMmParaMinutos(norm); inpMin.value=String(mins);
+            if (mins<1||mins>1440){ inpMin.setCustomValidity('Duração deve ser entre 00:01 e 24:00'); } else { inpMin.setCustomValidity(''); }
+        });
+        inpHhMm.addEventListener('invalid', function(){ if (!this.value||this.value.trim()===''){ this.setCustomValidity('Preencha esse campo'); } });
+    }
+
+    function ligarCampoHora(idHora){
+        const inp=document.getElementById(idHora); if (!inp) return;
+        inp.addEventListener('input', function(){ const dig=apenasDigitos(this.value); const live=formatarLiveHhMm(dig); this.value=live; this.setCustomValidity(''); });
+        inp.addEventListener('blur', function(){ if (!this.value) return; const norm=normalizarHoraHhMm(this.value); this.value=norm; if (!validarHora(norm)){ this.setCustomValidity('Hora deve estar entre 00:00 e 23:59'); } else { this.setCustomValidity(''); }});
+        inp.addEventListener('invalid', function(){ if (!this.value||this.value.trim()===''){ this.setCustomValidity('Preencha esse campo'); } });
+    }
+
+    // Ligações
+    ligarCampoHhMm('novo_duracao_hhmm','novo_duracao_real');
+    ligarCampoHhMm('edit_duracao_hhmm','edit_duracao_real');
+    ligarCampoHora('novo_hora_inicio');
+    ligarCampoHora('edit_hora_inicio');
+
+    // Ao trocar serviço, sugerir duração padrão (em hh:mm) e refletir minutos
+    function conectarServicoParaDuracao(selectId, hhmmId, minId){
+        const sel=document.getElementById(selectId); const hh=document.getElementById(hhmmId); const mi=document.getElementById(minId);
+        if (!sel || !hh || !mi) return;
+        const setFromServico=()=>{
+            const dur=mapDuracao[sel.value]||0;
+            if (!hh.value){ hh.value=minutosParaHhMm(dur); }
+            // Atualiza minutos a partir do HH:MM (ou padrão)
+            const mins=hhMmParaMinutos(hh.value || minutosParaHhMm(dur));
+            mi.value=String(mins);
+        };
+        sel.addEventListener('change', setFromServico);
+        setFromServico();
+    }
+    conectarServicoParaDuracao('novo_servico_id','novo_duracao_hhmm','novo_duracao_real');
+    conectarServicoParaDuracao('edit_servico_id','edit_duracao_hhmm','edit_duracao_real');
 
     // Preencher modal de edição a partir do botão
     const modalEditar = document.getElementById('modalEditarAgendamento');
@@ -539,10 +635,18 @@ $next = clone $dtSel; $next->modify('+1 day');
             document.getElementById('edit_data').value = ag.data_agendamento || '';
             // hora_inicio vem com HH:MM:SS
             const h = (ag.hora_inicio || '').slice(0,5);
-            document.getElementById('edit_hora_inicio').value = h;
+            // normaliza e aplica no campo texto
+            const hNorm = normalizarHoraHhMm(h);
+            document.getElementById('edit_hora_inicio').value = hNorm;
             document.getElementById('edit_profissional_id').value = ag.profissional_id || '';
             document.getElementById('edit_servico_id').value = ag.servico_id || '';
-            document.getElementById('edit_duracao_real').value = ag.duracao_real || '';
+            // Duração: preencher hh:mm a partir de duracao_real ou duração padrão do serviço
+            const durReal = (ag.duracao_real != null) ? parseInt(ag.duracao_real,10) : (mapDuracao[String(ag.servico_id)]||0);
+            const hhmm = minutosParaHhMm(durReal);
+            const editHH = document.getElementById('edit_duracao_hhmm');
+            const editMin = document.getElementById('edit_duracao_real');
+            if (editHH) editHH.value = hhmm;
+            if (editMin) editMin.value = String(durReal);
             document.getElementById('edit_status').value = ag.status || 'agendado';
             document.getElementById('edit_cliente_id').value = ag.cliente_id || '';
             document.getElementById('edit_nome_cliente').value = ag.nome_cliente || '';
