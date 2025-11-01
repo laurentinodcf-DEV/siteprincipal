@@ -938,6 +938,40 @@ $next = clone $dtSel; $next->modify('+1 day');
         editStatusSel.addEventListener('change', ()=> setValorServicoFromSelect('edit_servico_id','edit_valor_servico_view'));
     }
 
+    // Bloquear/Desbloquear campos não pagamento quando status = concluído
+    function applyLockForConcluido(form, lock){
+        if (!form) return;
+        const allowed = new Set(['action','id','status','valor_pago','forma_pagamento','status_pagamento','numero_parcelas','valor_parcela','dia_vencimento']);
+        const els = form.querySelectorAll('input, select, textarea');
+        els.forEach(el=>{
+            const name = el.name || '';
+            if (!lock){
+                if (el.dataset && el.dataset.locked === '1'){
+                    el.readOnly = false;
+                    el.disabled = false;
+                    el.classList.remove('bg-light');
+                    delete el.dataset.locked;
+                }
+                return;
+            }
+            if (name === '' || allowed.has(name)) return;
+            if (el.type === 'hidden') return;
+            el.dataset.locked = '1';
+            if (el.tagName === 'SELECT'){
+                el.disabled = true;
+            } else {
+                el.readOnly = true;
+            }
+            el.classList.add('bg-light');
+        });
+    }
+    function unlockDisabledForSubmit(form){
+        if (!form) return;
+        form.querySelectorAll('[data-locked="1"]').forEach(el=>{
+            if (el.disabled) el.disabled = false;
+        });
+    }
+
     // Ao trocar serviço, sugerir duração padrão (em hh:mm) e refletir minutos
     function formatCurrencyBRL(v){
         try { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); } catch(e){ return 'R$ '+(v||0).toFixed ? (v||0).toFixed(2).replace('.',',') : '0,00'; }
@@ -1000,6 +1034,8 @@ $next = clone $dtSel; $next->modify('+1 day');
             document.getElementById('edit_status').value = ag.status || 'agendado';
             // Ajustar sessão de pagamento conforme status carregado
             togglePagamento('edit_status','edit_pagamento_section');
+            // Trancar campos não pagamento se concluído
+            applyLockForConcluido(document.getElementById('formEditarAgendamento'), (ag.status||'agendado') === 'concluido');
             // Pagamento: preencher campos quando disponível
             const vsView = document.getElementById('edit_valor_servico_view');
             if (vsView) {
@@ -1085,9 +1121,37 @@ $next = clone $dtSel; $next->modify('+1 day');
         return true;
     }
     const formNovo = document.querySelector('#modalNovoAgendamento form');
-    if (formNovo){ formNovo.addEventListener('submit', function(e){ if (!validarPagamentoAntesSubmit(formNovo)){ e.preventDefault(); e.stopPropagation(); } }); }
+    if (formNovo){
+        formNovo.addEventListener('submit', function(e){
+            if (!validarPagamentoAntesSubmit(formNovo)){
+                e.preventDefault(); e.stopPropagation(); return;
+            }
+            unlockDisabledForSubmit(formNovo);
+        });
+        const novoStatus = document.getElementById('novo_status');
+        if (novoStatus){
+            novoStatus.addEventListener('change', ()=>{
+                applyLockForConcluido(formNovo, novoStatus.value === 'concluido');
+            });
+            applyLockForConcluido(formNovo, novoStatus.value === 'concluido');
+        }
+    }
     const formEdit = document.getElementById('formEditarAgendamento');
-    if (formEdit){ formEdit.addEventListener('submit', function(e){ if (!validarPagamentoAntesSubmit(formEdit)){ e.preventDefault(); e.stopPropagation(); } }); }
+    if (formEdit){
+        formEdit.addEventListener('submit', function(e){
+            if (!validarPagamentoAntesSubmit(formEdit)){
+                e.preventDefault(); e.stopPropagation(); return;
+            }
+            unlockDisabledForSubmit(formEdit);
+        });
+        const editStatus = document.getElementById('edit_status');
+        if (editStatus){
+            editStatus.addEventListener('change', ()=>{
+                applyLockForConcluido(formEdit, editStatus.value === 'concluido');
+            });
+            applyLockForConcluido(formEdit, editStatus.value === 'concluido');
+        }
+    }
 
     // Remover estado de erro ao editar os campos
     function attachClearInvalid(selector){
