@@ -907,6 +907,25 @@ $next = clone $dtSel; $next->modify('+1 day');
     wireParceladoToggle('novo_status_pagamento','novo_parcelado_fields');
     wireParceladoToggle('edit_status_pagamento','edit_parcelado_fields');
 
+    // Atualizar Valor Serviço ao alternar status para exibir pagamento
+    function setValorServicoFromSelect(selectId, valorViewId){
+        const sel = document.getElementById(selectId);
+        const out = document.getElementById(valorViewId);
+        if (!sel || !out) return;
+        const preco = mapPreco[String(sel.value)] || 0;
+        out.value = formatCurrencyBRL(preco);
+    }
+    const novoStatusSel = document.getElementById('novo_status');
+    if (novoStatusSel){
+        novoStatusSel.addEventListener('change', ()=> setValorServicoFromSelect('novo_servico_id','novo_valor_servico_view'));
+        // estado inicial
+        setValorServicoFromSelect('novo_servico_id','novo_valor_servico_view');
+    }
+    const editStatusSel = document.getElementById('edit_status');
+    if (editStatusSel){
+        editStatusSel.addEventListener('change', ()=> setValorServicoFromSelect('edit_servico_id','edit_valor_servico_view'));
+    }
+
     // Ao trocar serviço, sugerir duração padrão (em hh:mm) e refletir minutos
     function formatCurrencyBRL(v){
         try { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); } catch(e){ return 'R$ '+(v||0).toFixed ? (v||0).toFixed(2).replace('.',',') : '0,00'; }
@@ -972,7 +991,11 @@ $next = clone $dtSel; $next->modify('+1 day');
             // Pagamento: preencher campos quando disponível
             const vsView = document.getElementById('edit_valor_servico_view');
             if (vsView) {
-                const vs = parseFloat(ag.valor_servico ?? 0) || 0;
+                let vs = parseFloat(ag.valor_servico ?? 0) || 0;
+                // fallback: caso não haja valor_servico salvo, usa tabela de serviços
+                if (!vs && ag.servico_id) {
+                    vs = mapPreco[String(ag.servico_id)] || 0;
+                }
                 vsView.value = formatCurrencyBRL(vs);
             }
             const inpVP = document.getElementById('edit_valor_pago');
