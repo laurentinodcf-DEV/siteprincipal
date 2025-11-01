@@ -75,7 +75,7 @@ if ($r = $conn->query("SELECT id, nome FROM salao_profissionais WHERE ativo = 1 
 }
 
 $servicos = [];
-if ($r = $conn->query("SELECT id, nome, duracao FROM salao_servicos WHERE ativo = 1 ORDER BY nome")) {
+if ($r = $conn->query("SELECT id, nome, duracao, preco FROM salao_servicos WHERE ativo = 1 ORDER BY nome")) {
     while ($row = $r->fetch_assoc()) { $servicos[] = $row; }
     $r->free();
 }
@@ -89,6 +89,9 @@ if ($r = $conn->query("SELECT id, nome FROM salao_clientes ORDER BY nome")) {
 // Mapas úteis
 $mapServicoDuracao = [];
 foreach ($servicos as $s) { $mapServicoDuracao[(int)$s['id']] = (int)($s['duracao'] ?? 0); }
+// Preços dos serviços
+$mapServicoPreco = [];
+foreach ($servicos as $s) { $mapServicoPreco[(int)$s['id']] = (float)($s['preco'] ?? 0); }
 
 // Filtros
 $dataSelecionada = isset($_GET['data']) ? normalizarDataPost($_GET['data']) : date('Y-m-d');
@@ -116,6 +119,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $duracao_real = isset($_POST['duracao_real']) && $_POST['duracao_real'] !== '' ? (int)$_POST['duracao_real'] : null;
         $duracao_para_fim = $duracao_real !== null && $duracao_real > 0 ? $duracao_real : $duracao_prevista;
 
+        // Pagamento (a partir dos requisitos)
+        $valor_servico = $mapServicoPreco[$servico_id] ?? 0.0; // snapshot do valor do serviço
+        $valor_pago = isset($_POST['valor_pago']) && $_POST['valor_pago'] !== '' ? (float)str_replace(',', '.', $_POST['valor_pago']) : 0.0;
+        $forma_pagamento = $_POST['forma_pagamento'] ?? null; // dinheiro, cartao, pix, outro
+        $status_pagamento = $_POST['status_pagamento'] ?? null; // pendente, pago, parcelado, cancelado
+        $parceladoFlagPost = 0;
+        $quantidade_parcelas = 0;
+        $valor_parcela = null;
+        $dia_vencimento = null;
+        if ($status === 'concluido') {
+            if ($status_pagamento === 'pago') {
+                // ok
+                if ($valor_pago <= 0) {
+                    $mensagemErro = 'Para concluir com pagamento PAGO, informe um valor a ser pago maior que 0.';
+                }
+                if (!$forma_pagamento) {
+                    $mensagemErro = $mensagemErro ?: 'Para concluir com pagamento PAGO, selecione a forma de pagamento.';
+                }
+            } elseif ($status_pagamento === 'parcelado') {
+                $parceladoFlagPost = 1;
+                $quantidade_parcelas = isset($_POST['numero_parcelas']) ? (int)$_POST['numero_parcelas'] : 0;
+                $valor_parcela = isset($_POST['valor_parcela']) && $_POST['valor_parcela'] !== '' ? (float)str_replace(',', '.', $_POST['valor_parcela']) : 0.0;
+                $dia_vencimento = isset($_POST['dia_vencimento']) ? (int)$_POST['dia_vencimento'] : 0;
+                if ($quantidade_parcelas < 2) {
+                    $mensagemErro = 'Informe ao menos 2 parcelas para pagamento parcelado.';
+                } elseif ($valor_parcela <= 0) {
+                    $mensagemErro = 'Informe o valor de cada parcela (maior que 0).';
+                } elseif ($dia_vencimento < 1 || $dia_vencimento > 31) {
+                    $mensagemErro = 'Informe um dia de vencimento entre 1 e 31.';
+                }
+                // Para parcelado, valor_pago do agendamento fica 0; o faturamento será reconhecido nas parcelas
+                $valor_pago = 0.0;
+            } else {
+                // pendente ou cancelado não podem deixar concluir
+                if ($status_pagamento === null || $status_pagamento === '' || $status_pagamento === 'pendente' || $status_pagamento === 'cancelado') {
+                    $mensagemErro = 'Nao e permitido concluir com status de pagamento Pendente/Cancelado. Selecione PAGO ou PARCELADO.';
+                }
+            }
+        }
+
         // Normalizar hora_inicio para HH:MM:SS
         if ($hora_inicio && strlen($hora_inicio) === 5) { $hora_inicio .= ':00'; }
 
@@ -130,15 +173,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mensagemErro = 'Conflito de horário: já existe um agendamento para este profissional nesse período.';
             } else {
                 if ($acao === 'create') {
-                    $stmt = $conn->prepare('INSERT INTO salao_agendamentos (cliente_id, nome_cliente, telefone_cliente, profissional_id, servico_id, data_agendamento, hora_inicio, hora_fim, duracao_prevista, duracao_real, observacoes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                    $stmt = $conn->prepare('INSERT INTO salao_agendamentos (cliente_id, nome_cliente, telefone_cliente, profissional_id, servico_id, valor_servico, valor_pago, data_pagamento, forma_pagamento, status_pagamento, parcelado, quantidade_parcelas, data_agendamento, hora_inicio, hora_fim, duracao_prevista, duracao_real, observacoes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
                     if ($stmt) {
-                        $types = 'issiisssiisss'; // i s s i i s s s i i s s
+                        $types = 'issiiddsssiissssiiiss';
+                        // i: cliente_id, s: nome, s: telefone, i: prof, i: serv, d: valor_servico, d: valor_pago, s: data_pag (Y-m-d or null), s: forma, s: status_pagamento, i: parcelado, i: qtd_parc, s: data_ag, s: hora_inicio, s: hora_fim, i: dur_prev, i: dur_real, s: observ, s: status
+                        $data_pagamento = null;
+                        if ($status === 'concluido' && $status_pagamento === 'pago') {
+                            $data_pagamento = date('Y-m-d');
+                        }
                         bindParamsSafe($stmt, $types,
                             $cliente_id,
                             $nome_cliente,
                             $telefone_cliente,
                             $profissional_id,
                             $servico_id,
+                            $valor_servico,
+                            $valor_pago,
+                            $data_pagamento,
+                            $forma_pagamento,
+                            $status_pagamento,
+                            $parceladoFlagPost,
+                            $quantidade_parcelas,
                             $data_agendamento,
                             $hora_inicio,
                             $hora_fim,
@@ -152,6 +207,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             // Redefinir data selecionada para a data do agendamento salvo
                             $dataSelecionada = $data_agendamento;
                             if ($profFiltro === 0) { $profFiltro = $profissional_id; }
+
+                            // Se parcelado, gerar parcelas
+                            if ($status === 'concluido' && $status_pagamento === 'parcelado' && $parceladoFlagPost === 1 && $quantidade_parcelas > 1) {
+                                $novoAgId = $conn->insert_id;
+                                // Gerar vencimentos a partir de data_agendamento e dia_vencimento escolhido
+                                $datas = [];
+                                try {
+                                    $base = new DateTime($data_agendamento);
+                                    $diaBase = (int)$base->format('j');
+                                    $mesBase = (int)$base->format('n');
+                                    $anoBase = (int)$base->format('Y');
+                                    // Determinar primeiro vencimento: se dia_vencimento >= diaBase => este mês, senão próximo mês
+                                    $primeiroMes = $dia_vencimento >= $diaBase ? $mesBase : $mesBase + 1;
+                                    $ano = $anoBase;
+                                    for ($i=0; $i<$quantidade_parcelas; $i++) {
+                                        $mes = $primeiroMes + $i;
+                                        // ajustar ano/mes
+                                        $anoAdj = $ano + intdiv($mes-1, 12);
+                                        $mesAdj = (($mes-1) % 12) + 1;
+                                        // clamp dia para último dia do mês
+                                        $dt = DateTime::createFromFormat('Y-n-j', $anoAdj.'-'.$mesAdj.'-1');
+                                        $ultimoDia = (int)$dt->format('t');
+                                        $dia = min($dia_vencimento, $ultimoDia);
+                                        $dt->setDate($anoAdj, $mesAdj, $dia);
+                                        $datas[] = $dt->format('Y-m-d');
+                                    }
+                                } catch (Throwable $e) {}
+
+                                if (!empty($datas)) {
+                                    $stmtParc = $conn->prepare('INSERT INTO salao_agendamento_parcelas (agendamento_id, numero_parcela, valor_parcela, data_vencimento, data_pagamento, forma_pagamento, status) VALUES (?, ?, ?, ?, NULL, NULL, NULL)');
+                                    if ($stmtParc) {
+                                        foreach ($datas as $idx => $venc) {
+                                            $num = $idx + 1;
+                                            $stmtParc->bind_param('iids', $novoAgId, $num, $valor_parcela, $venc);
+                                            $stmtParc->execute();
+                                        }
+                                        $stmtParc->close();
+                                    }
+                                }
+                            }
                         } else {
                             $mensagemErro = 'Erro ao salvar: ' . $stmt->error;
                         }
@@ -163,15 +258,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($id <= 0) {
                         $mensagemErro = 'Agendamento inválido para edição.';
                     } else {
-                        $stmt = $conn->prepare('UPDATE salao_agendamentos SET cliente_id = ?, nome_cliente = ?, telefone_cliente = ?, profissional_id = ?, servico_id = ?, data_agendamento = ?, hora_inicio = ?, hora_fim = ?, duracao_prevista = ?, duracao_real = ?, observacoes = ?, status = ? WHERE id = ?');
+                        $stmt = $conn->prepare('UPDATE salao_agendamentos SET cliente_id = ?, nome_cliente = ?, telefone_cliente = ?, profissional_id = ?, servico_id = ?, valor_servico = ?, valor_pago = ?, data_pagamento = ?, forma_pagamento = ?, status_pagamento = ?, parcelado = ?, quantidade_parcelas = ?, data_agendamento = ?, hora_inicio = ?, hora_fim = ?, duracao_prevista = ?, duracao_real = ?, observacoes = ?, status = ? WHERE id = ?');
                         if ($stmt) {
-                            $types = 'issiisssiisssi'; // + id no final
+                            $types = 'issiiddsssiissssiiissi';
+                            $data_pagamento = null;
+                            if ($status === 'concluido' && $status_pagamento === 'pago') { $data_pagamento = date('Y-m-d'); }
                             bindParamsSafe($stmt, $types,
                                 $cliente_id,
                                 $nome_cliente,
                                 $telefone_cliente,
                                 $profissional_id,
                                 $servico_id,
+                                $valor_servico,
+                                $valor_pago,
+                                $data_pagamento,
+                                $forma_pagamento,
+                                $status_pagamento,
+                                $parceladoFlagPost,
+                                $quantidade_parcelas,
                                 $data_agendamento,
                                 $hora_inicio,
                                 $hora_fim,
@@ -185,6 +289,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $mensagemSucesso = 'Agendamento atualizado.';
                                 $dataSelecionada = $data_agendamento;
                                 if ($profFiltro === 0) { $profFiltro = $profissional_id; }
+
+                                // Se parcelado e não há parcelas ainda, criar
+                                if ($status === 'concluido' && $status_pagamento === 'parcelado' && $parceladoFlagPost === 1 && $quantidade_parcelas > 1) {
+                                    // Verificar existência de parcelas
+                                    $jaTem = 0;
+                                    if ($rs = $conn->query('SELECT COUNT(*) AS t FROM salao_agendamento_parcelas WHERE agendamento_id = '.(int)$id)) {
+                                        $row = $rs->fetch_assoc();
+                                        $jaTem = (int)($row['t'] ?? 0);
+                                        $rs->free();
+                                    }
+                                    if ($jaTem === 0) {
+                                        $datas = [];
+                                        try {
+                                            $base = new DateTime($data_agendamento);
+                                            $diaBase = (int)$base->format('j');
+                                            $mesBase = (int)$base->format('n');
+                                            $anoBase = (int)$base->format('Y');
+                                            $primeiroMes = $dia_vencimento >= $diaBase ? $mesBase : $mesBase + 1;
+                                            $ano = $anoBase;
+                                            for ($i=0; $i<$quantidade_parcelas; $i++) {
+                                                $mes = $primeiroMes + $i;
+                                                $anoAdj = $ano + intdiv($mes-1, 12);
+                                                $mesAdj = (($mes-1) % 12) + 1;
+                                                $dt = DateTime::createFromFormat('Y-n-j', $anoAdj.'-'.$mesAdj.'-1');
+                                                $ultimoDia = (int)$dt->format('t');
+                                                $dia = min($dia_vencimento, $ultimoDia);
+                                                $dt->setDate($anoAdj, $mesAdj, $dia);
+                                                $datas[] = $dt->format('Y-m-d');
+                                            }
+                                        } catch (Throwable $e) {}
+                                        if (!empty($datas)) {
+                                            $stmtParc = $conn->prepare('INSERT INTO salao_agendamento_parcelas (agendamento_id, numero_parcela, valor_parcela, data_vencimento, data_pagamento, forma_pagamento, status) VALUES (?, ?, ?, ?, NULL, NULL, NULL)');
+                                            if ($stmtParc) {
+                                                foreach ($datas as $idx => $venc) {
+                                                    $num = $idx + 1;
+                                                    $stmtParc->bind_param('iids', $id, $num, $valor_parcela, $venc);
+                                                    $stmtParc->execute();
+                                                }
+                                                $stmtParc->close();
+                                            }
+                                        }
+                                    }
+                                }
                             } else {
                                 $mensagemErro = 'Erro ao atualizar: ' . $stmt->error;
                             }
@@ -368,7 +515,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                             <select name="servico_id" id="novo_servico_id" class="form-select" required>
                                 <option value="">Selecione</option>
                                 <?php foreach ($servicos as $s): ?>
-                                    <option value="<?php echo (int)$s['id']; ?>" data-duracao="<?php echo (int)$s['duracao']; ?>"><?php echo htmlspecialchars($s['nome'], ENT_QUOTES, 'UTF-8'); ?> (<?php echo (int)$s['duracao']; ?> min)</option>
+                                    <option value="<?php echo (int)$s['id']; ?>" data-duracao="<?php echo (int)$s['duracao']; ?>" data-preco="<?php echo htmlspecialchars(number_format((float)$s['preco'], 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($s['nome'], ENT_QUOTES, 'UTF-8'); ?> (<?php echo (int)$s['duracao']; ?> min)</option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -398,7 +545,54 @@ $next = clone $dtSel; $next->modify('+1 day');
                                     <strong>Pagamento</strong>
                                 </div>
                                 <div class="card-body">
-                                    <div class="text-muted small">Sessão de pagamento será exibida quando o status for "Concluído". (Campos serão adicionados posteriormente.)</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Valor Serviço</label>
+                                            <input type="text" id="novo_valor_servico_view" class="form-control" value="" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Valor a ser pago</label>
+                                            <input type="number" step="0.01" min="0" name="valor_pago" id="novo_valor_pago" class="form-control" placeholder="0,00">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Forma pagamento</label>
+                                            <select name="forma_pagamento" id="novo_forma_pagamento" class="form-select">
+                                                <option value="">Selecione</option>
+                                                <option value="dinheiro">Dinheiro</option>
+                                                <option value="cartao">Cartão</option>
+                                                <option value="pix">PIX</option>
+                                                <option value="outro">Outro</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Status pagamento</label>
+                                            <select name="status_pagamento" id="novo_status_pagamento" class="form-select">
+                                                <option value="">Selecione</option>
+                                                <option value="pago">Pago</option>
+                                                <option value="parcelado">Parcelado</option>
+                                                <option value="pendente">Pendente</option>
+                                                <option value="cancelado">Cancelado</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12 d-none" id="novo_parcelado_fields">
+                                            <div class="row g-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Número de parcelas</label>
+                                                    <input type="number" min="2" max="36" name="numero_parcelas" id="novo_numero_parcelas" class="form-control" placeholder="ex: 6">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Valor da parcela</label>
+                                                    <input type="number" step="0.01" min="0" name="valor_parcela" id="novo_valor_parcela" class="form-control" placeholder="0,00">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Dia vencimento</label>
+                                                    <input type="number" min="1" max="31" name="dia_vencimento" id="novo_dia_vencimento" class="form-control" placeholder="1..31">
+                                                    <div class="form-text">Usado para gerar o vencimento das próximas parcelas.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -469,7 +663,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                             <label class="form-label">Serviço*</label>
                             <select name="servico_id" id="edit_servico_id" class="form-select" required>
                                 <?php foreach ($servicos as $s): ?>
-                                    <option value="<?php echo (int)$s['id']; ?>" data-duracao="<?php echo (int)$s['duracao']; ?>"><?php echo htmlspecialchars($s['nome'], ENT_QUOTES, 'UTF-8'); ?> (<?php echo (int)$s['duracao']; ?> min)</option>
+                                    <option value="<?php echo (int)$s['id']; ?>" data-duracao="<?php echo (int)$s['duracao']; ?>" data-preco="<?php echo htmlspecialchars(number_format((float)$s['preco'], 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($s['nome'], ENT_QUOTES, 'UTF-8'); ?> (<?php echo (int)$s['duracao']; ?> min)</option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -498,7 +692,54 @@ $next = clone $dtSel; $next->modify('+1 day');
                                     <strong>Pagamento</strong>
                                 </div>
                                 <div class="card-body">
-                                    <div class="text-muted small">Sessão de pagamento será exibida quando o status for "Concluído". (Campos serão adicionados posteriormente.)</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Valor Serviço</label>
+                                            <input type="text" id="edit_valor_servico_view" class="form-control" value="" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Valor a ser pago</label>
+                                            <input type="number" step="0.01" min="0" name="valor_pago" id="edit_valor_pago" class="form-control" placeholder="0,00">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Forma pagamento</label>
+                                            <select name="forma_pagamento" id="edit_forma_pagamento" class="form-select">
+                                                <option value="">Selecione</option>
+                                                <option value="dinheiro">Dinheiro</option>
+                                                <option value="cartao">Cartão</option>
+                                                <option value="pix">PIX</option>
+                                                <option value="outro">Outro</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Status pagamento</label>
+                                            <select name="status_pagamento" id="edit_status_pagamento" class="form-select">
+                                                <option value="">Selecione</option>
+                                                <option value="pago">Pago</option>
+                                                <option value="parcelado">Parcelado</option>
+                                                <option value="pendente">Pendente</option>
+                                                <option value="cancelado">Cancelado</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12 d-none" id="edit_parcelado_fields">
+                                            <div class="row g-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Número de parcelas</label>
+                                                    <input type="number" min="2" max="36" name="numero_parcelas" id="edit_numero_parcelas" class="form-control">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Valor da parcela</label>
+                                                    <input type="number" step="0.01" min="0" name="valor_parcela" id="edit_valor_parcela" class="form-control">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Dia vencimento</label>
+                                                    <input type="number" min="1" max="31" name="dia_vencimento" id="edit_dia_vencimento" class="form-control">
+                                                    <div class="form-text">Usado para gerar o vencimento das próximas parcelas.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -541,6 +782,10 @@ $next = clone $dtSel; $next->modify('+1 day');
     const mapDuracao = {};
     <?php foreach ($servicos as $s): ?>
         mapDuracao["<?php echo (int)$s['id']; ?>"] = <?php echo (int)$s['duracao']; ?>;
+    <?php endforeach; ?>
+    const mapPreco = {};
+    <?php foreach ($servicos as $s): ?>
+        mapPreco["<?php echo (int)$s['id']; ?>"] = parseFloat("<?php echo htmlspecialchars(number_format((float)$s['preco'], 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>") || 0;
     <?php endforeach; ?>
 
     // === Utilidades HH:MM replicadas do cadastro de serviços ===
@@ -637,6 +882,21 @@ $next = clone $dtSel; $next->modify('+1 day');
         togglePagamento(selectId, sectionId);
     }
 
+    // Mostrar/ocultar campos de parcelado baseado no select de status_pagamento
+    function toggleParcelado(selectPagId, fieldsId){
+        const sel = document.getElementById(selectPagId);
+        const box = document.getElementById(fieldsId);
+        if (!sel || !box) return;
+        const show = (sel.value === 'parcelado');
+        box.classList.toggle('d-none', !show);
+    }
+    function wireParceladoToggle(selectPagId, fieldsId){
+        const sel = document.getElementById(selectPagId);
+        if (!sel) return;
+        sel.addEventListener('change', ()=> toggleParcelado(selectPagId, fieldsId));
+        toggleParcelado(selectPagId, fieldsId);
+    }
+
     // Ligações
     ligarCampoHhMm('novo_duracao_hhmm','novo_duracao_real');
     ligarCampoHhMm('edit_duracao_hhmm','edit_duracao_real');
@@ -644,10 +904,17 @@ $next = clone $dtSel; $next->modify('+1 day');
     ligarCampoHora('edit_hora_inicio');
     wirePagamentoToggle('novo_status','novo_pagamento_section');
     wirePagamentoToggle('edit_status','edit_pagamento_section');
+    wireParceladoToggle('novo_status_pagamento','novo_parcelado_fields');
+    wireParceladoToggle('edit_status_pagamento','edit_parcelado_fields');
 
     // Ao trocar serviço, sugerir duração padrão (em hh:mm) e refletir minutos
-    function conectarServicoParaDuracao(selectId, hhmmId, minId){
+    function formatCurrencyBRL(v){
+        try { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); } catch(e){ return 'R$ '+(v||0).toFixed ? (v||0).toFixed(2).replace('.',',') : '0,00'; }
+    }
+
+    function conectarServicoParaDuracao(selectId, hhmmId, minId, valorServicoViewId){
         const sel=document.getElementById(selectId); const hh=document.getElementById(hhmmId); const mi=document.getElementById(minId);
+        const vsView = valorServicoViewId ? document.getElementById(valorServicoViewId) : null;
         if (!sel || !hh || !mi) return;
         const setFromServico=()=>{
             // Novo comportamento: não preencher HH:MM automaticamente.
@@ -659,13 +926,19 @@ $next = clone $dtSel; $next->modify('+1 day');
                 // manter minutos em branco quando HH:MM está vazio
                 mi.value='';
             }
+            // Atualizar valor do serviço
+            if (vsView) {
+                const idSel = sel.value;
+                const preco = mapPreco[String(idSel)] || 0;
+                vsView.value = formatCurrencyBRL(preco);
+            }
         };
         sel.addEventListener('change', setFromServico);
         // inicializa respeitando o estado atual (vazio não preenche nada)
         setFromServico();
     }
-    conectarServicoParaDuracao('novo_servico_id','novo_duracao_hhmm','novo_duracao_real');
-    conectarServicoParaDuracao('edit_servico_id','edit_duracao_hhmm','edit_duracao_real');
+    conectarServicoParaDuracao('novo_servico_id','novo_duracao_hhmm','novo_duracao_real','novo_valor_servico_view');
+    conectarServicoParaDuracao('edit_servico_id','edit_duracao_hhmm','edit_duracao_real','edit_valor_servico_view');
 
     // Preencher modal de edição a partir do botão
     const modalEditar = document.getElementById('modalEditarAgendamento');
@@ -696,6 +969,23 @@ $next = clone $dtSel; $next->modify('+1 day');
             document.getElementById('edit_status').value = ag.status || 'agendado';
             // Ajustar sessão de pagamento conforme status carregado
             togglePagamento('edit_status','edit_pagamento_section');
+            // Pagamento: preencher campos quando disponível
+            const vsView = document.getElementById('edit_valor_servico_view');
+            if (vsView) {
+                const vs = parseFloat(ag.valor_servico ?? 0) || 0;
+                vsView.value = formatCurrencyBRL(vs);
+            }
+            const inpVP = document.getElementById('edit_valor_pago');
+            if (inpVP) { inpVP.value = (ag.valor_pago != null ? parseFloat(ag.valor_pago) : '').toString(); }
+            const selForma = document.getElementById('edit_forma_pagamento');
+            if (selForma) { selForma.value = ag.forma_pagamento || ''; }
+            const selSP = document.getElementById('edit_status_pagamento');
+            if (selSP) { selSP.value = ag.status_pagamento || ''; }
+            // Exibir campos de parcelado se aplicável e preencher quantidade
+            toggleParcelado('edit_status_pagamento','edit_parcelado_fields');
+            const np = document.getElementById('edit_numero_parcelas');
+            if (np) { np.value = (ag.quantidade_parcelas != null ? parseInt(ag.quantidade_parcelas,10) : '') || ''; }
+            // valor_parcela e dia_vencimento não são armazenados diretamente; manter em branco
             document.getElementById('edit_cliente_id').value = ag.cliente_id || '';
             document.getElementById('edit_nome_cliente').value = ag.nome_cliente || '';
             document.getElementById('edit_telefone_cliente').value = ag.telefone_cliente || '';
@@ -706,5 +996,41 @@ $next = clone $dtSel; $next->modify('+1 day');
             document.getElementById('formEditarAgendamento').reset();
         });
     }
+
+    // Validação antes de enviar (novo e editar)
+    function validarPagamentoAntesSubmit(form){
+        if (!form) return true;
+        const statusAg = form.querySelector('select[name="status"]');
+        if (!statusAg) return true;
+        if (statusAg.value !== 'concluido') return true;
+        const sp = form.querySelector('select[name="status_pagamento"]');
+        const fp = form.querySelector('select[name="forma_pagamento"]');
+        const vp = form.querySelector('input[name="valor_pago"]');
+        if (!sp || !sp.value || sp.value === 'pendente' || sp.value === 'cancelado'){
+            alert('Para concluir o agendamento, selecione Status de pagamento como PAGO ou PARCELADO.');
+            return false;
+        }
+        if (sp.value === 'pago'){
+            const v = parseFloat(vp && vp.value ? vp.value.replace(',','.') : '0') || 0;
+            if (v <= 0){ alert('Informe um valor a ser pago maior que 0.'); return false; }
+            if (!fp || !fp.value){ alert('Selecione a forma de pagamento.'); return false; }
+        }
+        if (sp.value === 'parcelado'){
+            const np = form.querySelector('input[name="numero_parcelas"]');
+            const vParc = form.querySelector('input[name="valor_parcela"]');
+            const dia = form.querySelector('input[name="dia_vencimento"]');
+            const n = np ? parseInt(np.value,10) : 0;
+            const vv = vParc ? parseFloat(vParc.value.replace(',','.')) : 0;
+            const d = dia ? parseInt(dia.value,10) : 0;
+            if (!n || n < 2){ alert('Informe ao menos 2 parcelas.'); return false; }
+            if (!vv || vv <= 0){ alert('Informe o valor de cada parcela.'); return false; }
+            if (!d || d < 1 || d > 31){ alert('Informe um dia de vencimento entre 1 e 31.'); return false; }
+        }
+        return true;
+    }
+    const formNovo = document.querySelector('#modalNovoAgendamento form');
+    if (formNovo){ formNovo.addEventListener('submit', function(e){ if (!validarPagamentoAntesSubmit(formNovo)){ e.preventDefault(); e.stopPropagation(); } }); }
+    const formEdit = document.getElementById('formEditarAgendamento');
+    if (formEdit){ formEdit.addEventListener('submit', function(e){ if (!validarPagamentoAntesSubmit(formEdit)){ e.preventDefault(); e.stopPropagation(); } }); }
 })();
 </script>
