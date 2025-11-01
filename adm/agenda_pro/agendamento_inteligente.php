@@ -553,6 +553,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                                         <div class="col-md-3">
                                             <label class="form-label">Valor a ser pago</label>
                                             <input type="number" step="0.01" min="0" name="valor_pago" id="novo_valor_pago" class="form-control" placeholder="0,00">
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Forma pagamento</label>
@@ -563,6 +564,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                                                 <option value="pix">PIX</option>
                                                 <option value="outro">Outro</option>
                                             </select>
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Status pagamento</label>
@@ -573,6 +575,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                                                 <option value="pendente">Pendente</option>
                                                 <option value="cancelado">Cancelado</option>
                                             </select>
+                                            <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-12 d-none" id="novo_parcelado_fields">
@@ -580,15 +583,18 @@ $next = clone $dtSel; $next->modify('+1 day');
                                                 <div class="col-md-3">
                                                     <label class="form-label">Número de parcelas</label>
                                                     <input type="number" min="2" max="36" name="numero_parcelas" id="novo_numero_parcelas" class="form-control" placeholder="ex: 6">
+                                                    <div class="invalid-feedback"></div>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label">Valor da parcela</label>
                                                     <input type="number" step="0.01" min="0" name="valor_parcela" id="novo_valor_parcela" class="form-control" placeholder="0,00">
+                                                    <div class="invalid-feedback"></div>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label">Dia vencimento</label>
                                                     <input type="number" min="1" max="31" name="dia_vencimento" id="novo_dia_vencimento" class="form-control" placeholder="1..31">
                                                     <div class="form-text">Usado para gerar o vencimento das próximas parcelas.</div>
+                                                    <div class="invalid-feedback"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -700,6 +706,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                                         <div class="col-md-3">
                                             <label class="form-label">Valor a ser pago</label>
                                             <input type="number" step="0.01" min="0" name="valor_pago" id="edit_valor_pago" class="form-control" placeholder="0,00">
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Forma pagamento</label>
@@ -710,6 +717,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                                                 <option value="pix">PIX</option>
                                                 <option value="outro">Outro</option>
                                             </select>
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Status pagamento</label>
@@ -720,6 +728,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                                                 <option value="pendente">Pendente</option>
                                                 <option value="cancelado">Cancelado</option>
                                             </select>
+                                            <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-12 d-none" id="edit_parcelado_fields">
@@ -727,15 +736,18 @@ $next = clone $dtSel; $next->modify('+1 day');
                                                 <div class="col-md-3">
                                                     <label class="form-label">Número de parcelas</label>
                                                     <input type="number" min="2" max="36" name="numero_parcelas" id="edit_numero_parcelas" class="form-control">
+                                                    <div class="invalid-feedback"></div>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label">Valor da parcela</label>
                                                     <input type="number" step="0.01" min="0" name="valor_parcela" id="edit_valor_parcela" class="form-control">
+                                                    <div class="invalid-feedback"></div>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label">Dia vencimento</label>
                                                     <input type="number" min="1" max="31" name="dia_vencimento" id="edit_dia_vencimento" class="form-control">
                                                     <div class="form-text">Usado para gerar o vencimento das próximas parcelas.</div>
+                                                    <div class="invalid-feedback"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1021,6 +1033,22 @@ $next = clone $dtSel; $next->modify('+1 day');
     }
 
     // Validação antes de enviar (novo e editar)
+    function setFieldError(el, msg){
+        if (!el) return; el.classList.add('is-invalid');
+        let fb = el.nextElementSibling;
+        if (!fb || !fb.classList || !fb.classList.contains('invalid-feedback')){
+            fb = document.createElement('div');
+            fb.className = 'invalid-feedback';
+            el.insertAdjacentElement('afterend', fb);
+        }
+        fb.textContent = msg || '';
+    }
+    function clearFieldError(el){
+        if (!el) return;
+        el.classList.remove('is-invalid');
+        const fb = el.nextElementSibling;
+        if (fb && fb.classList && fb.classList.contains('invalid-feedback')){ fb.textContent=''; }
+    }
     function validarPagamentoAntesSubmit(form){
         if (!form) return true;
         const statusAg = form.querySelector('select[name="status"]');
@@ -1029,25 +1057,30 @@ $next = clone $dtSel; $next->modify('+1 day');
         const sp = form.querySelector('select[name="status_pagamento"]');
         const fp = form.querySelector('select[name="forma_pagamento"]');
         const vp = form.querySelector('input[name="valor_pago"]');
+        const np = form.querySelector('input[name="numero_parcelas"]');
+        const vParc = form.querySelector('input[name="valor_parcela"]');
+        const dia = form.querySelector('input[name="dia_vencimento"]');
+
+        // limpar erros anteriores
+        [sp, fp, vp, np, vParc, dia].forEach(clearFieldError);
+
         if (!sp || !sp.value || sp.value === 'pendente' || sp.value === 'cancelado'){
-            alert('Para concluir o agendamento, selecione Status de pagamento como PAGO ou PARCELADO.');
+            setFieldError(sp, 'Selecione PAGO ou PARCELADO para concluir.');
+            sp && sp.focus();
             return false;
         }
         if (sp.value === 'pago'){
             const v = parseFloat(vp && vp.value ? vp.value.replace(',','.') : '0') || 0;
-            if (v <= 0){ alert('Informe um valor a ser pago maior que 0.'); return false; }
-            if (!fp || !fp.value){ alert('Selecione a forma de pagamento.'); return false; }
+            if (v <= 0){ setFieldError(vp,'Informe um valor maior que 0.'); vp && vp.focus(); return false; }
+            if (!fp || !fp.value){ setFieldError(fp,'Selecione a forma de pagamento.'); fp && fp.focus(); return false; }
         }
         if (sp.value === 'parcelado'){
-            const np = form.querySelector('input[name="numero_parcelas"]');
-            const vParc = form.querySelector('input[name="valor_parcela"]');
-            const dia = form.querySelector('input[name="dia_vencimento"]');
             const n = np ? parseInt(np.value,10) : 0;
             const vv = vParc ? parseFloat(vParc.value.replace(',','.')) : 0;
             const d = dia ? parseInt(dia.value,10) : 0;
-            if (!n || n < 2){ alert('Informe ao menos 2 parcelas.'); return false; }
-            if (!vv || vv <= 0){ alert('Informe o valor de cada parcela.'); return false; }
-            if (!d || d < 1 || d > 31){ alert('Informe um dia de vencimento entre 1 e 31.'); return false; }
+            if (!n || n < 2){ setFieldError(np,'Informe ao menos 2 parcelas.'); np && np.focus(); return false; }
+            if (!vv || vv <= 0){ setFieldError(vParc,'Informe o valor por parcela.'); vParc && vParc.focus(); return false; }
+            if (!d || d < 1 || d > 31){ setFieldError(dia,'Dia de vencimento entre 1 e 31.'); dia && dia.focus(); return false; }
         }
         return true;
     }
@@ -1055,5 +1088,16 @@ $next = clone $dtSel; $next->modify('+1 day');
     if (formNovo){ formNovo.addEventListener('submit', function(e){ if (!validarPagamentoAntesSubmit(formNovo)){ e.preventDefault(); e.stopPropagation(); } }); }
     const formEdit = document.getElementById('formEditarAgendamento');
     if (formEdit){ formEdit.addEventListener('submit', function(e){ if (!validarPagamentoAntesSubmit(formEdit)){ e.preventDefault(); e.stopPropagation(); } }); }
+
+    // Remover estado de erro ao editar os campos
+    function attachClearInvalid(selector){
+        document.querySelectorAll(selector).forEach(el=>{
+            const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+            el.addEventListener(evt, ()=>{
+                clearFieldError(el);
+            });
+        });
+    }
+    attachClearInvalid('input[name="valor_pago"], select[name="forma_pagamento"], select[name="status_pagamento"], input[name="numero_parcelas"], input[name="valor_parcela"], input[name="dia_vencimento"]');
 })();
 </script>
