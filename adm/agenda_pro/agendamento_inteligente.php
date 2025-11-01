@@ -609,13 +609,18 @@ $next = clone $dtSel; $next->modify('+1 day');
         const sel=document.getElementById(selectId); const hh=document.getElementById(hhmmId); const mi=document.getElementById(minId);
         if (!sel || !hh || !mi) return;
         const setFromServico=()=>{
-            const dur=mapDuracao[sel.value]||0;
-            if (!hh.value){ hh.value=minutosParaHhMm(dur); }
-            // Atualiza minutos a partir do HH:MM (ou padrão)
-            const mins=hhMmParaMinutos(hh.value || minutosParaHhMm(dur));
-            mi.value=String(mins);
+            // Novo comportamento: não preencher HH:MM automaticamente.
+            // Se usuário já digitou HH:MM, apenas recalcula minutos.
+            if (hh.value && hh.value.length === 5) {
+                const mins=hhMmParaMinutos(hh.value);
+                mi.value=String(mins);
+            } else {
+                // manter minutos em branco quando HH:MM está vazio
+                mi.value='';
+            }
         };
         sel.addEventListener('change', setFromServico);
+        // inicializa respeitando o estado atual (vazio não preenche nada)
         setFromServico();
     }
     conectarServicoParaDuracao('novo_servico_id','novo_duracao_hhmm','novo_duracao_real');
