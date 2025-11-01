@@ -384,12 +384,23 @@ $next = clone $dtSel; $next->modify('+1 day');
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
+                            <select name="status" id="novo_status" class="form-select">
                                 <option value="agendado">Agendado</option>
                                 <option value="em_andamento">Em andamento</option>
                                 <option value="concluido">Concluído</option>
                                 <option value="cancelado">Cancelado</option>
                             </select>
+                        </div>
+
+                        <div class="col-12">
+                            <div id="novo_pagamento_section" class="card border-success d-none">
+                                <div class="card-header bg-success-subtle">
+                                    <strong>Pagamento</strong>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-muted small">Sessão de pagamento será exibida quando o status for "Concluído". (Campos serão adicionados posteriormente.)</div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="col-md-6">
@@ -479,6 +490,17 @@ $next = clone $dtSel; $next->modify('+1 day');
                                 <option value="concluido">Concluído</option>
                                 <option value="cancelado">Cancelado</option>
                             </select>
+                        </div>
+
+                        <div class="col-12">
+                            <div id="edit_pagamento_section" class="card border-success d-none">
+                                <div class="card-header bg-success-subtle">
+                                    <strong>Pagamento</strong>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-muted small">Sessão de pagamento será exibida quando o status for "Concluído". (Campos serão adicionados posteriormente.)</div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="col-md-6">
@@ -598,11 +620,30 @@ $next = clone $dtSel; $next->modify('+1 day');
         inp.addEventListener('invalid', function(){ if (!this.value||this.value.trim()===''){ this.setCustomValidity('Preencha esse campo'); } });
     }
 
+    // Mostrar/ocultar sessão de pagamento conforme status
+    function togglePagamento(selectId, sectionId){
+        const sel = document.getElementById(selectId);
+        const sec = document.getElementById(sectionId);
+        if (!sel || !sec) return;
+        const show = (sel.value === 'concluido');
+        sec.classList.toggle('d-none', !show);
+    }
+
+    function wirePagamentoToggle(selectId, sectionId){
+        const sel = document.getElementById(selectId);
+        if (!sel) return;
+        sel.addEventListener('change', ()=> togglePagamento(selectId, sectionId));
+        // estado inicial
+        togglePagamento(selectId, sectionId);
+    }
+
     // Ligações
     ligarCampoHhMm('novo_duracao_hhmm','novo_duracao_real');
     ligarCampoHhMm('edit_duracao_hhmm','edit_duracao_real');
     ligarCampoHora('novo_hora_inicio');
     ligarCampoHora('edit_hora_inicio');
+    wirePagamentoToggle('novo_status','novo_pagamento_section');
+    wirePagamentoToggle('edit_status','edit_pagamento_section');
 
     // Ao trocar serviço, sugerir duração padrão (em hh:mm) e refletir minutos
     function conectarServicoParaDuracao(selectId, hhmmId, minId){
@@ -653,6 +694,8 @@ $next = clone $dtSel; $next->modify('+1 day');
             if (editHH) editHH.value = hhmm;
             if (editMin) editMin.value = String(durReal);
             document.getElementById('edit_status').value = ag.status || 'agendado';
+            // Ajustar sessão de pagamento conforme status carregado
+            togglePagamento('edit_status','edit_pagamento_section');
             document.getElementById('edit_cliente_id').value = ag.cliente_id || '';
             document.getElementById('edit_nome_cliente').value = ag.nome_cliente || '';
             document.getElementById('edit_telefone_cliente').value = ag.telefone_cliente || '';
