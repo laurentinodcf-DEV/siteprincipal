@@ -174,6 +174,7 @@ function mesEstaFuncionando(array $diasMes): bool
     <meta charset="utf-8">
     <title>Horário de Funcionamento</title>
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styleProjet.css">
     <link rel="stylesheet" href="../css/estilo.css">
 </head>
 <body class="pagina-admin">

@@ -19,6 +19,7 @@ if (isset($menuBasePathUrl)) {
 ?>
 
 <link rel="stylesheet" href="<?= $modaisBasePathUrl ?>/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="<?= $modaisBasePathUrl ?>/css/styleProjet.css">
 <link rel="stylesheet" href="<?= $modaisBasePathUrl ?>/css/estilo.css">
 
 <div id="modal" class="modal" style="display: none;">

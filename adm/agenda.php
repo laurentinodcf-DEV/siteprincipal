@@ -80,6 +80,7 @@ $usuario = $_SESSION['usuario_nome'] ?? 'Administrador';
     <title>Sistema de Agenda - Studio Salomé</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styleProjet.css">
     <link rel="stylesheet" href="css/painel.css">
     <style>
         /* Customizações específicas do sistema de agenda */

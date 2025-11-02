@@ -3,6 +3,7 @@
 ?>
 
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../css/styleProjet.css">
 <link rel="stylesheet" href="../css/estilo.css">
 
 <nav class="nav-menu-principal">

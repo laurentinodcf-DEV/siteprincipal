@@ -273,6 +273,7 @@ function renderizarVideosGrid(array $lista, array $categoriasMapa): void
     <meta charset="utf-8">
     <title>Inserir Video</title>
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styleProjet.css">
     <link href="../css/estilo.css" rel="stylesheet">
     <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
 </head>

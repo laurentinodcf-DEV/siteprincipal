@@ -32,6 +32,7 @@ if ($resultado) {
    
     <!-- CSS do Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styleProjet.css">
 
     <link rel="stylesheet" type="text/css" href="css/estilo.css"> 
 

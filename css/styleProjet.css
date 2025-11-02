@@ -1,0 +1,31 @@
+/* Global project stylesheet. Add global overrides/utilities here. */
+
+/* Readonly visuals for inputs/textarea (HTML readonly + Bootstrap variants) */
+input[readonly],
+textarea[readonly],
+input:read-only,
+textarea:read-only,
+.form-control[readonly],
+.form-control:read-only {
+  background-color: #E5E5E5 !important; /* override Bootstrap defaults */
+}
+
+/* Selects não suportam readonly nativo — normalmente usamos disabled */
+select[disabled],
+input[disabled],
+textarea[disabled],
+.form-control:disabled {
+  background-color: #E5E5E5 !important; /* manter visual consistente quando bloqueado */
+  opacity: 1; /* evita cinza pálido do Bootstrap se quiser cor cheia */
+}
+
+/* Utilitário opcional para simular readonly mantendo envio do valor (principalmente em <select>) */
+.is-readonly {
+  pointer-events: none; /* impede interação, mas mantém habilitado para submissão */
+}
+
+/* Reforço direcionado para os campos de Duração real (min) */
+#novo_duracao_real,
+#edit_duracao_real {
+  background-color: #E5E5E5 !important;
+}

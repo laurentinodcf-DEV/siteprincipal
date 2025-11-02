@@ -494,6 +494,7 @@ function renderizarServicosGrid(array $servicosLista): void
     <meta charset="utf-8">
     <title>Gestao de Servicos</title>
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styleProjet.css">
     <link rel="stylesheet" href="../css/estilo.css">
     <style>
         /* Corrigir modais transparentes */

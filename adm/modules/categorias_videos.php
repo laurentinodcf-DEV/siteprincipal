@@ -188,6 +188,7 @@ foreach ($categorias as $cat) {
     <meta charset="utf-8">
     <title>Categorias de videos</title>
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/styleProjet.css">
     <link rel="stylesheet" href="../../css/estilo.css">
     <link rel="stylesheet" href="../css/painel.css">
     <style>

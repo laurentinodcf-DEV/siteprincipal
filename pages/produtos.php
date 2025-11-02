@@ -119,6 +119,7 @@ function formatarCodigoProduto(array $produto): string
   <meta charset="UTF-8">
   <title>Produtos - Salome Beleza</title>
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styleProjet.css">
   <link rel="stylesheet" href="../css/estilo.css">
   <style>
     .produtos-banner { /* banner principal */

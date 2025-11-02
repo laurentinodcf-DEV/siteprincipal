@@ -570,7 +570,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Duração real (min)</label>
-                            <input type="number" name="duracao_real" id="novo_duracao_real" class="form-control" min="1" readonly>
+                            <input type="number" name="duracao_real" id="novo_duracao_real" class="form-control" min="1" readonly data-alwaysreadonly="1">
                             <div class="form-text">Calculado a partir do campo acima</div>
                         </div>
                         <div class="col-md-3">
@@ -727,7 +727,7 @@ $next = clone $dtSel; $next->modify('+1 day');
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Duração real (min)</label>
-                            <input type="number" name="duracao_real" id="edit_duracao_real" class="form-control" min="1" readonly>
+                            <input type="number" name="duracao_real" id="edit_duracao_real" class="form-control" min="1" readonly data-alwaysreadonly="1">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Status</label>
@@ -994,7 +994,12 @@ $next = clone $dtSel; $next->modify('+1 day');
             const name = el.name || '';
             if (!lock){
                 if (el.dataset && el.dataset.locked === '1'){
-                    el.readOnly = false;
+                    // Preserve always-readonly fields like duracao_real
+                    if (el.dataset.alwaysreadonly === '1') {
+                        el.readOnly = true;
+                    } else {
+                        el.readOnly = false;
+                    }
                     el.disabled = false;
                     el.classList.remove('bg-light');
                     delete el.dataset.locked;
@@ -1009,7 +1014,10 @@ $next = clone $dtSel; $next->modify('+1 day');
             } else {
                 el.readOnly = true;
             }
-            el.classList.add('bg-light');
+            // Evita cobrir o estilo global de readonly nos campos marcados como sempre-readonly
+            if (el.dataset.alwaysreadonly !== '1') {
+                el.classList.add('bg-light');
+            }
         });
     }
     function unlockDisabledForSubmit(form){

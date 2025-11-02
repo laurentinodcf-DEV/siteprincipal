@@ -511,6 +511,7 @@ function renderizarDepoimentoCard(array $d): void {
     <title>Depoimentos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/styleProjet.css">
     <link rel="stylesheet" href="../../css/estilo.css">
     <style>
         body {

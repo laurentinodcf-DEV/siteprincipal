@@ -227,6 +227,7 @@ if ($categoriaOutros !== null) {
   <meta charset="UTF-8">
   <title>Videos - Salome Beleza</title>
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styleProjet.css">
   <link rel="stylesheet" href="../css/estilo.css">
   <style>
     .videos-banner {

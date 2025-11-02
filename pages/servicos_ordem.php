@@ -104,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($servicosAtivos)) {
     <meta charset="utf-8">
     <title>Ordenar serviços</title>
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styleProjet.css">
     <link rel="stylesheet" href="../css/estilo.css">
     <style>
         .ordenacao-wrapper {

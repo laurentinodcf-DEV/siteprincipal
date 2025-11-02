@@ -11,6 +11,7 @@ if (!isset($_SESSION["usuario_id"])) {
     <meta charset="UTF-8">
     <title>Painel do Administrador</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styleProjet.css">
 </head>
 <body class="container mt-5">
     <h2>Bem-vindo, <?php echo $_SESSION["usuario_nome"]; ?></h2>

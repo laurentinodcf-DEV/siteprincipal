@@ -21,6 +21,7 @@ if ($resultado) {
   <meta charset="UTF-8">
   <title>Servicos - Salome Beleza</title>
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styleProjet.css">
   <link rel="stylesheet" href="../css/estilo.css">
   <style>
     .servicos-publico-wrapper {
