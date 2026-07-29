@@ -73,7 +73,21 @@ $headers = "From: noreply@salomebeleza.local\r\n";
 $headers .= "Reply-To: noreply@salomebeleza.local\r\n";
 $headers .= "X-Mailer: PHP/" . phpversion();
 
-$mailSent = mail($email, $subject, $message, $headers);
+$mailError = null;
+set_error_handler(static function (int $severity, string $errorMessage) use (&$mailError): bool {
+    $mailError = $errorMessage;
+    return true;
+});
+
+try {
+    $mailSent = mail($email, $subject, $message, $headers);
+} finally {
+    restore_error_handler();
+}
+
+if ($mailError !== null) {
+    error_log('Password reset mail warning: ' . $mailError);
+}
 
 if (!$mailSent) {
     // Guardamos o código em sessão para facilitar testes locais.
