@@ -1164,6 +1164,19 @@ nav ul ul li {
     position: relative;
 }
 
+/* Escopo admin: não interferir nos modais do Bootstrap dentro do painel */
+body.painel-modulo .modal {
+    display: block; /* Bootstrap controla via classes, manter visível somente quando .show */
+}
+body.painel-modulo .modal:not(.show) {
+    display: none;
+}
+body.painel-modulo .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.5);
+}
+
 .login-modal-card {
     display: flex;
     flex-direction: row;

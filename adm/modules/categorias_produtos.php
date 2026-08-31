@@ -164,6 +164,7 @@ if ($resultado) {
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../css/styleProjet.css">
     <link rel="stylesheet" href="../../css/estilo.css">
+    <link rel="stylesheet" href="../css/painel.css">
     <style>
         body {
             margin: 0;
@@ -293,7 +294,7 @@ if ($resultado) {
         }
     </style>
 </head>
-<body>
+<body class="painel-modulo">
     <div class="categorias-wrapper">
         <section class="categoria-form-section">
             <h2>Nova categoria</h2>
@@ -602,6 +603,21 @@ if ($resultado) {
                         form.reset();
                     }
                 });
+            }
+
+            // Remover backdrops restantes para evitar tela escura bloqueando cliques
+            const cleanupBackdrops = () => {
+                document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('paddingRight');
+            };
+
+            if (editarModal) {
+                editarModal.addEventListener('hidden.bs.modal', cleanupBackdrops);
+            }
+            if (excluirModal) {
+                excluirModal.addEventListener('hidden.bs.modal', cleanupBackdrops);
             }
         });
     </script>
